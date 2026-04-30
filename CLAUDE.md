@@ -16,33 +16,43 @@ This repo contains two projects:
 ### Commands
 ```bash
 cd myAlias
-npm install       # Install dependencies (Vite, Base44 SDK, vite-plugin-pwa)
-npm run dev       # Start Vite dev server (game works without Base44 config)
-npm run build     # Build to ./dist/ with service worker for offline use
-npm run preview   # Preview production build locally
+npm install            # Install dependencies (Vite, Base44 SDK, vite-plugin-pwa)
+npm run dev            # Start Vite dev server (game works without Base44 config)
+npm run build          # Runs generate-icons.mjs, then vite build → ./dist/ with service worker
+npm run preview        # Preview production build locally
+
+deploy-prod.bat        # Build + `base44 site deploy` to production app (ID 69bb0f318b7ad64ca3b003e7)
+deploy-debug.bat       # Swap .env + base44/.app.jsonc to debug app, build, deploy, restore prod config
 ```
 
-### Backend (Base44)
-```bash
-# After creating a Base44 app:
-cp myAlias/.env.example myAlias/.env   # Add VITE_BASE44_APP_ID=<your-id>
-base44 entities push                    # Push WordPack schema to Base44
-base44 deploy                           # Deploy to Base44 hosting
-```
+### Versioning
+Bump both on every deploy, kept in sync:
+- `index.html:1234` — `const APP_VERSION = "x.y.z";`
+- `public/version.json` — `{ "version": "x.y.z" }`
+
+`version.json` is forced to **NetworkOnly** in `vite.config.js`'s Workbox config (never cached by the service worker) so the running app can detect new versions.
 
 ### Architecture
 
-**Entry point** (`index.html`): Large single-file game (CSS + JS inline). Vite processes the module script reference at the bottom; the inline game script is left unchanged.
+**Entry point** (`index.html`): Large single-file classic Alias game (CSS + inline `<script>` containing `APP_VERSION`, `WORDS`, and all core game logic). Vite processes the module script reference at the bottom; the inline game script is left unchanged.
 
-**Base44 integration** (`src/`):
-- `src/main.js` — Deferred module; runs after the inline game script. Calls Base44, then extends `window.WORD_LISTS` with custom word packs before the first turn.
-- `src/base44.js` — Creates a Base44 SDK client using `VITE_BASE44_APP_ID`. Caches API results in `localStorage` for 24 h for offline use.
+**Key global**: The inline game script exposes `window.WORD_LISTS` so the ES module entry point can extend it without touching the inline game logic.
 
-**Offline strategy**: `vite-plugin-pwa` (in `vite.config.js`) auto-generates a Workbox service worker at build time that pre-caches all assets. Without `VITE_BASE44_APP_ID`, or when offline, the game runs entirely on built-in word lists.
+**Module entry** (`src/main.js`): Deferred module; runs after the inline game script. Calls Base44 to fetch custom word packs, then pushes them into `window.WORD_LISTS[language][difficulty]` before the first turn.
 
-**Custom word packs** (`base44/entities/word_pack.jsonc`): `WordPack` entity with `language` (he/en/es), `difficulty` (1–6), `words` (string[]), `active` (boolean). Manage via Base44 dashboard; picked up on next load.
+**Base44 client** (`src/base44.js`): Creates a Base44 SDK client using `VITE_BASE44_APP_ID`. Caches WordPack API results in `localStorage` for 24 h for offline use. Without an app ID, or when offline, the game runs entirely on built-in word lists.
 
-**Key global**: The inline game script exposes `window.WORD_LISTS` so the module script can extend it without touching the game logic.
+**Ptakim multiplayer mode** (`src/ptakim.js`, `src/ptakim-api.js`, `src/ptakim.css`): Separate party-game mode ("פתקים") with rooms, teams, submitted notes, and rounds. Uses direct Base44 entity CRUD (no auth) via `@base44/sdk`; real-time sync via entity subscriptions. Privacy of notes is enforced in the UI (press-and-hold reveal), not server-side. Entities: `PtakimRoom`, `PtakimNote` (see `base44/entities/`). Optional server-side logic lives in `base44/functions/ptakim-*` (5 Cloud functions: create-room, join-room, action, get-note, submit-notes) — but the UI primarily talks to entities directly.
+
+**Install prompt** (`src/install-prompt.js`): Shows a PWA install banner 1.5 s after load — native `beforeinstallprompt` flow on Android, manual instructions on iOS. Dismissal remembered for 7 days.
+
+**Offline strategy**: `vite-plugin-pwa` (in `vite.config.js`) auto-generates a Workbox service worker at build time that pre-caches all JS/CSS/HTML/SVG/PNG/ICO/WOFF2. `clientsClaim` + `skipWaiting` so new SWs activate immediately. `version.json` is excluded via `navigateFallbackDenylist` + NetworkOnly `runtimeCaching`.
+
+**Base44 schemas** (`base44/entities/*.jsonc`):
+- `WordPack` — `language` (he/en/es), `difficulty` (1–6), `words` (string[]), `active` (boolean)
+- `PtakimRoom`, `PtakimNote` — multiplayer state (see files for full schema)
+
+Manage data via Base44 dashboard; `base44 entities push` to sync schema changes.
 
 ---
 
@@ -51,7 +61,7 @@ base44 deploy                           # Deploy to Base44 hosting
 ### Commands
 ```bash
 cd myAlias-android
-build-apk.bat             # Full build: runs Vite build, copies dist/, then Gradle
+build-apk.bat             # Full build: runs npm install + build in ../myAlias/, copies dist/, then Gradle
 node run-gradle.js        # Gradle build only (assembleDebug), skips web build
 ```
 
@@ -59,7 +69,7 @@ Output APK: `app/build/outputs/apk/debug/app-debug.apk`
 
 ### Architecture
 
-- `build-apk.bat` runs `npm run build` in `../myAlias/`, then copies **`../myAlias/dist/`** (Vite output) into `app/src/main/assets/` before each Gradle build
+- `build-apk.bat` runs `npm run build` in `../myAlias/`, then `xcopy`s **`../myAlias/dist/`** (Vite output) into `app/src/main/assets/` before each Gradle build
 - `MainActivity.java` — Single-activity app; loads `file:///android_asset/index.html` in a full-screen WebView with JS, DOM storage, and media playback enabled; prevents external navigation
-- All Android SDK, JDK 17, and Gradle distribution are vendored locally in `myAlias-android/` (no system installs needed)
+- All Android SDK, JDK 17, and Gradle distribution are vendored locally in `myAlias-android/` (no system installs needed). `run-gradle.js` sets `JAVA_HOME` and `ANDROID_HOME` before invoking `gradlew`.
 - App ID: `com.myalias.app`, target SDK 34, min SDK 26
