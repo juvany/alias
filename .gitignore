@@ -23,5 +23,5 @@ myAlias-android/app/src/main/assets/
 desktop.ini
 Thumbs.db
 
-# Claude Code
-.claude/
+# Claude Code (machine-specific)
+.claude/settings.local.json
