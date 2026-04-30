@@ -1,0 +1,459 @@
+# Word Lists - All Languages
+# Generated from myAlias/index.html
+
+============================================================
+Hebrew (עברית)
+============================================================
+
+--- Level 1: Very Easy (239 words) ---
+כלב, חתול, בית, ים, שמש, לחם, עץ, פרח
+דג, ציפור, ירח, כוכב, גשם, שלג, אש, מים
+אמא, אבא, ילד, כדור, נעל, כובע, כוס, ספר
+מכונית, פרה, סוס, ביצה, עוגה, גלידה, כיסא, שולחן
+דלת, חלון, מפתח, יד, עין, אף, פה, ראש
+שיניים, שיר, ריצה, שחייה, כדורגל, פיצה, חמור, קוף
+ארנב, נמר, תפוח, תפוז, ענב, תות, אבטיח, לימון
+אגס, דובדבן, מנגו, קוקוס, עגבנייה, תפוח אדמה, גזר, בצל
+שום, תירס, שעועית, אורז, פסטה, מרק, חלב, מיץ
+ממתק, עוגייה, פופקורן, כריך, סלט, טוסט, חמאה, סכין
+מזלג, כף, צלחת, קערה, סיר, מחבת, תנור, כיור
+מגבת, מברשת, מברשת שיניים, מקלחת, אמבטיה, שירותים, כר, שמיכה
+סדין, מנורה, רדיו, תיק, תרמיל, מזוודה, כפתור, רוכסן
+משקפיים, טבעת, שרשרת, עיפרון, מחק, סרגל, נייר, מחברת
+מספריים, דבק, נמלה, דבורה, פרפר, עכביש, תולעת, זבוב
+יונה, תוכי, ברווז, תרנגולת, תרנגול, נשר, ברבור, צב
+תנין, לוויתן, תמנון, מדוזה, סרטן, עמק, חצר, שביל
+גדר, שער, מנעול, גן, ספסל, נדנדה, מגלשה, בית ספר
+כיתה, לוח, מורה, תלמיד, שיעור, משטרה, שוטר, כלא
+שופט, שוק, חנות, מחיר, הנחה, כרטיס אשראי, מטבע, שטר
+קבלה, חשמל, ביוב, גז, מדרגות, מעלית, מסדרון, מרפסת
+ספר, עט, מחברת, תיק ספרים, אוכל, שתייה, שינה, משחק
+שיר, ריצה, קפיצה, שחייה, ציור, בנייה, שבירה, עזרה
+הסבר, הצגה, ספירה, חישוב, קריאה, כתיבה, האזנה, דיבור
+חיוך, בכי, צחוק, כעס, פחד, אהבה, שנאה, שמחה
+עצב, הפתעה, שעמום, עייפות, רעב, צמא, כאב, ריח
+טעם, מגע, ראייה, שמיעה, חום, קור, לחות, יובש
+אור, חושך, רעש, שקט, מהיר, איטי, גדול, קטן
+גבוה, נמוך, חזק, חלש, יפה, מכוער, חדש, ישן
+נקי, מלוכלך, ממותק, מלוח, חמוץ, מר, חריף
+
+--- Level 2: Easy (245 words) ---
+מחשב, טלפון, מסעדה, חנות, פארק, מטוס, אופניים, מוזיקה
+ריקוד, סרט, חג, יום הולדת, מסיבה, מקרר, טלוויזיה, גשר
+מלון, גינה, ספרייה, בית ספר, חנוכייה, פורים, קפה, תה
+המבורגר, שוקולד, בננה, תפוז, בריכה, אוטובוס, רכבת, גיטרה
+פסנתר, מצלמה, שעון, ארנק, גלגל, מטריה, כפפות, גרב
+חולצה, מכנסיים, מראה, מסרק, נחש, פיל, אריה, כריש
+ינשוף, פינגווין, רופא שיניים, אחות, מורה, שוטר, חייל, טבח
+מלצר, נהג, טייס, בונה, גיטרה, תופים, חליל, כינור
+טרומבון, חצוצרה, אקורדיון, בנג'ו, צ'לו, אגרוף, היאבקות, ג'ודו
+קראטה, טניס, כדורעף, כדורסל, בייסבול, הוקי, ראגבי, שחמט
+דמקה, דומינו, פאזל, קוביות, קלפים, משחק לוח, עפיפון, יו-יו
+בלון, אוהל, שק שינה, מצפן, משקפת, פנס, חבל, גפרורים
+בול דואר, מעטפה, גלויה, חבילה, תיבת דואר, כתובת, חתימה, קבלה
+כרטיס, בושם, קרם, שמפו, מרכך, דאודורנט, מקדחה, פטיש
+מסמר, ברג, מפתח, מלקחיים, מסור, סולם, דלי, מברשת צבע
+גלגל, מנוע, סוללה, כבל, מתג, תקע, שקע, חיטה
+קמח, סוכר, מלח, פלפל, חומץ, שמן, רוטב, סירופ
+ריבה, ז'קט, מעיל, שמלה, חצאית, חליפה, עניבה, צעיף
+כפפה, מגף, סנדל, יהלום, זהב, כסף, ברונזה, ברזל
+נחושת, אבן, שיש, זכוכית, פלסטיק, נסיך, נסיכה, אביר
+קוסם, מכשפה, פיה, ענק, גמד, ג'ונגל, ביצה, אחו
+נווה מדבר, מישור, קניון, קרחון, מפרץ, חצי אי, שני, שלישי
+בוקר, צהריים, ערב, חצות, זריחה, שקיעה, אתמול, מחר
+סוף שבוע, חופש, צפון, דרום, מזרח, מערב, מרכז, חשמל
+ביוב, גז, מים חמים, מזגן, מאוורר, ספר תורה, מזוזה, חנוכייה
+שופר, לולב, סוכה, פורים, פסח, שבועות, ראש השנה, יום כיפור
+סעודה, ברכה, תפילה, הגדה, קינות, תחנות, קדיש, מצווה
+חסד, צדקה, גמילות חסדים, מחילה, תשובה, כפרה, גאולה, ישועה
+אמונה, ספק, ידע, חכמה, הבנה, שאלה, תשובה, בחירה
+החלטה, פתרון, בעיה, הצלחה, כישלון, ניסיון, טעות, לימוד
+הוראה, חינוך, גידול, פיתוח, שיפור
+
+--- Level 3: Medium (212 words) ---
+מוזיאון, בנק, בית חולים, עורך דין, רופא, מהנדס, כבאי, אמן
+מדען, צלם, שדה תעופה, חוף, מדבר, יער, הר, מצודה
+מפה, טיול, הרפתקה, חלום, זיכרון, חזרה, בחינה, תחרות
+פרס, אחריות, בחירה, ידע, דיון, בעיה, פתרון, ניסוי
+תוצאה, הצגה, במה, תפאורה, שחקן, מנצח, תדריך, אוצר
+מגדלור, נמל, ספינה, דרקון, ניצחון, תבוסה, מסע, עמק
+מפל, מערה, עיתונאי, אדריכל, סופר, קצין, גנן, נגר
+חשמלאי, שכונה, רחוב, שיפוץ, בית משפט, שופט, חקירה, עדות
+שוד, בריחה, גילוי, המצאה, מנהיג, עצרת, טקס, חגיגה
+מלגה, ראיון, חוזה, תעודה, שביתה, הפגנה, אסיפה, כינוס
+מינוי, כלכלן, מדינאי, צלבנים, קולוניאליזם, אימפריאליזם, לאומיות, ציונות
+אוטונומיה, עצמאות, ריפוי, טיפוס הרים, ספורט אתגרי, דאייה, צלילה, רפטינג
+קמפינג, טרקינג, תחנת כוח, מפעל, בית זיקוק, בית מלאכה, מחצבה, כרייה
+קידוח, מגן דוד, מנורת שבעת הקנים, מגילה, תורה, מלחמה, שלום, הפוגה
+הסכם, אמנה, ברית, סכסוך, מתיחות, יריב, בעל ברית, אקדח
+חרב, שריון, טנק, מטוס קרב, צוללת, רקטה, שמירת טבע, הגנת הסביבה
+זיהום, פסולת, מיחזור, אנרגיה ירוקה, פחמן, שינויי אקלים, חממה, מגיפה
+נגיף, חיידק, תרכיב, חיסון, אנטיביוטיקה, הקרנות, השתלה, כלכלה
+מסחר, יצוא, יבוא, מכס, מיסים, תקציב, גירעון, עודף
+חוב, מדיה, פרסום, יחסי ציבור, תדמית, מותג, שיווק, מכירות
+לוגיסטיקה, ביטחון לאומי, מודיעין, ריגול, סייבר, הצפנה, אוכלוסייה, הגירה
+עיור, פיתוח, עוני, רווחה, שירותי בריאות, אזרחות, זהות, מורשת
+מסורת, ערכים, הצבעה, בחירות, קמפיין, מפלגה, קואליציה, אופוזיציה
+ממשלה, פרלמנט, ועדה, פורמולה 1, אולימפיאדה, מונדיאל, גמר, ליגה
+מחשוב, תוכנה, חומרה, אפליקציה, רשת, שרת, ענן, עדכון
+תחזוקה, אבטחה, פרטיות, בדיקה, השקה, גרסה, תיעוד, תמיכה
+שירות, לקוח, ספק, שותף
+
+--- Level 4: Medium-Hard (195 words) ---
+דמוקרטיה, כלכלה, פוליטיקה, חינוך, תרבות, מסורת, שוויון, חירות
+צדק, אמת, ידידות, נאמנות, בגידה, הצלחה, כישלון, תקווה
+אהבה, שנאה, דיפלומטיה, גישור, ביטוח, חוק, אינפלציה, משבר
+מנהיגות, תקשורת, יצירתיות, השראה, מוטיבציה, אמפתיה, סטרס, טראומה
+מהפכה, קנאה, גאווה, בושה, בלבול, שלווה, עייפות, התרגשות
+ביורוקרטיה, אבחון, חוות דעת, הוכחה, מחאה, פשרה, פיוס, שינוי
+התפתחות, כינוי, אחריות, שקיפות, יושרה, אותנטיות, ריבונות, לגיטימיות
+סמכות, ממשל, תשתית, קיימות, מגוון ביולוגי, שימור, שיקום, הסתגלות
+יזם, חדשנות, שיבוש, מדרגיות, אקוסיסטם, קוונטום, יחסיות, אנטרופיה
+אי-ודאות, הסתברות, השערה, אקסיומה, מדיטציה, מיינדפולנס, תודעה, תפיסה
+הסתכלות פנימית, מודעות עצמית, הארה, חוסן, גמישות, פגיעות, העצמה, שחרור
+אוטונומיה, ג'נטריפיקציה, תיעוש, דיגיטציה, אוטומציה, גלובליזציה, הפרטה, תעמולה
+צנזורה, מעקב, השפעה, רדיקליזציה, קיצוניות, פנדמנטליזם, סקטריות, שבטיות
+אינטואיציה, צירוף מקרים, פרדוקס, סתירה, עמימות, מורכבות, אסתטיקה, נשגב
+מלנכוליה, אופוריה, מונופול, זיכיון, בת חברה, עקירה, אינטגרציה, הפרדה
+אפליה, דעה קדומה, סטראוטיפ, הטיה, טראומה, התאוששות, צמיחה, אבולוציה
+שינוי, אידיאולוגיה, דוקטרינה, אמונה, ספקנות, אתאיזם, רוחניות, חוקה
+חקיקה, רגולציה, שיפוט, בוררות, גישור, תביעה, הגנה, פסיקה
+תופעה, סטייה, יוצא דופן, מהפכה, נאורות, עתידנות, אמפתיה, חמלה
+סימפתיה, סולידריות, אלטרואיזם, פילנתרופיה, צדקה, נדיבות, טוב לב, הפשטה
+ייצוג, פרשנות, ניתוח, סינתזה, הערכה, יישום, יצירה, תלמוד
+משנה, גמרא, הלכה, מדרש, קבלה, כימותרפיה, האקינג, אלגוריתם
+פרוטוקול, מסד נתונים, ממשק, רנסנס, בארוק, קלאסיציזם, רומנטיקה, אימפרסיוניזם
+אקספרסיוניזם, קוביזם, סוריאליזם, מינימליזם, סוציולוג, פסיכולוג, אנתרופולוג, דמוגרף
+גיאוגרף, קרימינולוג, דיפלומט
+
+--- Level 5: Hard (194 words) ---
+אינטליגנציה, אסתטיקה, אתיקה, פילוסופיה, אקולוגיה, גנטיקה, אסטרונומיה, נוירולוגיה
+אנתרופולוגיה, סוציולוגיה, אינטואיציה, פרדוקס, אירוניה, מניפולציה, קונספירציה, כריזמה
+פסימיות, אופטימיות, אידיאולוגיה, אבסורד, מטאפורה, רנסנס, קפיטליזם, סוציאליזם
+גלובליזציה, ציונות, אנרכיה, תיאוקרטיה, ריאליזם, סמליות, אנטגוניזם, פרוטגוניסט
+נרטיב, ניתוח, הסתברות, אלגוריתם, מטבוליזם, פוטוסינתזה, אבולוציה, קוסמוגרפיה
+רלטיביזם, אמפיריציזם, נוסטלגיה, מלנכוליה, אויקומן, כרונולוגיה, אנלוגיה, סינתזה
+דיאלקטיקה, אפוריזם, פנומנולוגיה, הרמנויטיקה, אפיסטמולוגיה, אונטולוגיה, טלאולוגיה, אסכטולוגיה
+סוטריולוגיה, תאודיציה, פסיכואנליזה, ביהביוריזם, קוגניטיביזם, קונסטרוקטיביזם, פוזיטיביזם, אמפיריציזם
+רציונליזם, אידיאליזם, מטריאליזם, דטרמיניזם, תרמודינמיקה, אלקטרומגנטיות, אסטרופיזיקה, ננוטכנולוגיה
+ביוטכנולוגיה, נוירוסיינס, אימונולוגיה, אפידמיולוגיה, פתופיזיולוגיה, פרמקוקינטיקה, לקסיקוגרפיה, מורפולוגיה
+פונולוגיה, פרגמטיקה, סמנטיקה, תחביר, אטימולוגיה, רטוריקה, קריפטוגרפיה, סטגנוגרפיה
+ביומטריקה, קיברסיקיוריטי, קריפטאנליזה, יוריסטיקה, רקורסיה, איטרציה, הפשטה, אנקפסולציה
+יורספרודנס, קונסטיטוציונליזם, פדרליזם, ריבונות, סקולריזם, תאוקרטיה, פלוטוקרטיה, טכנוקרטיה
+מריטוקרטיה, קלפטוקרטיה, אוטיליטריאניזם, דאונטולוגיה, אתיקת מידות, קונסקוונציאליזם, קונטרקטריאניזם, קומוניטריאניזם
+ליברטריאניזם, אגליטריאניזם, קולקטיביזם, אינדיווידואליזם, מיקרואקונומיה, מאקרואקונומיה, אקונומטריה, מוניטרי
+פיסקלי, גירעון מסחרי, יתרון יחסי, שיווי משקל שוק, גמישות מחיר, עלות הזדמנות, היסטוריוגרפיה, פלאונטולוגיה
+נומיסמטיקה, פילטליה, ואקסילולוגיה, גנאלוגיה, דמוגרפיה, קרטוגרפיה, טופוגרפיה, אתנוגרפיה
+סינסתזיה, פרופריוספציה, אינטרוספציה, קינסתזיה, וסטיבולרי, נוציספציה, תרמוספציה, כמוספציה
+מכנוספציה, פולימת, אוטודידקט, פרוגיגי, סאבנט, קוגנוסנטי, דילטנטה, קונואסר
+וירטואוז, מאסטרו, לומינרי, אנכרוניזם, אוקסימורון, טאוטולוגיה, פלאונסם, אופמיזם
+דיספמיזם, ליטוטס, היפרבולה, מטונימיה, סינקדוכה, שאדנפרויד, וולטאנשאונג, צייטגייסט
+אנגסט, גשטלט, לייטמוטיף, קיטש, קאירוס, פאתוס, אתוס, ניאוקלאסיציזם
+רומנטיציזם, אימפרסיוניזם, אקספרסיוניזם, קוביזם, סוריאליזם, דאדאיזם, פוטוריזם, מינימליזם
+קונספטואליזם, טרנסהומניזם, פוסטהומניזם, סינגולריות, קריוניקה, קיברנטיקה, ביוניקה, פרוסתטיקה
+אוגמנטציה, שיפור
+
+============================================================
+English (English)
+============================================================
+
+--- Level 1: Very Easy (263 words) ---
+dog, cat, house, sea, sun, bread, tree, flower
+fish, bird, moon, star, rain, snow, fire, water
+mom, dad, child, ball, shoe, hat, cup, book
+car, cow, horse, egg, cake, ice cream, chair, table
+door, window, key, hand, eye, nose, mouth, head
+teeth, song, run, swim, soccer, pizza, donkey, monkey
+rabbit, tiger, apple, orange, grapes, strawberry, watermelon, lemon
+pear, cherry, mango, coconut, tomato, potato, carrot, onion
+garlic, corn, beans, rice, pasta, soup, milk, juice
+candy, cookie, popcorn, sandwich, salad, toast, butter, knife
+fork, spoon, plate, bowl, pot, pan, oven, sink
+towel, brush, toothbrush, shower, bath, toilet, pillow, blanket
+lamp, radio, bag, backpack, suitcase, button, zipper, glasses
+ring, necklace, pencil, eraser, ruler, paper, notebook, scissors
+glue, ant, bee, butterfly, spider, worm, fly, dove
+parrot, duck, hen, rooster, eagle, swan, turtle, frog
+crocodile, hippo, giraffe, zebra, whale, octopus, jellyfish, crab
+cloud, wind, rainbow, thunder, lightning, fog, field, farm
+valley, red, blue, green, yellow, orange, purple, pink
+brown, big, small, tall, short, fast, slow, hot
+cold, happy, sad, angry, scared, tired, hungry, sleepy
+sick, strong, funny, jump, walk, fly, eat, drink
+sleep, play, sing, draw, build, break, help, explain
+show, count, read, write, listen, speak, smile, cry
+laugh, fear, love, hate, joy, boredom, surprise, pain
+smell, taste, touch, sight, hearing, warmth, cold, light
+dark, noise, silence, clean, dirty, sweet, salty, sour
+bitter, spicy, smooth, rough, sharp, soft, heavy, light
+round, square, long, short, wide, narrow, open, closed
+full, empty, new, old, young, beautiful, ugly, fast
+slow, easy, hard, safe, dangerous, same, different, true
+false, yes, no, maybe, always, never, sometimes, here
+there, everywhere, now, then, today, tomorrow, yesterday
+
+--- Level 2: Easy (253 words) ---
+computer, phone, restaurant, store, park, airplane, bicycle, music
+dance, movie, holiday, birthday, party, fridge, television, bridge
+hotel, garden, library, school, candle, carnival, coffee, tea
+hamburger, chocolate, banana, orange, pool, bus, train, guitar
+piano, camera, clock, wallet, wheel, umbrella, gloves, sock
+shirt, pants, mirror, comb, snake, elephant, lion, shark
+owl, penguin, dentist, nurse, teacher, policeman, soldier, chef
+waiter, driver, pilot, builder, guitar, drums, flute, saxophone
+trumpet, harp, accordion, banjo, ukulele, cello, boxing, wrestling
+judo, karate, tennis, volleyball, basketball, baseball, hockey, rugby
+chess, checkers, dominoes, puzzle, dice, cards, board game, kite
+balloon, tent, sleeping bag, compass, binoculars, flashlight, rope, matches
+postcard, package, mailbox, address, signature, receipt, ticket, perfume
+lotion, shampoo, conditioner, deodorant, drill, hammer, nail, screw
+wrench, pliers, saw, ladder, bucket, paintbrush, wheel, engine
+battery, cable, switch, plug, socket, wheat, flour, sugar
+salt, pepper, vinegar, oil, sauce, syrup, jam, jacket
+coat, dress, skirt, suit, tie, scarf, gloves, boots
+sandals, diamond, gold, silver, bronze, iron, copper, marble
+glass, plastic, prince, princess, knight, wizard, witch, fairy
+giant, dwarf, jungle, swamp, meadow, oasis, plateau, canyon
+glacier, bay, peninsula, Monday, Tuesday, Wednesday, Thursday, Friday
+Saturday, Sunday, morning, afternoon, evening, midnight, sunrise, sunset
+weekend, vacation, north, south, east, west, center, electricity
+plumbing, air conditioning, elevator, corridor, balcony, garden, yard, path
+fence, gate, lock, bench, swing, slide, church, synagogue
+mosque, prayer, angel, heaven, market, shop, price, discount
+coin, bill, receipt, stamp, envelope, delivery, signature, perfume
+cream, shampoo, drill, hammer, flour, sugar, jacket, coat
+diamond, iron, copper, prince, princess, glacier, plateau, sunrise
+sunset, vacation, elevator, balcony, bench, swing, slide, church
+prayer, market, price, stamp, envelope
+
+--- Level 3: Medium (221 words) ---
+museum, bank, hospital, lawyer, doctor, engineer, firefighter, artist
+scientist, photographer, airport, beach, desert, forest, mountain, castle
+map, trip, adventure, dream, memory, rehearsal, exam, competition
+prize, responsibility, choice, knowledge, debate, problem, solution, experiment
+result, show, stage, scenery, actor, conductor, treasure, lighthouse
+harbor, ship, dragon, victory, defeat, journey, valley, waterfall
+cave, briefing, archaeologist, paleontologist, geologist, meteorologist, oceanographer, economist
+sociologist, anthropologist, demographer, geographer, criminologist, diplomat, statesman, renaissance
+baroque, classicism, romanticism, impressionism, expressionism, cubism, surrealism, minimalism
+crusades, colonialism, imperialism, nationalism, zionism, autonomy, independence, rock climbing
+adventure sport, skydiving, scuba diving, rafting, camping, trekking, power plant, factory
+refinery, workshop, quarry, mining, drilling, shield, scroll, scripture
+theology, philosophy, mythology, history, empire, kingdom, republic, democracy
+monarchy, federation, parliament, senate, congress, presidency, diplomacy, treaty
+alliance, conflict, ceasefire, sanction, embargo, referendum, election, environmental protection
+pollution, recycling, green energy, carbon footprint, climate change, greenhouse, pandemic, virus
+bacteria, vaccine, immunization, antibiotic, chemotherapy, radiation, transplant, genetics
+economy, trade, export, import, customs, taxes, budget, deficit
+surplus, debt, media, advertising, public relations, brand, marketing, sales
+logistics, national security, intelligence, espionage, cyber, hacking, encryption, population
+immigration, urbanization, development, poverty, welfare, healthcare, citizenship, identity
+heritage, tradition, values, campaign, coalition, opposition, government, committee
+formula one, olympics, world cup, final, league, computing, software, hardware
+application, algorithm, artificial intelligence, network, server, cloud, database, interface
+protocol, backup, recovery, update, maintenance, security, privacy, customer
+supplier, partner, freelance, startup, investor, venture, acquisition, merger
+partnership, contract, budget, revenue, profit, loss, growth, strategy
+vision, mission, objective, performance, evaluation
+
+--- Level 4: Medium-Hard (209 words) ---
+democracy, economy, politics, education, culture, tradition, equality, freedom
+justice, truth, friendship, loyalty, betrayal, success, failure, hope
+love, hate, diplomacy, mediation, insurance, law, inflation, crisis
+leadership, communication, creativity, inspiration, motivation, empathy, stress, trauma
+revolution, jealousy, pride, shame, confusion, peace, exhaustion, excitement
+bureaucracy, diagnosis, opinion, proof, protest, compromise, reconciliation, change
+development, nickname, accountability, transparency, integrity, authenticity, sovereignty, legitimacy
+jurisdiction, governance, infrastructure, sustainability, biodiversity, conservation, restoration, adaptation
+entrepreneur, innovation, disruption, ecosystem, quantum, relativity, entropy, uncertainty
+probability, hypothesis, theorem, axiom, meditation, mindfulness, consciousness, perception
+cognition, metacognition, introspection, self-awareness, enlightenment, transcendence, resilience, flexibility
+vulnerability, empowerment, liberation, emancipation, autonomy, gentrification, urbanization, industrialization
+digitalization, automation, mechanization, standardization, privatization, postmodernism, deconstruction, propaganda
+censorship, surveillance, indoctrination, manipulation, radicalization, extremism, fundamentalism, tribalism
+intuition, premonition, coincidence, paradox, contradiction, ambiguity, complexity, aesthetic
+sublime, melancholy, euphoria, catharsis, epiphany, revelation, monopoly, cartel
+syndicate, conglomerate, franchise, subsidiary, migration, displacement, diaspora, assimilation
+integration, segregation, discrimination, prejudice, stereotype, bias, trauma, recovery
+healing, transformation, growth, evolution, ideology, dogma, doctrine, belief
+faith, skepticism, agnosticism, atheism, spirituality, mysticism, constitution, legislation
+regulation, mediation, prosecution, defense, verdict, phenomenon, anomaly, deviation
+exception, revolution, reformation, modernism, futurism, nihilism, existentialism, absurdism
+empathy, compassion, sympathy, solidarity, altruism, philanthropy, charity, generosity
+benevolence, abstraction, representation, interpretation, analysis, synthesis, evaluation, application
+creation, collaboration, leadership, mentorship, coaching, negotiation, persuasion, influence
+motivation, inspiration, vision, strategy, execution, feedback, improvement, learning
+development
+
+--- Level 5: Hard (175 words) ---
+intelligence, aesthetics, ethics, philosophy, ecology, genetics, astronomy, neurology
+anthropology, sociology, intuition, paradox, irony, manipulation, conspiracy, charisma
+pessimism, optimism, ideology, absurd, metaphor, renaissance, capitalism, socialism
+globalization, anarchism, theocracy, realism, symbolism, antagonism, protagonist, narrative
+analysis, probability, algorithm, metabolism, photosynthesis, evolution, phenomenon, relativism
+empiricism, nostalgia, melancholy, chronology, analogy, synthesis, rhetoric, utopia
+nihilism, existentialism, epistemology, ontology, psychoanalysis, behaviorism, cognitivism, constructivism
+positivism, empiricism, rationalism, idealism, materialism, determinism, thermodynamics, electromagnetism
+astrophysics, nanotechnology, biotechnology, neuroscience, immunology, epidemiology, morphology, phonology
+pragmatics, semantics, syntax, etymology, rhetoric, cryptography, biometrics, cybersecurity
+heuristics, recursion, iteration, abstraction, encapsulation, jurisprudence, constitutionalism, federalism
+sovereignty, secularism, theocracy, plutocracy, technocracy, meritocracy, kleptocracy, utilitarianism
+deontology, virtue ethics, consequentialism, communitarianism, libertarianism, egalitarianism, collectivism, individualism
+microeconomics, macroeconomics, econometrics, monetary policy, fiscal policy, trade deficit, comparative advantage, market equilibrium
+price elasticity, opportunity cost, historiography, paleontology, genealogy, demography, cartography, topography
+ethnography, polymath, autodidact, prodigy, savant, connoisseur, virtuoso, anachronism
+oxymoron, tautology, euphemism, litotes, hyperbole, metonymy, synecdoche, schadenfreude
+zeitgeist, angst, gestalt, leitmotif, kitsch, pathos, ethos, neoclassicism
+romanticism, impressionism, expressionism, cubism, surrealism, dadaism, futurism, minimalism
+conceptualism, transhumanism, posthumanism, singularity, cryonics, cybernetics, bionics, prosthetics
+augmentation, enhancement, portmanteau, palindrome, anagram, acronym, onomatopoeia, alliteration
+seismology, volcanology, glaciology, oceanography, existentialism, nihilism, relativism
+
+============================================================
+Spanish (Español)
+============================================================
+
+--- Level 1: Very Easy (257 words) ---
+perro, gato, casa, mar, sol, pan, árbol, flor
+pez, pájaro, luna, estrella, lluvia, nieve, fuego, agua
+mamá, papá, niño, pelota, zapato, sombrero, taza, libro
+coche, vaca, caballo, huevo, pastel, helado, silla, mesa
+puerta, ventana, llave, mano, ojo, nariz, boca, cabeza
+dientes, canción, correr, nadar, fútbol, pizza, burro, mono
+conejo, tigre, manzana, naranja, uvas, fresa, sandía, limón
+pera, cereza, mango, coco, tomate, patata, zanahoria, cebolla
+ajo, maíz, judías, arroz, pasta, sopa, leche, zumo
+caramelo, galleta, palomitas, bocadillo, ensalada, tostada, mantequilla, cuchillo
+tenedor, cuchara, plato, cuenco, olla, sartén, horno, fregadero
+toalla, cepillo, cepillo dientes, ducha, bañera, aseo, almohada, manta
+sábana, lámpara, radio, bolso, mochila, maleta, botón, cremallera
+gafas, anillo, collar, lápiz, goma, regla, papel, cuaderno
+tijeras, pegamento, hormiga, abeja, mariposa, araña, gusano, mosca
+paloma, loro, pato, gallina, gallo, águila, cisne, tortuga
+rana, cocodrilo, hipopótamo, jirafa, cebra, ballena, pulpo, medusa
+cangrejo, nube, viento, arcoíris, trueno, relámpago, niebla, campo
+granja, valle, rojo, azul, verde, amarillo, naranja, morado
+rosa, marrón, grande, pequeño, alto, bajo, rápido, lento
+caliente, frío, feliz, triste, enfadado, asustado, cansado, hambriento
+somnoliento, enfermo, fuerte, gracioso, saltar, caminar, volar, comer
+beber, dormir, jugar, cantar, dibujar, construir, romper, ayudar
+explicar, mostrar, contar, leer, escribir, escuchar, hablar, sonreír
+llorar, reír, miedo, amor, odio, alegría, aburrimiento, sorpresa
+dolor, olfato, gusto, tacto, vista, oído, calor, luz
+oscuridad, ruido, silencio, limpio, sucio, dulce, salado, ácido
+amargo, picante, suave, áspero, afilado, pesado, ligero, redondo
+cuadrado, largo, corto, ancho, estrecho, abierto, cerrado, lleno
+vacío, nuevo, viejo, joven, bonito, feo, fácil, difícil
+seguro, peligroso, igual, diferente, verdadero, falso, sí, no
+quizás, siempre, nunca, aquí, allí, ahora, hoy, mañana
+ayer
+
+--- Level 2: Easy (222 words) ---
+computadora, teléfono, restaurante, tienda, parque, avión, bicicleta, música
+baile, película, fiesta, cumpleaños, nevera, televisión, puente, hotel
+jardín, biblioteca, escuela, vela, carnaval, café, té, hamburguesa
+chocolate, plátano, naranja, piscina, autobús, tren, guitarra, piano
+cámara, reloj, cartera, rueda, paraguas, guantes, calcetín, camisa
+pantalón, espejo, peine, serpiente, elefante, león, tiburón, búho
+pingüino, cangrejo, dentista, enfermera, profesor, policía, soldado, cocinero
+camarero, conductor, piloto, constructor, guitarra, batería, flauta, saxofón
+trompeta, arpa, acordeón, banjo, ukelele, violonchelo, boxeo, lucha libre
+judo, karate, tenis, voleibol, baloncesto, béisbol, hockey, rugby
+ajedrez, damas, dominó, puzle, dados, cartas, juego de mesa, cometa
+globo, tienda de campaña, saco de dormir, brújula, prismáticos, linterna, cuerda, cerillas
+postal, paquete, buzón, dirección, firma, recibo, billete, perfume
+loción, champú, acondicionador, desodorante, taladro, martillo, clavo, tornillo
+llave inglesa, alicates, sierra, escalera, cubo, brocha, rueda, motor
+batería, cable, interruptor, enchufe, toma, trigo, harina, azúcar
+sal, pimienta, vinagre, aceite, salsa, sirope, mermelada, chaqueta
+abrigo, vestido, falda, traje, corbata, bufanda, guantes, botas
+sandalias, diamante, oro, plata, bronce, hierro, cobre, mármol
+vidrio, plástico, príncipe, princesa, caballero, mago, bruja, hada
+gigante, enano, selva, pantano, pradera, oasis, meseta, cañón
+glaciar, bahía, península, lunes, martes, miércoles, jueves, viernes
+sábado, domingo, mañana, tarde, noche, medianoche, amanecer, atardecer
+fin de semana, vacaciones, norte, sur, este, oeste, electricidad, fontanería
+aire acondicionado, ascensor, pasillo, balcón, jardín, patio, camino, valla
+puerta, cerradura, banco, columpio, tobogán, iglesia, sinagoga, mezquita
+oración, ángel, cielo, mercado, tienda, precio, descuento, moneda
+billete, recibo, sello, sobre, entrega, firma
+
+--- Level 3: Medium (202 words) ---
+museo, banco, hospital, abogado, médico, ingeniero, bombero, artista
+científico, fotógrafo, aeropuerto, playa, desierto, bosque, montaña, castillo
+mapa, viaje, aventura, sueño, memoria, ensayo, examen, competencia
+premio, responsabilidad, elección, conocimiento, debate, problema, solución, experimento
+resultado, espectáculo, escenario, decorado, actor, director, tesoro, faro
+puerto, barco, dragón, victoria, derrota, trayecto, valle, cascada
+cueva, instrucción, arqueólogo, paleontólogo, geólogo, meteorólogo, oceanógrafo, economista
+sociólogo, antropólogo, demógrafo, geógrafo, criminólogo, diplomático, estadista, renacimiento
+barroco, clasicismo, romanticismo, impresionismo, expresionismo, cubismo, surrealismo, minimalismo
+cruzadas, colonialismo, imperialismo, nacionalismo, sionismo, autonomía, independencia, escalada
+deporte aventura, paracaidismo, buceo, rafting, acampada, senderismo, central eléctrica, fábrica
+refinería, taller, cantera, minería, perforación, escudo, pergamino, escritura
+teología, filosofía, mitología, historia, imperio, reino, república, democracia
+monarquía, federación, parlamento, senado, congreso, presidencia, diplomacia, tratado
+alianza, conflicto, alto el fuego, sanción, embargo, referéndum, elección, protección ambiental
+contaminación, reciclaje, energía verde, huella de carbono, cambio climático, invernadero, pandemia, virus
+bacteria, vacuna, inmunización, antibiótico, quimioterapia, radiación, trasplante, genética
+economía, comercio, exportación, importación, aduanas, impuestos, presupuesto, déficit
+superávit, deuda, medios de comunicación, publicidad, relaciones públicas, marca, marketing, ventas
+logística, seguridad nacional, inteligencia, espionaje, cibernética, piratería, cifrado, población
+inmigración, urbanización, desarrollo, pobreza, bienestar, sanidad, ciudadanía, identidad
+herencia, tradición, valores, campaña, coalición, oposición, gobierno, comité
+fórmula uno, olimpiadas, mundial, final, liga, informática, software, hardware
+aplicación, algoritmo, inteligencia artificial, red, servidor, nube, base de datos, interfaz
+protocolo, copia de seguridad, recuperación, actualización, mantenimiento, seguridad, privacidad, cliente
+proveedor, socio
+
+--- Level 4: Medium-Hard (194 words) ---
+democracia, economía, política, educación, cultura, tradición, igualdad, libertad
+justicia, verdad, amistad, lealtad, traición, éxito, fracaso, esperanza
+amor, odio, diplomacia, mediación, seguro, ley, inflación, crisis
+liderazgo, comunicación, creatividad, inspiración, motivación, empatía, estrés, trauma
+revolución, celos, orgullo, vergüenza, confusión, paz, agotamiento, emoción
+burocracia, diagnóstico, opinión, prueba, protesta, compromiso, reconciliación, cambio
+desarrollo, apodo, responsabilidad, transparencia, integridad, autenticidad, soberanía, legitimidad
+jurisdicción, gobernanza, infraestructura, sostenibilidad, biodiversidad, conservación, restauración, adaptación
+emprendedor, innovación, disrupción, ecosistema, cuántico, relatividad, entropía, incertidumbre
+probabilidad, hipótesis, teorema, axioma, meditación, mindfulness, conciencia, percepción
+cognición, metacognición, introspección, autoconciencia, iluminación, trascendencia, resiliencia, flexibilidad
+vulnerabilidad, empoderamiento, liberación, emancipación, autonomía, gentrificación, urbanización, industrialización
+digitalización, automatización, mecanización, estandarización, privatización, posmodernismo, deconstrucción, pragmatismo
+propaganda, censura, vigilancia, adoctrinamiento, manipulación, radicalización, extremismo, fundamentalismo
+tribalismo, intuición, premonición, coincidencia, paradoja, contradicción, ambigüedad, complejidad
+estética, sublime, melancolía, euforia, catarsis, epifanía, revelación, monopolio
+cartel, sindicato, conglomerado, franquicia, subsidiaria, migración, desplazamiento, diáspora
+asimilación, integración, segregación, discriminación, prejuicio, estereotipo, sesgo, trauma
+recuperación, sanación, transformación, crecimiento, evolución, ideología, dogma, doctrina
+creencia, fe, escepticismo, agnosticismo, ateísmo, espiritualidad, misticismo, constitución
+legislación, regulación, mediación, procesamiento, defensa, veredicto, fenómeno, anomalía
+desviación, excepción, revolución, reforma, modernismo, futurismo, nihilismo, existencialismo
+absurdismo, empatía, compasión, simpatía, solidaridad, altruismo, filantropía, caridad
+generosidad, benevolencia, abstracción, representación, interpretación, análisis, síntesis, evaluación
+aplicación, creación
+
+--- Level 5: Hard (174 words) ---
+inteligencia, estética, ética, filosofía, ecología, genética, astronomía, neurología
+antropología, sociología, intuición, paradoja, ironía, manipulación, conspiración, carisma
+pesimismo, optimismo, ideología, absurdo, metáfora, renacimiento, capitalismo, socialismo
+globalización, anarquía, teocracia, realismo, simbolismo, antagonismo, protagonista, narrativa
+análisis, probabilidad, algoritmo, metabolismo, fotosíntesis, evolución, fenómeno, relativismo
+empirismo, nostalgia, melancolía, cronología, analogía, síntesis, retórica, utopía
+nihilismo, existencialismo, epistemología, ontología, psicoanálisis, conductismo, cognitivismo, constructivismo
+positivismo, empirismo, racionalismo, idealismo, materialismo, determinismo, termodinámica, electromagnetismo
+astrofísica, nanotecnología, biotecnología, neurociencia, inmunología, epidemiología, morfología, fonología
+pragmática, semántica, sintaxis, etimología, retórica, criptografía, biometría, ciberseguridad
+heurística, recursión, iteración, abstracción, encapsulamiento, jurisprudencia, constitucionalismo, federalismo
+soberanía, secularismo, teocracia, plutocracia, tecnocracia, meritocracia, cleptocracia, utilitarismo
+deontología, ética de virtudes, consecuencialismo, comunitarismo, libertarismo, igualitarismo, colectivismo, individualismo
+microeconomía, macroeconomía, econometría, política monetaria, política fiscal, déficit comercial, ventaja comparativa, equilibrio de mercado
+elasticidad precio, costo de oportunidad, historiografía, paleontología, genealogía, demografía, cartografía, topografía
+etnografía, polímata, autodidacta, prodigio, savant, conocedor, virtuoso, anacronismo
+oxímoron, tautología, eufemismo, lítotes, hipérbole, metonimia, sinécdoque, schadenfreude
+zeitgeist, angst, gestalt, leitmotiv, kitsch, pathos, ethos, neoclasicismo
+romanticismo, impresionismo, expresionismo, cubismo, surrealismo, dadaísmo, futurismo, minimalismo
+conceptualismo, transhumanismo, posthumanismo, singularidad, criónica, cibernética, biónica, prótesis
+aumento, mejora, palindromo, anagrama, acrónimo, onomatopeya, aliteración, sismología
+vulcanología, glaciología, oceanografía, existencialismo, nihilismo, relativismo
+

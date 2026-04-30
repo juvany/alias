@@ -1,0 +1,2 @@
+c:\Dev\platform-tools>adb install -r C:\Users\juvan\alias\myAlias-android\app\build\outputs\apk\debug\app-debug.apk
+Performing Streamed Install

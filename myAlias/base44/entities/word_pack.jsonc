@@ -1,0 +1,31 @@
+{
+  "name": "WordPack",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name for this word pack (e.g. 'Sports Terms')"
+    },
+    "language": {
+      "type": "string",
+      "description": "Language code: he (Hebrew), en (English), or es (Spanish)",
+      "enum": ["he", "en", "es"]
+    },
+    "difficulty": {
+      "type": "number",
+      "description": "Difficulty level: 1 (very easy) to 6 (very hard)",
+      "enum": [1, 2, 3, 4, 5, 6]
+    },
+    "words": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of words/phrases to add to the game"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Set to false to temporarily disable this pack without deleting it"
+    }
+  },
+  "required": ["name", "language", "difficulty", "words"]
+}

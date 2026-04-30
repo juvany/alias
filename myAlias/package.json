@@ -1,0 +1,19 @@
+{
+  "name": "alias",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "node generate-icons.mjs && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@base44/sdk": "latest",
+    "motion": "^12.38.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5",
+    "vite": "^6.0.0",
+    "vite-plugin-pwa": "^0.21.0"
+  }
+}

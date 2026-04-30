@@ -1,0 +1,103 @@
+{
+  "name": "PtakimRoom",
+  "type": "object",
+  "properties": {
+    "room_code": {
+      "type": "string",
+      "description": "4-character room code for players to join"
+    },
+    "host_device_id": {
+      "type": "string",
+      "description": "Device ID of the host player"
+    },
+    "phase": {
+      "type": "string",
+      "description": "Current game phase",
+      "enum": ["lobby", "submitting_notes", "round_intro", "turn_active", "turn_result", "round_result", "game_finished"]
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "notes_per_player": { "type": "number" },
+        "skip_allowed": { "type": "boolean" },
+        "team_mode": { "type": "string", "enum": ["auto", "manual"] }
+      }
+    },
+    "players": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": { "type": "string" },
+          "name": { "type": "string" },
+          "ready": { "type": "boolean" },
+          "notes_submitted": { "type": "boolean" },
+          "emoji": { "type": "string" }
+        }
+      }
+    },
+    "teams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "color": { "type": "string" },
+          "emoji": { "type": "string" },
+          "player_device_ids": { "type": "array", "items": { "type": "string" } },
+          "explainer_idx": { "type": "number" },
+          "scores": { "type": "array", "items": { "type": "number" } }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string" },
+          "author_device_id": { "type": "string" },
+          "note_index": { "type": "number" }
+        }
+      },
+      "description": "All submitted notes"
+    },
+    "note_count": {
+      "type": "number",
+      "description": "Total number of notes submitted"
+    },
+    "current_round": {
+      "type": "number",
+      "description": "Current round (0=not started, 1-3=active)"
+    },
+    "current_turn": {
+      "type": "object",
+      "properties": {
+        "team_idx": { "type": "number" },
+        "player_idx": { "type": "number" },
+        "start_time": { "type": "string" },
+        "end_time": { "type": "string" }
+      }
+    },
+    "deck_order": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "Shuffled note indices for current round"
+    },
+    "deck_index": {
+      "type": "number",
+      "description": "Pointer into deck_order"
+    },
+    "turn_results": {
+      "type": "object",
+      "properties": {
+        "team_idx": { "type": "number" },
+        "player_idx": { "type": "number" },
+        "correct": { "type": "number" },
+        "skipped": { "type": "number" },
+        "deck_empty": { "type": "boolean" }
+      }
+    }
+  },
+  "required": ["room_code", "host_device_id", "phase"]
+}

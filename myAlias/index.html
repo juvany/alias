@@ -1,0 +1,3951 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>פתקים</title>
+  <meta name="theme-color" content="#6C63FF">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="פתקים">
+  <link rel="manifest" href="manifest.json">
+  <script>
+    // Capture beforeinstallprompt early so the deferred module doesn't miss it.
+    // Only suppress Chrome's native mini-infobar on mobile where we show our own banner.
+    window.addEventListener('beforeinstallprompt', function(e) {
+      window.__pwaPrompt = e;
+      var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      var isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                         || !!window.navigator.standalone;
+      var isDismissed = false;
+      try {
+        var ts = localStorage.getItem('pwa_install_dismissed_v2');
+        isDismissed = !!ts && (Date.now() - Number(ts) < 604800000); // 7 days
+      } catch(ex) {}
+      if (isMobile && !isStandalone && !isDismissed) {
+        e.preventDefault(); // suppress Chrome's mini-infobar; we'll show our own
+      }
+    });
+  </script>
+  <style>
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --bg: #f0f2ff;
+      --surface: #ffffff;
+      --card: #ffffff;
+      --card2: #f0f2ff;
+      --text: #1a1a3e;
+      --text-dim: #5555aa;
+      --text-muted: #9999cc;
+      --border: #dde0f8;
+      --correct: #16a34a;
+      --skip-color: #dc2626;
+      --t1: #16a34a; --t1d: #dcfce7;
+      --t2: #65a30d; --t2d: #ecfccb;
+      --t3: #ca8a04; --t3d: #fef9c3;
+      --t4: #ea580c; --t4d: #ffedd5;
+      --t5: #dc2626; --t5d: #fee2e2;
+      --t6: #7c3aed; --t6d: #f3e8ff;
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      direction: rtl;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    #app {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ===== SCREEN BASE ===== */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      animation: screenIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes screenIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .screen-inner {
+      width: 100%;
+      max-width: 480px;
+      padding: 16px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      border: none;
+      border-radius: 16px;
+      padding: 13px 24px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
+      font-family: inherit;
+      direction: rtl;
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active { transform: scale(0.95); filter: brightness(0.9); }
+    .btn-primary {
+      background: linear-gradient(135deg, #6C63FF 0%, #9B59B6 100%);
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(108,99,255,0.35);
+    }
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text-dim);
+      border: 1.5px solid var(--border);
+    }
+    .btn-correct {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color: #fff;
+      font-size: 1.8rem;
+      padding: 28px;
+      border-radius: 22px;
+      box-shadow: 0 8px 32px rgba(34,197,94,0.35);
+      flex: 2;
+    }
+    .btn-skip {
+      background: #fff0f0;
+      color: var(--skip-color);
+      border: 2px solid rgba(220,38,38,0.3);
+      font-size: 1.3rem;
+      padding: 22px;
+      border-radius: 18px;
+      flex: 1;
+    }
+    .btn-ghost {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 8px;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-ghost:active { opacity: 0.6; }
+
+    /* ===== SPACERS ===== */
+    .spacer { flex: 1; }
+    .gap4 { height: 4px; }
+    .gap8 { height: 6px; }
+    .gap12 { height: 8px; }
+    .gap16 { height: 10px; }
+    .gap20 { height: 14px; }
+    .gap24 { height: 14px; }
+    .gap32 { height: 18px; }
+    .gap40 { height: 20px; }
+
+    /* ===== DIVIDER ===== */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    /* ===== PILL BADGE ===== */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 14px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    /* ===== HOME SCREEN ===== */
+    .home-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 80%, rgba(155,89,182,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .logo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 48px;
+    }
+
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #6C63FF, #9B59B6);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      box-shadow: 0 16px 48px rgba(108,99,255,0.4);
+      animation: logoFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .logo-text {
+      font-size: 2.8rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #a78bfa, #6C63FF, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    /* ===== SETUP SCREEN ===== */
+    .section-label {
+      width: 100%;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .team-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .team-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .team-input {
+      flex: 1;
+      padding: 8px 12px;
+      background: var(--card2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.95rem;
+      direction: rtl;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .team-input:focus { border-color: #6C63FF; }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      transition: color 0.2s;
+    }
+    .remove-btn:hover { color: var(--skip-color); }
+
+    .add-team-btn {
+      width: 100%;
+      padding: 13px;
+      background: none;
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .add-team-btn:hover { border-color: #6C63FF; color: #a78bfa; }
+
+    .options-row {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+    }
+
+    .option-card {
+      flex: 1;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .option-card.active {
+      background: rgba(108,99,255,0.15);
+      border-color: #6C63FF;
+    }
+    .option-card-label {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .option-card-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    .toggle-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: var(--card);
+      border-radius: 14px;
+    }
+    .toggle-label { font-size: 0.95rem; }
+    .toggle-sub { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
+
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 28px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      right: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    input:checked + .slider { background: #6C63FF; }
+    input:checked + .slider::before { transform: translateX(-22px); }
+
+    /* ===== BOARD SCREEN ===== */
+    .board-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .board-title { font-size: 1.1rem; font-weight: 800; }
+    .round-badge {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    /* Track */
+    .track-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding: 16px 0;
+      scrollbar-width: none;
+    }
+    .track-wrapper::-webkit-scrollbar { display: none; }
+
+    .track {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 20px;
+      width: max-content;
+    }
+
+    .track-tile {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.2rem;
+      position: relative;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .track-tile.tile-start {
+      background: var(--card);
+      border-color: var(--border);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-dim);
+    }
+
+    .track-tile.tile-end {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      color: #1a0a00;
+      font-size: 0.75rem;
+      font-weight: 800;
+      border-color: rgba(255,200,0,0.5);
+      box-shadow: 0 4px 16px rgba(255,165,0,0.3);
+    }
+
+    .tile-d1 { background: #16a34a; color: #fff; border-color: #15803d; }
+    .tile-d2 { background: #65a30d; color: #fff; border-color: #4d7c0f; }
+    .tile-d3 { background: #ca8a04; color: #fff; border-color: #a16207; }
+    .tile-d4 { background: #ea580c; color: #fff; border-color: #c2410c; }
+    .tile-d5 { background: #dc2626; color: #fff; border-color: #b91c1c; }
+    .tile-d6 { background: #7c3aed; color: #fff; border-color: #6d28d9; }
+
+    .track-tile.active-tile {
+      transform: scale(1.12);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.8), 0 8px 24px rgba(108,99,255,0.3);
+    }
+
+    .tile-teams {
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 2px;
+    }
+
+    .tile-team-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1.5px solid var(--bg);
+    }
+
+    .track-arrow {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    /* Team cards on board */
+    .team-cards-grid {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .team-board-card {
+      width: 100%;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .team-board-card.active-team {
+      border-color: var(--active-team-color, rgba(108,99,255,0.6));
+      background: var(--active-team-bg, rgba(108,99,255,0.08));
+    }
+
+    .team-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .team-info { flex: 1; }
+    .team-name-text { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+    .team-tile-info { font-size: 0.78rem; color: var(--text-dim); }
+
+    .team-score-display {
+      font-size: 1.8rem;
+      font-weight: 900;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .current-turn-bar {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(155,89,182,0.05));
+      border: 2px solid rgba(108,99,255,0.2);
+      border-radius: 18px;
+      padding: 16px;
+      text-align: center;
+    }
+    .current-turn-label { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 6px; }
+    .current-turn-name { font-size: 1.5rem; font-weight: 900; }
+    .current-turn-sub { font-size: 0.85rem; color: var(--text-dim); margin-top: 4px; }
+
+    /* ===== TURN INTRO SCREEN ===== */
+    .turn-intro-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .turn-team-display {
+      width: 120px;
+      height: 120px;
+      border-radius: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: 900;
+      color: white;
+      animation: teamPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes teamPop {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .turn-team-name {
+      font-size: 2rem;
+      font-weight: 900;
+    }
+
+    .turn-difficulty-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 14px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      border: 1.5px solid var(--border);
+    }
+
+    .diff-label { font-size: 0.78rem; color: var(--text-dim); }
+    .diff-stars { font-size: 1.4rem; letter-spacing: 2px; }
+    .diff-name { font-size: 1rem; font-weight: 700; }
+
+    .turn-instructions {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      max-width: 280px;
+      line-height: 1.6;
+    }
+
+    /* ===== PLAYING SCREEN ===== */
+    .playing-wrap {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .playing-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px 8px;
+    }
+
+    .playing-team-badge {
+      padding: 7px 16px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .playing-score {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    /* Circular Timer */
+    .timer-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 20px;
+      gap: 8px;
+    }
+
+    .timer-circle-wrap {
+      position: relative;
+      width: 90px;
+      height: 90px;
+    }
+
+    .timer-svg {
+      width: 90px;
+      height: 90px;
+      transform: rotate(-90deg);
+    }
+
+    .timer-bg-circle {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 6;
+    }
+
+    .timer-progress-circle {
+      fill: none;
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear, stroke 0.5s;
+    }
+
+    .timer-number {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 900;
+      transition: color 0.5s;
+    }
+
+    .turn-mini-stats {
+      display: flex;
+      gap: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .stat-ok { color: var(--correct); }
+    .stat-sk { color: var(--skip-color); }
+
+    /* Word Card */
+    .word-card {
+      flex: 1;
+      margin: 0 20px;
+      background: var(--card);
+      border-radius: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 24px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      box-shadow: 0 4px 24px rgba(108,99,255,0.1);
+      transition: background 0.25s;
+    }
+
+    .word-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .word-diff-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    .word-text {
+      font-size: clamp(2rem, 9vw, 3.2rem);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.2;
+      animation: wordIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes wordIn {
+      from { opacity: 0; transform: scale(0.85) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .word-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .word-card.flash-correct {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34,197,94,0.4);
+    }
+    .word-card.flash-skip {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239,68,68,0.3);
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 12px;
+      padding: 16px 20px 32px;
+    }
+
+    /* ===== TURN RESULTS ===== */
+    .results-points-banner {
+      width: 100%;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(155,89,182,0.1));
+      border: 1.5px solid rgba(108,99,255,0.3);
+      border-radius: 22px;
+      padding: 24px;
+    }
+
+    .results-points-label { font-size: 0.85rem; color: var(--text-dim); }
+    .results-points-number { font-size: 4rem; font-weight: 900; line-height: 1; }
+    .results-points-sub { font-size: 0.85rem; color: var(--text-dim); margin-top: 4px; }
+
+    .results-list { width: 100%; }
+
+    .result-word-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      background: var(--card);
+      border-radius: 12px;
+      margin-bottom: 7px;
+      font-size: 0.95rem;
+    }
+
+    .result-icon { font-size: 1rem; flex-shrink: 0; }
+
+    /* Scores table */
+    .scores-wrap { width: 100%; }
+
+    .score-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--card);
+      border-radius: 14px;
+      margin-bottom: 8px;
+      border: 1.5px solid var(--border);
+    }
+
+    .score-item.leader {
+      border-color: rgba(255,215,0,0.5);
+      background: rgba(255,215,0,0.06);
+    }
+
+    .score-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .score-name { flex: 1; font-weight: 700; font-size: 0.95rem; }
+    .score-pos { font-size: 0.75rem; color: var(--text-dim); }
+    .score-pts { font-size: 1.6rem; font-weight: 900; }
+
+    /* ===== WIN SCREEN ===== */
+    .win-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      gap: 10px;
+    }
+
+    .win-stars {
+      font-size: 1.4rem;
+      letter-spacing: 6px;
+      animation: winFadeUp 0.8s ease both;
+      animation-delay: 0.2s;
+    }
+
+    .win-avatar-wrap {
+      position: relative;
+      animation: winAvatarIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      animation-delay: 0.15s;
+    }
+
+    .win-avatar {
+      width: 110px; height: 110px;
+      border-radius: 30px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .win-avatar-glow {
+      position: absolute;
+      inset: -12px;
+      border-radius: 38px;
+      opacity: 0.35;
+      filter: blur(18px);
+      z-index: 0;
+      animation: winPulseGlow 2s ease-in-out infinite;
+    }
+
+    .win-trophy {
+      font-size: 4rem;
+      animation: winTrophyIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      animation-delay: 0.5s;
+      position: absolute;
+      bottom: -14px;
+      right: -18px;
+      z-index: 2;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+    }
+
+    .win-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 600;
+      animation: winFadeUp 0.6s ease both;
+      animation-delay: 0.6s;
+    }
+
+    .win-team-name {
+      font-size: 2.8rem;
+      font-weight: 900;
+      animation: winNameIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      animation-delay: 0.75s;
+      line-height: 1.15;
+    }
+
+    .win-players {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      animation: winFadeUp 0.6s ease both;
+      animation-delay: 1s;
+    }
+
+    .win-player-chip {
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1.5px solid;
+    }
+
+    .win-reached {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      animation: winFadeUp 0.6s ease both;
+      animation-delay: 1.1s;
+    }
+
+    .win-divider {
+      width: 60px;
+      height: 3px;
+      border-radius: 3px;
+      margin: 6px 0;
+      animation: winFadeUp 0.6s ease both;
+      animation-delay: 1.2s;
+    }
+
+    @keyframes winAvatarIn {
+      from { transform: scale(0) rotate(-15deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    @keyframes winTrophyIn {
+      from { transform: scale(0) rotate(20deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    @keyframes winNameIn {
+      from { transform: scale(0.5) translateY(20px); opacity: 0; }
+      to   { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    @keyframes winFadeUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes winPulseGlow {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.55; transform: scale(1.08); }
+    }
+
+    /* ===== DIFFICULTY COLORS ===== */
+    .d1 { color: #16a34a; }
+    .d2 { color: #65a30d; }
+    .d3 { color: #ca8a04; }
+    .d4 { color: #ea580c; }
+    .d5 { color: #dc2626; }
+    .d6 { color: #7c3aed; }
+
+    /* ===== INSTRUCTIONS ===== */
+    .instructions-card {
+      width: 100%;
+      background: var(--card);
+      border-radius: 18px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      border: 1.5px solid var(--border);
+    }
+
+    .instructions-card h3 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .instructions-card p, .instructions-card li {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    .instructions-card ul { padding-right: 16px; }
+
+    /* ===== CONFETTI CANVAS ===== */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ===== DIFFICULTY LEGEND ===== */
+    .diff-legend {
+      width: 100%;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .diff-badge {
+      flex: 1;
+      min-width: 80px;
+      padding: 8px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    /* ===== TRAIL BOARD ===== */
+    .trail-board-outer { width:100%; padding:6px 0 8px; }
+    .trail-board-bg {
+      background: var(--bg);
+      border-radius: 20px;
+      padding: 12px 14px 10px;
+      width: 100%;
+      border: 1.5px solid var(--border);
+    }
+    .trail-board { width:100%; display:flex; flex-direction:column; gap:0; }
+    .trail-row   { display:flex; align-items:center; justify-content:center; }
+
+    /* circular tile */
+    .trail-tile  {
+      border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative; flex-shrink: 0;
+      border: 3px solid rgba(255,255,255,0.4);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
+      font-size: 0.85rem; font-weight: 900; color: #fff;
+      transition: transform 0.15s;
+    }
+    .trail-tile .tile-num {
+      font-size: 0.85rem; font-weight: 900; color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6); line-height: 1; z-index: 1;
+    }
+    .trail-start-tile {
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff 0%, #ddd 100%);
+      border: 3px solid rgba(255,255,255,0.5);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.8);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: relative; flex-shrink: 0;
+      font-size: 0.5rem; font-weight: 900; letter-spacing: 0.04em; color: #8B0000;
+    }
+
+    /* tile colors — now with glossy radial highlight */
+    .tile-d1 { background: radial-gradient(circle at 35% 35%, #4ade80 0%, #16a34a 100%); border-color: rgba(255,255,255,0.3); }
+    .tile-d2 { background: radial-gradient(circle at 35% 35%, #a3e635 0%, #65a30d 100%); border-color: rgba(255,255,255,0.3); }
+    .tile-d3 { background: radial-gradient(circle at 35% 35%, #fde047 0%, #ca8a04 100%); border-color: rgba(255,255,255,0.3); }
+    .tile-d4 { background: radial-gradient(circle at 35% 35%, #fb923c 0%, #ea580c 100%); border-color: rgba(255,255,255,0.3); }
+    .tile-d5 { background: radial-gradient(circle at 35% 35%, #f87171 0%, #dc2626 100%); border-color: rgba(255,255,255,0.3); }
+    .tile-d6 { background: radial-gradient(circle at 35% 35%, #c084fc 0%, #7c3aed 100%); border-color: rgba(255,255,255,0.3); }
+
+    .just-moved { animation: justMoved 1.6s ease forwards; z-index: 4; }
+    @keyframes justMoved {
+      0%   { box-shadow: 0 3px 6px rgba(0,0,0,0.4); transform: scale(1); }
+      20%  { box-shadow: 0 0 0 7px gold, 0 3px 6px rgba(0,0,0,0.4); transform: scale(1.35); }
+      60%  { box-shadow: 0 0 0 5px gold, 0 3px 6px rgba(0,0,0,0.4); transform: scale(1.2); }
+      100% { box-shadow: 0 0 0 4px gold, 0 3px 6px rgba(0,0,0,0.4); transform: scale(1.15); }
+    }
+    .path-hl { filter: brightness(1.25); box-shadow: 0 0 0 3px rgba(255,215,0,0.6), 0 3px 6px rgba(0,0,0,0.4); }
+
+    .bonus-moved { animation: bonusMoved 1.4s ease 0.6s both; z-index: 4; }
+    @keyframes bonusMoved {
+      0%   { box-shadow: 0 3px 6px rgba(0,0,0,0.4); transform: scale(1); }
+      25%  { box-shadow: 0 0 0 6px #38bdf8, 0 3px 6px rgba(0,0,0,0.4); transform: scale(1.3); }
+      60%  { box-shadow: 0 0 0 4px #38bdf8, 0 3px 6px rgba(0,0,0,0.4); transform: scale(1.15); }
+      100% { box-shadow: 0 0 0 3px #38bdf8, 0 3px 6px rgba(0,0,0,0.4); transform: scale(1.1); }
+    }
+
+    /* pawn avatars sitting on top of tiles */
+    .tile-avatars { position: absolute; inset: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; pointer-events: none; z-index: 3; }
+    .tile-avatar  { font-size: var(--av-fs, 1.3rem); line-height: 1; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8)); }
+    .tile-avatar.small { font-size: var(--av-fs-sm, 0.95rem); }
+
+    /* legacy dots */
+    .tile-tokens { position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); display:flex; gap:2px; z-index:3; }
+    .tile-token  { width:11px; height:11px; border-radius:50%; border:1.5px solid var(--bg); }
+
+    /* ===== PLAYER MANAGEMENT ===== */
+    .players-wrap  { padding:2px 0 10px 24px; }
+    .player-row    { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .player-num    { width:20px; height:20px; border-radius:50%; background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:0.68rem; font-weight:800; color:var(--text-dim); flex-shrink:0; }
+    .player-input  { flex:1; padding:9px 12px; background:var(--surface); border:1.5px solid var(--border); border-radius:10px; color:var(--text); font-size:0.88rem; direction:rtl; outline:none; font-family:inherit; }
+    .add-player-btn { background:none; border:1.5px dashed var(--border); border-radius:10px; color:var(--text-dim); font-size:0.8rem; cursor:pointer; padding:7px; width:100%; text-align:center; font-family:inherit; margin-top:2px; }
+    .team-expand-btn { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.8rem; padding:4px 8px; font-family:inherit; transition:color 0.2s; }
+    .team-expand-btn:hover { color:var(--text-dim); }
+
+    /* ===== DIFFICULTY OFFSET ===== */
+    .diff-offset-wrap { padding:2px 0 4px 0; }
+    .diff-offset-label { font-size:0.75rem; color:var(--text-dim); margin-bottom:4px; }
+    .diff-offset-btns { display:flex; gap:5px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+    .diff-offset-btns::-webkit-scrollbar { display:none; }
+    .dob { padding:6px 10px; border-radius:8px; background:var(--card2); border:1.5px solid var(--border); color:var(--text-dim); font-size:0.75rem; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; flex-shrink:0; transition:background 0.15s, border-color 0.15s, color 0.15s; }
+    .dob.dob-active { background:rgba(108,99,255,0.15); border-color:#6C63FF; color:#a78bfa; }
+
+    /* ===== LANGUAGE SELECTOR ===== */
+    .lang-btns { display:flex; gap:5px; }
+    .lang-btn { padding:5px 10px; border-radius:8px; background:var(--card2); border:1.5px solid var(--border); color:var(--text-dim); font-size:0.8rem; font-weight:700; cursor:pointer; font-family:inherit; transition:background 0.15s,border-color 0.15s,color 0.15s; display:flex; align-items:center; gap:4px; }
+    .lang-btn.lang-active { background:rgba(108,99,255,0.15); border-color:#6C63FF; color:#a78bfa; }
+
+    /* ===== GAME MENU MODAL ===== */
+    .game-menu-overlay { position:fixed; inset:0; background:rgba(0,0,0,0); z-index:200; display:flex; align-items:flex-end; justify-content:center; padding:20px; transition:background 0.25s; pointer-events:none; }
+    .game-menu-overlay.open { background:rgba(0,0,0,0.7); pointer-events:all; }
+    .game-menu-sheet { background:var(--surface); border-radius:24px 24px 20px 20px; padding:24px; width:100%; max-width:440px; border:1.5px solid var(--border); box-shadow:0 -4px 32px rgba(0,0,0,0.12); transform:translateY(40px); opacity:0; transition:transform 0.25s ease, opacity 0.25s ease; }
+    .game-menu-overlay.open .game-menu-sheet { transform:translateY(0); opacity:1; }
+
+    /* ===== MINI BOARD IN RESULTS ===== */
+    .mini-board-section { width:100%; }
+    .mini-board-title { font-size:0.75rem; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
+    .mini-board-outer { width:100%; overflow-x:auto; border-radius:16px; padding:4px 0; scrollbar-width:none; }
+    .mini-board-outer::-webkit-scrollbar { display:none; }
+
+    /* ===== SCROLLBAR ===== */
+    .screen::-webkit-scrollbar { width: 4px; }
+    .screen::-webkit-scrollbar-track { background: transparent; }
+    .screen::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ===== RESPONSIVE — DESKTOP ===== */
+    @media (min-width: 769px) {
+      .screen-inner {
+        max-width: 1100px;
+        padding: 36px 48px 60px;
+      }
+
+      .btn { max-width: 480px; font-size: 1.15rem; padding: 18px 36px; }
+
+      /* Home */
+      .logo-wrap { margin-top: 80px; }
+      .logo-icon { width: 96px; height: 96px; font-size: 2.8rem; }
+      .logo-text { font-size: 3.6rem; }
+
+      /* Board: 2-column grid */
+      .board-layout {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 24px;
+        align-items: start;
+        width: 100%;
+      }
+      .board-right { position: sticky; top: 36px; }
+
+      /* Setup: 2-column grid */
+      .setup-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        align-items: start;
+        width: 100%;
+        overflow: hidden;
+      }
+      .setup-left { overflow-y: auto; min-height: 0; }
+      .setup-right { position: sticky; top: 36px; }
+
+      /* Playing: centered, bigger */
+      .playing-wrap { max-width: 800px; margin: 0 auto; }
+      .word-text { font-size: clamp(2.5rem, 7vw, 5rem); }
+      .timer-circle-wrap { width: 120px; height: 120px; }
+      .timer-svg { width: 120px; height: 120px; }
+      .timer-number { font-size: 2.4rem; }
+      .timer-bg-circle, .timer-progress-circle { stroke-width: 7; }
+      .action-btns { padding: 20px 40px 40px; gap: 20px; }
+      .btn-correct { font-size: 2.2rem; padding: 34px; }
+      .btn-skip { font-size: 1.5rem; padding: 28px; }
+
+      /* Turn intro: bigger */
+      .turn-team-display { width: 160px; height: 160px; font-size: 4rem; border-radius: 40px; }
+      .turn-team-name { font-size: 2.8rem; }
+
+      /* Win: bigger */
+      .win-avatar { width: 140px; height: 140px; font-size: 4.5rem; border-radius: 36px; }
+      .win-avatar-glow { inset: -16px; border-radius: 44px; filter: blur(24px); }
+      .win-trophy { font-size: 5rem; bottom: -18px; right: -22px; }
+      .win-team-name { font-size: 3.5rem; }
+      .win-stars { font-size: 1.8rem; letter-spacing: 10px; }
+    }
+
+    /* ===== MODE SELECT SCREEN ===== */
+    .mode-cards {
+      display: flex;
+      gap: 14px;
+      width: 100%;
+      max-width: 400px;
+      flex-direction: column;
+    }
+    .mode-card {
+      flex: 1;
+      background: var(--card);
+      border-radius: 22px;
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      border: 2px solid var(--border);
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    }
+    .mode-card:active { transform: scale(0.97); }
+    .mode-card:hover { border-color: #6C63FF; box-shadow: 0 8px 28px rgba(108,99,255,0.18); }
+    .mode-card-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+    .mode-card-info { flex: 1; min-width: 0; }
+    .mode-card-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .mode-card-desc {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+    .mode-card-arrow {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+<div id="app"></div>
+
+<script>
+/* =====================================================
+   APP VERSION — update this on each deploy
+   ===================================================== */
+const APP_VERSION = "1.4.8";
+
+/* =====================================================
+   WORD LISTS — organized by difficulty 1–4
+   ===================================================== */
+const WORDS = {
+  1: [
+    "כלב","חתול","בית","ים","שמש","לחם","עץ","פרח",
+    "דג","ציפור","ירח","כוכב","גשם","שלג","אש","מים",
+    "אמא","אבא","ילד","כדור","נעל","כובע","כוס","ספר",
+    "מכונית","פרה","סוס","ביצה","עוגה","גלידה","כיסא","שולחן",
+    "דלת","חלון","מפתח","יד","עין","אף","פה","ראש",
+    "שיניים","שיר","ריצה","שחייה","כדורגל","פיצה","חמור","קוף",
+    "ארנב","נמר","תפוח","תפוז","ענב","תות","אבטיח","לימון",
+    "אגס","דובדבן","מנגו","קוקוס","עגבנייה","תפוח אדמה","גזר","בצל",
+    "שום","תירס","שעועית","אורז","פסטה","מרק","חלב","מיץ",
+    "ממתק","עוגייה","פופקורן","כריך","סלט","טוסט","חמאה","סכין",
+    "מזלג","כף","צלחת","קערה","סיר","מחבת","תנור","כיור",
+    "מגבת","מברשת","מברשת שיניים","מקלחת","אמבטיה","שירותים","כר","שמיכה",
+    "סדין","מנורה","רדיו","תיק","תרמיל","מזוודה","כפתור","רוכסן",
+    "משקפיים","טבעת","שרשרת","עיפרון","מחק","סרגל","נייר","מחברת",
+    "מספריים","דבק","נמלה","דבורה","פרפר","עכביש","תולעת","זבוב",
+    "יונה","תוכי","ברווז","תרנגולת","תרנגול","נשר","ברבור","צב",
+    "תנין","לוויתן","תמנון","מדוזה","סרטן","עמק","חצר","שביל",
+    "גדר","שער","מנעול","גן","ספסל","נדנדה","מגלשה","בית ספר",
+    "כיתה","לוח","מורה","תלמיד","שיעור","משטרה","שוטר","כלא",
+    "שופט","שוק","חנות","מחיר","הנחה","כרטיס אשראי","מטבע","שטר",
+    "קבלה","חשמל","ביוב","גז","מדרגות","מעלית","מסדרון","מרפסת",
+    "עט","תיק ספרים","אוכל","שתייה","שינה","משחק","קפיצה","ציור",
+    "בנייה","שבירה","עזרה","הסבר","הצגה","ספירה","חישוב","קריאה",
+    "כתיבה","האזנה","דיבור","חיוך","בכי","צחוק","כעס","פחד",
+    "אהבה","שנאה","שמחה","עצב","הפתעה","שעמום","עייפות","רעב",
+    "צמא","כאב","ריח","טעם","מגע","ראייה","שמיעה","חום",
+    "קור","לחות","יובש","אור","חושך","רעש","שקט","מהיר",
+    "איטי","גדול","קטן","גבוה","נמוך","חזק","חלש","יפה",
+    "מכוער","חדש","ישן","נקי","מלוכלך","ממותק","מלוח","חמוץ",
+    "מר","חריף"
+  ],
+  2: [
+    "מחשב","טלפון","מסעדה","פארק","מטוס","אופניים","מוזיקה","ריקוד",
+    "סרט","חג","יום הולדת","מסיבה","מקרר","טלוויזיה","גשר","מלון",
+    "גינה","ספרייה","חנוכייה","פורים","קפה","תה","המבורגר","שוקולד",
+    "בננה","בריכה","אוטובוס","רכבת","גיטרה","פסנתר","מצלמה","שעון",
+    "ארנק","גלגל","מטריה","כפפות","גרב","חולצה","מכנסיים","מראה",
+    "מסרק","נחש","פיל","אריה","כריש","ינשוף","פינגווין","רופא שיניים",
+    "אחות","חייל","טבח","מלצר","נהג","טייס","בונה","תופים",
+    "חליל","כינור","טרומבון","חצוצרה","אקורדיון","בנג'ו","צ'לו","אגרוף",
+    "היאבקות","ג'ודו","קראטה","טניס","כדורעף","כדורסל","בייסבול","הוקי",
+    "ראגבי","שחמט","דמקה","דומינו","פאזל","קוביות","קלפים","משחק לוח",
+    "עפיפון","יו-יו","בלון","אוהל","שק שינה","מצפן","משקפת","פנס",
+    "חבל","גפרורים","בול דואר","מעטפה","גלויה","חבילה","תיבת דואר","כתובת",
+    "חתימה","כרטיס","בושם","קרם","שמפו","מרכך","דאודורנט","מקדחה",
+    "פטיש","מסמר","ברג","מלקחיים","מסור","סולם","דלי","מברשת צבע",
+    "מנוע","סוללה","כבל","מתג","תקע","שקע","חיטה","קמח",
+    "סוכר","מלח","פלפל","חומץ","שמן","רוטב","סירופ","ריבה",
+    "ז'קט","מעיל","שמלה","חצאית","חליפה","עניבה","צעיף","כפפה",
+    "מגף","סנדל","יהלום","זהב","כסף","ברונזה","ברזל","נחושת",
+    "אבן","שיש","זכוכית","פלסטיק","נסיך","נסיכה","אביר","קוסם",
+    "מכשפה","פיה","ענק","גמד","ג'ונגל","אחו","נווה מדבר","מישור",
+    "קניון","קרחון","מפרץ","חצי אי","שני","שלישי","בוקר","צהריים",
+    "ערב","חצות","זריחה","שקיעה","אתמול","מחר","סוף שבוע","חופש",
+    "צפון","דרום","מזרח","מערב","מרכז","מים חמים","מזגן","מאוורר",
+    "ספר תורה","מזוזה","שופר","לולב","סוכה","פסח","שבועות","ראש השנה",
+    "יום כיפור","סעודה","ברכה","תפילה","הגדה","קינות","תחנות","קדיש",
+    "מצווה","חסד","צדקה","גמילות חסדים","מחילה","תשובה","כפרה","גאולה",
+    "ישועה","אמונה","ספק","ידע","חכמה","הבנה","שאלה","בחירה",
+    "החלטה","פתרון","בעיה","הצלחה","כישלון","ניסיון","טעות","לימוד",
+    "הוראה","חינוך","גידול","פיתוח","שיפור","טלפון חכם","מטען","אוזניות",
+    "רמקול","מקלדת","עכבר","מסך","סוללה ניידת","סיסמה","אימוג׳י","סלפי",
+    "וידאו","צ׳אט","הודעה","לייק","תגובה","עוקב","פרופיל","צילום מסך",
+    "קפוצ׳ון","ג׳ינס","סניקרס","בקבוק מים","כריך גבינה","פופקורן מתוק","חופשה","פארק מים",
+    "חדר בריחה","יום צילום","לוח שנה","פגישה","הזמנה"
+  ],
+  3: [
+    "מוזיאון","בנק","בית חולים","עורך דין","רופא","מהנדס","כבאי","אמן",
+    "מדען","צלם","שדה תעופה","חוף","מדבר","יער","הר","מצודה",
+    "מפה","טיול","הרפתקה","חלום","זיכרון","חזרה","בחינה","תחרות",
+    "פרס","אחריות","דיון","ניסוי","תוצאה","במה","תפאורה","שחקן",
+    "מנצח","תדריך","אוצר","מגדלור","נמל","ספינה","דרקון","ניצחון",
+    "תבוסה","מסע","מפל","מערה","עיתונאי","אדריכל","סופר","קצין",
+    "גנן","נגר","חשמלאי","שכונה","רחוב","שיפוץ","בית משפט","חקירה",
+    "עדות","שוד","בריחה","גילוי","המצאה","מנהיג","עצרת","טקס",
+    "חגיגה","מלגה","ראיון","חוזה","תעודה","שביתה","הפגנה","אסיפה",
+    "כינוס","מינוי","כלכלן","מדינאי","צלבנים","קולוניאליזם","אימפריאליזם","לאומיות",
+    "ציונות","אוטונומיה","עצמאות","ריפוי","טיפוס הרים","ספורט אתגרי","דאייה","צלילה",
+    "רפטינג","קמפינג","טרקינג","תחנת כוח","מפעל","בית זיקוק","בית מלאכה","מחצבה",
+    "כרייה","קידוח","מגן דוד","מנורת שבעת הקנים","מגילה","תורה","מלחמה","שלום",
+    "הפוגה","הסכם","אמנה","ברית","סכסוך","מתיחות","יריב","בעל ברית",
+    "אקדח","חרב","שריון","טנק","מטוס קרב","צוללת","רקטה","שמירת טבע",
+    "הגנת הסביבה","זיהום","פסולת","מיחזור","אנרגיה ירוקה","פחמן","שינויי אקלים","חממה",
+    "מגיפה","נגיף","חיידק","תרכיב","חיסון","אנטיביוטיקה","הקרנות","השתלה",
+    "כלכלה","מסחר","יצוא","יבוא","מכס","מיסים","תקציב","גירעון",
+    "עודף","חוב","מדיה","פרסום","יחסי ציבור","תדמית","מותג","שיווק",
+    "מכירות","לוגיסטיקה","ביטחון לאומי","מודיעין","ריגול","סייבר","הצפנה","אוכלוסייה",
+    "הגירה","עיור","עוני","רווחה","שירותי בריאות","אזרחות","זהות","מורשת",
+    "מסורת","ערכים","הצבעה","בחירות","קמפיין","מפלגה","קואליציה","אופוזיציה",
+    "ממשלה","פרלמנט","ועדה","פורמולה 1","אולימפיאדה","מונדיאל","גמר","ליגה",
+    "מחשוב","תוכנה","חומרה","אפליקציה","רשת","שרת","ענן","עדכון",
+    "תחזוקה","אבטחה","פרטיות","בדיקה","שירות","לקוח","שותף","ביטחון עצמי",
+    "ביישנות","התלהבות","אכזבה","לחץ חברתי","תור","פקק","קבלת פנים","מסיבת הפתעה",
+    "צילום וידאו"
+  ],
+  4: [
+    "דמוקרטיה","פוליטיקה","תרבות","שוויון","חירות","צדק","אמת","ידידות",
+    "נאמנות","בגידה","תקווה","דיפלומטיה","גישור","ביטוח","חוק","אינפלציה",
+    "משבר","מנהיגות","תקשורת","יצירתיות","השראה","מוטיבציה","אמפתיה","סטרס",
+    "טראומה","מהפכה","קנאה","גאווה","בושה","בלבול","שלווה","התרגשות",
+    "ביורוקרטיה","אבחון","חוות דעת","הוכחה","מחאה","פשרה","פיוס","שינוי",
+    "התפתחות","כינוי","שקיפות","יושרה","אותנטיות","ריבונות","לגיטימיות","סמכות",
+    "ממשל","תשתית","קיימות","מגוון ביולוגי","שימור","שיקום","הסתגלות","יזם",
+    "חדשנות","שיבוש","מדרגיות","אקוסיסטם","קוונטום","יחסיות","אנטרופיה","אי-ודאות",
+    "הסתברות","השערה","אקסיומה","מדיטציה","מיינדפולנס","תודעה","תפיסה","הסתכלות פנימית",
+    "מודעות עצמית","גמישות","צנזורה","מעקב","השפעה","אינטואיציה","צירוף מקרים","סתירה",
+    "עמימות","אסתטיקה","מלנכוליה","אופוריה","מונופול","אפליה","דעה קדומה","צמיחה",
+    "אבולוציה","ספקנות","אתאיזם","חוקה","תביעה","הגנה","יוצא דופן","טוב לב",
+    "רנסנס","פסיכולוג"
+  ],
+};
+
+const WORDS_EN = {
+  1: [
+    "dog","cat","house","sea","sun","bread","tree","flower",
+    "fish","bird","moon","star","rain","snow","fire","water",
+    "mom","dad","child","ball","shoe","hat","cup","book",
+    "car","cow","horse","egg","cake","ice cream","chair","table",
+    "door","window","key","hand","eye","nose","mouth","head",
+    "teeth","song","run","swim","soccer","pizza","donkey","monkey",
+    "rabbit","tiger","apple","orange","grapes","strawberry","watermelon","lemon",
+    "pear","cherry","mango","coconut","tomato","potato","carrot","onion",
+    "garlic","corn","beans","rice","pasta","soup","milk","juice",
+    "candy","cookie","popcorn","sandwich","salad","toast","butter","knife",
+    "fork","spoon","plate","bowl","pot","pan","oven","sink",
+    "towel","brush","toothbrush","shower","bath","toilet","pillow","blanket",
+    "lamp","radio","bag","backpack","suitcase","button","zipper","glasses",
+    "ring","necklace","pencil","eraser","ruler","paper","notebook","scissors",
+    "glue","ant","bee","butterfly","spider","worm","fly","dove",
+    "parrot","duck","hen","rooster","eagle","swan","turtle","frog",
+    "crocodile","hippo","giraffe","zebra","whale","octopus","jellyfish","crab",
+    "cloud","wind","rainbow","thunder","lightning","fog","field","farm",
+    "valley","red","blue","green","yellow","purple","pink","brown",
+    "big","small","tall","short","fast","slow","hot","cold",
+    "happy","sad","angry","scared","tired","hungry","sleepy","sick",
+    "strong","funny","jump","walk","eat","drink","sleep","play",
+    "sing","draw","build","break","help","explain","show","count",
+    "read","write","listen","speak","smile","cry","laugh","fear",
+    "love","hate","joy","boredom","surprise","pain","smell","taste",
+    "touch","sight","hearing","warmth","light","dark","noise","silence",
+    "clean","dirty","sweet","salty","sour","bitter","spicy","smooth",
+    "rough","sharp","soft","heavy","round","square","long","wide",
+    "narrow","open","closed","full","empty","new","old","young",
+    "beautiful","ugly","easy","hard","safe","dangerous","same","different",
+    "true","false","yes","no","maybe","always","never","sometimes",
+    "here","there","everywhere","now","then","today","tomorrow"
+  ],
+  2: [
+    "computer","phone","restaurant","store","park","airplane","bicycle","music",
+    "dance","movie","holiday","birthday","party","fridge","television","bridge",
+    "hotel","garden","library","school","candle","carnival","coffee","tea",
+    "hamburger","chocolate","banana","pool","bus","train","guitar","piano",
+    "camera","clock","wallet","wheel","umbrella","gloves","sock","shirt",
+    "pants","mirror","comb","snake","elephant","lion","shark","owl",
+    "penguin","dentist","nurse","teacher","policeman","soldier","chef","waiter",
+    "driver","pilot","builder","drums","flute","saxophone","trumpet","harp",
+    "accordion","banjo","ukulele","cello","boxing","wrestling","judo","karate",
+    "tennis","volleyball","basketball","baseball","hockey","rugby","chess","checkers",
+    "dominoes","puzzle","dice","cards","board game","kite","balloon","tent",
+    "sleeping bag","compass","binoculars","flashlight","rope","matches","postcard","package",
+    "mailbox","address","signature","receipt","ticket","perfume","lotion","shampoo",
+    "conditioner","deodorant","drill","hammer","nail","screw","wrench","pliers",
+    "saw","ladder","bucket","paintbrush","engine","battery","cable","switch",
+    "plug","socket","wheat","flour","sugar","salt","pepper","vinegar",
+    "oil","sauce","syrup","jam","jacket","coat","dress","skirt",
+    "suit","tie","scarf","boots","sandals","diamond","gold","silver",
+    "bronze","iron","copper","marble","glass","plastic","prince","princess",
+    "knight","wizard","witch","fairy","giant","dwarf","jungle","swamp",
+    "meadow","oasis","plateau","canyon","glacier","bay","peninsula","Monday",
+    "Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday","morning","afternoon",
+    "evening","midnight","sunrise","sunset","weekend","vacation","north","south",
+    "east","west","center","electricity","plumbing","air conditioning","elevator","corridor",
+    "balcony","yard","path","fence","gate","lock","bench","swing",
+    "slide","church","synagogue","mosque","prayer","angel","heaven","market",
+    "shop","price","discount","coin","bill","stamp","envelope","delivery",
+    "cream","smartphone","charger","speaker","keyboard","mouse","screen","power bank",
+    "password","app","emoji","selfie","video","chat","message","like",
+    "comment","follower","profile","screenshot","hoodie","jeans","sneakers","water bottle",
+    "cheese sandwich","sweet popcorn","holiday trip","mall","water park","escape room","photo day","calendar",
+    "meeting","invitation"
+  ],
+  3: [
+    "museum","bank","hospital","lawyer","doctor","engineer","firefighter","artist",
+    "scientist","photographer","airport","beach","desert","forest","mountain","castle",
+    "map","trip","adventure","dream","memory","exam","competition","prize",
+    "problem","solution","experiment","result","stage","actor","lighthouse","harbor",
+    "ship","dragon","victory","defeat","journey","waterfall","cave","independence",
+    "rock climbing","skydiving","scuba diving","rafting","camping","trekking","factory","workshop",
+    "shield","alliance","conflict","election","pollution","recycling","pandemic","virus",
+    "bacteria","vaccine","antibiotic","transplant","trade","export","import","budget",
+    "debt","media","brand","marketing","sales","population","immigration","poverty",
+    "citizenship","identity","heritage","tradition","values","government","committee","formula one",
+    "olympics","world cup","final","league","software","hardware","application","network",
+    "server","update","maintenance","security","privacy","customer","partner","startup",
+    "investor","contract","profit","loss","growth","strategy","vision","mission",
+    "self-confidence","shyness","excitement","disappointment","peer pressure","queue","traffic jam","welcome party",
+    "surprise party","video shoot"
+  ],
+};
+
+const WORDS_ES = {
+  1: [
+    "perro","gato","casa","mar","sol","pan","árbol","flor",
+    "pez","pájaro","luna","estrella","lluvia","nieve","fuego","agua",
+    "mamá","papá","niño","pelota","zapato","sombrero","taza","libro",
+    "coche","vaca","caballo","huevo","pastel","helado","silla","mesa",
+    "puerta","ventana","llave","mano","ojo","nariz","boca","cabeza",
+    "dientes","canción","correr","nadar","fútbol","pizza","burro","mono",
+    "conejo","tigre","manzana","naranja","uvas","fresa","sandía","limón",
+    "pera","cereza","mango","coco","tomate","patata","zanahoria","cebolla",
+    "ajo","maíz","judías","arroz","pasta","sopa","leche","zumo",
+    "caramelo","galleta","palomitas","bocadillo","ensalada","tostada","mantequilla","cuchillo",
+    "tenedor","cuchara","plato","cuenco","olla","sartén","horno","fregadero",
+    "toalla","cepillo","cepillo dientes","ducha","bañera","aseo","almohada","manta",
+    "sábana","lámpara","radio","bolso","mochila","maleta","botón","cremallera",
+    "gafas","anillo","collar","lápiz","goma","regla","papel","cuaderno",
+    "tijeras","pegamento","hormiga","abeja","mariposa","araña","gusano","mosca",
+    "paloma","loro","pato","gallina","gallo","águila","cisne","tortuga",
+    "rana","cocodrilo","hipopótamo","jirafa","cebra","ballena","pulpo","medusa",
+    "cangrejo","nube","viento","arcoíris","trueno","relámpago","niebla","campo",
+    "granja","valle","rojo","azul","verde","amarillo","morado","rosa",
+    "marrón","grande","pequeño","alto","bajo","rápido","lento","caliente",
+    "frío","feliz","triste","enfadado","asustado","cansado","hambriento","somnoliento",
+    "enfermo","fuerte","gracioso","saltar","caminar","volar","comer","beber",
+    "dormir","jugar","cantar","dibujar","construir","romper","ayudar","explicar",
+    "mostrar","contar","leer","escribir","escuchar","hablar","sonreír","llorar",
+    "reír","miedo","amor","odio","alegría","aburrimiento","sorpresa","dolor",
+    "olfato","gusto","tacto","vista","oído","calor","luz","oscuridad",
+    "ruido","silencio","limpio","sucio","dulce","salado","ácido","amargo",
+    "picante","suave","áspero","afilado","pesado","ligero","redondo","cuadrado",
+    "largo","corto","ancho","estrecho","abierto","cerrado","lleno","vacío",
+    "nuevo","viejo","joven","bonito","feo","fácil","difícil","seguro",
+    "peligroso","igual","diferente","verdadero","falso","sí","no","quizás",
+    "siempre","nunca","aquí","allí","ahora","hoy","mañana"
+  ],
+  2: [
+    "computadora","teléfono","restaurante","tienda","parque","avión","bicicleta","música",
+    "baile","película","fiesta","cumpleaños","nevera","televisión","puente","hotel",
+    "jardín","biblioteca","escuela","vela","carnaval","café","té","hamburguesa",
+    "chocolate","plátano","piscina","autobús","tren","guitarra","piano","cámara",
+    "reloj","cartera","rueda","paraguas","guantes","calcetín","camisa","pantalón",
+    "espejo","peine","serpiente","elefante","león","tiburón","búho","pingüino",
+    "dentista","enfermera","profesor","policía","soldado","cocinero","camarero","conductor",
+    "piloto","constructor","batería","flauta","saxofón","trompeta","arpa","acordeón",
+    "banjo","ukelele","violonchelo","boxeo","lucha libre","judo","karate","tenis",
+    "voleibol","baloncesto","béisbol","hockey","rugby","ajedrez","damas","dominó",
+    "puzle","dados","cartas","juego de mesa","cometa","globo","tienda de campaña","saco de dormir",
+    "brújula","prismáticos","linterna","cuerda","cerillas","postal","paquete","buzón",
+    "dirección","firma","recibo","billete","perfume","loción","champú","acondicionador",
+    "desodorante","taladro","martillo","clavo","tornillo","llave inglesa","alicates","sierra",
+    "escalera","cubo","brocha","motor","cable","interruptor","enchufe","toma",
+    "trigo","harina","azúcar","sal","pimienta","vinagre","aceite","salsa",
+    "sirope","mermelada","chaqueta","abrigo","vestido","falda","traje","corbata",
+    "bufanda","botas","sandalias","diamante","oro","plata","bronce","hierro",
+    "cobre","mármol","vidrio","plástico","príncipe","princesa","caballero","mago",
+    "bruja","hada","gigante","enano","selva","pantano","pradera","oasis",
+    "meseta","cañón","glaciar","bahía","península","lunes","martes","miércoles",
+    "jueves","viernes","sábado","domingo","tarde","noche","medianoche","amanecer",
+    "atardecer","fin de semana","vacaciones","norte","sur","este","oeste","electricidad",
+    "fontanería","aire acondicionado","ascensor","pasillo","balcón","patio","camino","valla",
+    "cerradura","banco","columpio","tobogán","iglesia","sinagoga","mezquita","oración",
+    "ángel","cielo","mercado","precio","descuento","moneda","sello","sobre",
+    "entrega","smartphone","cargador","auriculares","altavoz","teclado","ratón","pantalla",
+    "batería externa","contraseña","app","emoji","selfie","video","chat","mensaje",
+    "like","comentario","seguidor","perfil","captura de pantalla","sudadera","vaqueros","zapatillas",
+    "botella de agua","sándwich de queso","palomitas dulces","viaje de vacaciones","centro comercial","parque acuático","escape room","día de fotos",
+    "calendario","reunión","invitación"
+  ],
+  3: [
+    "museo","hospital","abogado","médico","ingeniero","bombero","artista","científico",
+    "fotógrafo","aeropuerto","playa","desierto","bosque","montaña","castillo","mapa",
+    "viaje","aventura","sueño","memoria","examen","competencia","premio","problema",
+    "solución","experimento","resultado","espectáculo","escenario","actor","faro","puerto",
+    "barco","dragón","victoria","derrota","trayecto","cascada","cueva","independencia",
+    "escalada","paracaidismo","buceo","rafting","acampada","senderismo","fábrica","taller",
+    "escudo","alianza","conflicto","contaminación","reciclaje","pandemia","virus","bacteria",
+    "vacuna","antibiótico","trasplante","comercio","exportación","importación","presupuesto","deuda",
+    "medios de comunicación","marca","marketing","ventas","población","inmigración","pobreza","ciudadanía",
+    "identidad","herencia","tradición","valores","gobierno","comité","fórmula uno","olimpiadas",
+    "mundial","final","liga","software","hardware","aplicación","red","servidor",
+    "actualización","mantenimiento","seguridad","privacidad","cliente","confianza","timidez","emoción",
+    "decepción","presión social","cola","atasco","fiesta de bienvenida","fiesta sorpresa","grabación de video"
+  ],
+};
+
+const WORD_LISTS = { he: WORDS, en: WORDS_EN, es: WORDS_ES };
+
+/* =====================================================
+   WORD CATEGORIES
+   ===================================================== */
+const CATEGORIES = {
+  everyday: { icon:'🏠', color:'#6C63FF', label:{ he:'יומיומי', en:'Everyday', es:'Cotidiano' } },
+  food:     { icon:'🍕', color:'#f59e0b', label:{ he:'אוכל', en:'Food & Drink', es:'Comida' } },
+  nature:   { icon:'🌿', color:'#16a34a', label:{ he:'טבע', en:'Nature', es:'Naturaleza' } },
+  sports:   { icon:'⚽', color:'#0ea5e9', label:{ he:'ספורט', en:'Sports', es:'Deportes' } },
+  movies:   { icon:'🎬', color:'#e11d48', label:{ he:'סרטים', en:'Movies & TV', es:'Películas' } },
+  music:    { icon:'🎵', color:'#8b5cf6', label:{ he:'מוסיקה', en:'Music', es:'Música' } },
+  people:   { icon:'⭐', color:'#f97316', label:{ he:'מפורסמים', en:'Famous People', es:'Famosos' } },
+  science:  { icon:'🔬', color:'#06b6d4', label:{ he:'מדע', en:'Science & Tech', es:'Ciencia' } },
+};
+
+const CATEGORY_WORDS = {
+  he: {
+    everyday: WORDS,
+    food: {
+      1:["אפרסק","גבינה"],
+      2:["מתכון","מרכיב","תפריט","מנגל","סושי","יין","בירה","שייק","דיאטה","צמחוני","טבעוני","אורגני","קינוח","מנה ראשונה","ארוחת בוקר","ארוחת צהריים","ארוחת ערב","חטיף","פירות ים","סטייק","בורגר","צ'יפס","פנקייק","וופל","שניצל","נקניקייה","טאקו","בוריטו","פלאפל","שווארמה","לימונדה","קולה","מילקשייק","גליל קינמון"],
+      3:["מטבח","גורמה","תבלין","מרינדה","תסיסה","מחמצת","גלוטן","לקטוז","אלרגיה","אוכל תאילנדי","פיוז'ן","אוכל רחוב","משאית מזון","מישלן"],
+    },
+    nature: {
+      1:["נהר","דשא","עלה","פטרייה"],
+      2:["ג'ירפה","זברה","היפו","זאב","דוב","איייל","שועל","צפרדע","אלמוג","הר געש","אי","טורנדו","קיפוד","קואלה","פנדה","דולפין","סנאי","טווס","יעל","קקטוס","חמנייה"],
+      3:["מין","בית גידול","תרדמת חורף","פוטוסינתזה","טורף","נטרף","הסוואה","הכחדה","בסכנת הכחדה","צונמי","רעידת אדמה","הוריקן","בצורת","אטמוספרה","שכבת האוזון","שונית אלמוגים","יער גשם"],
+      4:["ברירה טבעית","גנטיקה","DNA","שרשרת מזון","כריתת יערות","אנרגיה מתחדשת"],
+    },
+    sports: {
+      1:["בעיטה","זריקה","הפסד","קבוצה","מרוץ","ניקוד","חדר כושר"],
+      2:["רוגבי","רכיבה","מרתון","מאמן","אלוף","טורניר","אצטדיון","גביע","עונש","עבירה","אוהד","סקי","פינג פונג","סקייטבורד","טרמפולינה","חבל קפיצה","כפפת שוער","חימום","מתיחה","מסלול ריצה"],
+      3:["גביע העולם","NBA","גרנד סלאם","ווימבלדון","סופר בול","נוקאאוט"],
+      4:["אירובי","זריזות"],
+    },
+    movies: {
+      1:["גיבור","נבל","רובוט","קריקטורה","פעולה","קסם"],
+      2:["במאי","אנימציה","קומדיה","אימה","מותחן","דוקומנטרי","המשך","טריילר","הוליווד","אוסקר","בכורה","להיט","אפקטים מיוחדים","פסקול","תסריט","קולנוע","גיבור-על","עיבוד","הפקה","בינג׳","פרק","סדרה","שלט רחוק","מסך קולנוע","כרטיס לסרט","קומיקס"],
+    },
+    music: {
+      1:["תוף","זמר","קונצרט","להקה","מנגינה","ביט"],
+      2:["סקסופון","אקורדיאון","יוקולילי","בס","הרמוניה","ג'אז","רוק","פופ","קלאסי","רגאיי","היפ-הופ","אופרה","תזמורת","מקהלה","אלבום","מיקרופון","DJ","פלייליסט","קריוקי","רמקול בלוטות׳","שיר פתיחה","פזמון","אוזניות אלחוטיות"],
+      3:["מלחין","סימפוניה","אלתור","אקורד","טמפו","תווים","סיבוב הופעות"],
+    },
+    people: {
+      1:["איינשטיין","נפוליאון","קלאופטרה","שייקספיר","מוצרט","דה וינצ'י","פיקאסו","סופרמן","באטמן","ספיידרמן","הארי פוטר","מיקי מאוס","שרק"],
+      2:["גנדי","דרווין","ניוטון","בטהובן","מיכלאנג'לו","אדיסון","ארסטו","קולומבוס","לינקולן","צ'רצ'יל","מנדלה","קירי","פרויד","מרקס","אפלטון","סוקרטס","קיסר","אלכסנדר הגדול","מרקו פולו","גלילאו","ג'ואן ד'ארק","אנה פרנק","הלן קלר"],
+      3:["מרטין לותר קינג","סטיבן הוקינג","ניקולה טסלה","סלבדור דאלי","מרלין מונרו","אלביס פרסלי","מייקל ג'קסון","מוחמד עלי","פלה","פרידה קאלו","אנדי וורהול","צ'רלי צ'פלין","וולט דיסני","אילון מאסק","אודרי הפבורן","פרנק סינטרה","בוב מארלי","ג'ון לנון","פרדי מרקורי","פרינס","וויטני יוסטון","מדונה","ברוס לי"],
+      4:["סטיב ג'ובס","ביל גייטס","מארק צוקרברג","ג'ף בזוס","טים קוק","ליאונל מסי","כריסטיאנו רונאלדו","טיילור סוויפט","ביונסה","לאונרדו דיקפריו","טום הנקס","ברק אובמה","המלכה אליזבת","הנסיכה דיאנה","וורן באפט","קים קרדשיאן","קניה ווסט","ריהאנה","דרייק","לברון ג'יימס","סרינה וויליאמס","רוג'ר פדרר","יוסיין בולט","מייקל פלפס","גרטה תונברג","מלאלה","הדלאי לאמה","האפיפיור פרנציסקוס"],
+    },
+    science: {
+      1:["כוכב לכת","אטום","מגנט","וירוס"],
+      2:["תרופה","ניתוח","רנטגן","מיקרוסקופ","טלסקופ","מעבדה","כימיה","ביולוגיה","פיזיקה","מתמטיקה","הנדסה","אינטרנט","לווין","גרעיני","לייזר","GPS","רחפן","רובוטיקה","מדפסת","מצלמת רשת","חיפוש בגוגל","קישור"],
+      3:["חלבון","חור שחור","גלקסיה","בינה מלאכותית"],
+    },
+  },
+  en: {
+    everyday: WORDS_EN,
+    food: {
+      1:["grape","peach","cheese","apple","bread","milk","egg","rice","chicken","fish","soup","salad","pizza","pasta","sandwich","cookie","cake","ice cream","coffee","tea","juice","water","salt","pepper","butter","honey","jam","cereal","yogurt","chocolate"],
+      2:["recipe","ingredient","menu","barbecue","sushi","wine","beer","smoothie","diet","vegetarian","vegan","organic","dessert","appetizer","breakfast","lunch","dinner","snack","seafood","steak","burger","fries","pancake","waffle","schnitzel","hot dog","taco","burrito","falafel","shawarma","lemonade","cola","milkshake","cinnamon roll","avocado","croissant","omelette","risotto","curry","noodles","dumpling","spring roll","nachos","guacamole","hummus","pita","bagel","muffin","brownie","cheesecake","tiramisu"],
+      3:["cuisine","gourmet","spice","marinade","gluten","lactose","allergy","nutrition","Mediterranean","Japanese cuisine","Thai food","fusion","street food","food truck","artisan","brunch","tapas","dim sum","sashimi","tempura","ramen","pho","paella","gazpacho","ceviche","carpaccio","prosciutto","bruschetta","fondue","crème brûlée"],
+      4:["molecular gastronomy","sous vide","fermentation","umami","Michelin star","farm to table","locavore","sommelier","charcuterie","aioli","béchamel","hollandaise","consommé","tasting menu","amuse-bouche"],
+    },
+    nature: {
+      1:["river","stone","grass","leaf","mushroom","tree","flower","mountain","ocean","beach","forest","rain","snow","sun","moon","star","cloud","wind","bird","fish","dog","cat","horse","cow","pig","sheep","chicken","butterfly","bee","ant"],
+      2:["wolf","bear","deer","fox","coral","volcano","island","tornado","hedgehog","koala","panda","dolphin","squirrel","peacock","ibex","cactus","sunflower","eagle","shark","whale","tiger","lion","elephant","giraffe","zebra","monkey","gorilla","penguin","owl","snake","crocodile","turtle","octopus","jellyfish","starfish","canyon","waterfall","glacier","desert","jungle","savanna","tundra","swamp","cave","cliff","valley"],
+      3:["species","habitat","migration","hibernation","predator","prey","camouflage","adaptation","extinction","endangered","erosion","tsunami","earthquake","hurricane","drought","atmosphere","ozone","coral reef","rainforest","biodiversity","ecosystem","photosynthesis","pollination","food chain","carbon footprint","climate change","global warming","deforestation","conservation","sustainable"],
+      4:["symbiosis","mutualism","parasitism","keystone species","apex predator","trophic cascade","bioaccumulation","eutrophication","desertification","permafrost","albedo effect","El Niño","La Niña","jet stream","greenhouse effect"],
+    },
+    sports: {
+      1:["kick","throw","win","lose","goal","team","race","game","score","player","gym","ball","run","jump","swim","tennis","soccer","basketball","baseball","hockey","golf","boxing","wrestling","volleyball","badminton","cricket","rugby","bowling","archery","fencing"],
+      2:["cycling","marathon","referee","coach","champion","tournament","Olympic","stadium","trophy","penalty","timeout","cheerleader","surfing","skiing","ping pong","skateboard","trampoline","jump rope","goalkeeper glove","warm-up","stretching","running track","sprinter","hurdles","javelin","discus","shot put","high jump","long jump","pole vault","decathlon","triathlon","biathlon","snowboarding","ice skating","figure skating","bobsled","curling","water polo","handball","lacrosse","field hockey"],
+      3:["World Cup","NBA","Grand Slam","Formula 1","Wimbledon","Super Bowl","triathlon","relay","playoff","knockout","hat trick","offside","slam dunk","Tour de France","Champions League","Premier League","La Liga","Serie A","Bundesliga","UFC","MMA","CrossFit","Ironman","X Games","Paralympics","Commonwealth Games","PGA Tour","Masters Tournament","Stanley Cup","World Series"],
+      4:["doping scandal","VAR","photo finish","golden goal","sudden death","penalty shootout","Heisman Trophy","Ballon d'Or","Triple Crown","Grand Chelem","perfect game","no-hitter","walk-off","buzzer beater","Hail Mary"],
+    },
+    movies: {
+      1:["hero","villain","robot","cartoon","action","magic","movie","actor","actress","scene","camera","star","drama","western","musical","fantasy","mystery","romance","adventure","science fiction"],
+      2:["director","animation","comedy","horror","thriller","documentary","sequel","trailer","Hollywood","Oscar","premiere","blockbuster","special effects","soundtrack","script","cinema","streaming","superhero","remake","cast","binge-watch","episode","series","remote control","movie screen","movie ticket","comic book","prequel","trilogy","franchise","CGI","motion capture","IMAX","3D glasses","red carpet","paparazzi","tabloid","cameo","extra","stunt double","wardrobe","makeup artist"],
+      3:["screenplay","producer","editing","Netflix","plot twist","cliffhanger","narrator","monologue","stunt","box office","film festival","subtitles","dubbing","cinematography","Cannes","Sundance","Golden Globe","BAFTA","Emmy","SAG Awards","indie film","art house","film noir","cult classic","reboot","spin-off","anthology","miniseries","showrunner","pilot episode"],
+      4:["auteur theory","mise-en-scène","diegetic sound","fourth wall","MacGuffin","Bechdel test","method acting","Stanislavski","Hitchcockian","Tarantinoesque","neo-noir","mumblecore","found footage","mockumentary","Oscar bait"],
+    },
+    music: {
+      1:["drum","singer","concert","band","melody","beat","guitar","piano","song","dance","radio","voice","note","tune","rhythm","loud","quiet","fast","slow","happy","sad"],
+      2:["violin","bass","rhythm","harmony","jazz","rock","pop","classical","reggae","hip-hop","opera","orchestra","choir","conductor","album","microphone","headphones","festival","playlist","karaoke","bluetooth speaker","theme song","chorus","wireless headphones","saxophone","trumpet","flute","cello","harp","accordion","ukulele","banjo","harmonica","electronic","EDM","techno","house","dubstep","country","folk","blues","soul","R&B","gospel","punk","metal","grunge","alternative","indie"],
+      3:["composer","symphony","concerto","sonata","scale","chord","tempo","pitch","Grammy","music producer","remix","cover","genre","tour","DJ","synthesizer","music video","Billboard","Spotify","vinyl","recording studio","acoustic","amplifier","bass drop","breakdown","bridge","hook","riff","sample","mashup","collaboration","featuring","debut album","platinum record","gold record","music streaming"],
+      4:["polyrhythm","syncopation","modulation","counterpoint","atonality","leitmotif","twelve-tone","minimalism","Motown","Beatlemania","British Invasion","disco era","MTV generation","Auto-Tune","streaming royalties"],
+    },
+    people: {
+      1:["Einstein","Napoleon","Cleopatra","Shakespeare","Mozart","Superman","Batman","Picasso","Mona Lisa","King Arthur","Robin Hood","Sherlock Holmes","Santa Claus","Harry Potter","James Bond","Spider-Man","Wonder Woman","Mickey Mouse","Homer Simpson","Shrek"],
+      2:["Gandhi","Darwin","Newton","da Vinci","Beethoven","Michelangelo","Edison","Aristotle","Columbus","Lincoln","Churchill","Mandela","Curie","Freud","Marx","Plato","Socrates","Caesar","Alexander the Great","Genghis Khan","Marco Polo","Galileo","Copernicus","Magellan","Joan of Arc","Florence Nightingale","Anne Frank","Helen Keller","Rosa Parks","Amelia Earhart"],
+      3:["Martin Luther King","Stephen Hawking","Nikola Tesla","Salvador Dali","Marilyn Monroe","Elvis Presley","Michael Jackson","Muhammad Ali","Pelé","Frida Kahlo","Andy Warhol","Charlie Chaplin","Walt Disney","Oprah Winfrey","Elon Musk","Audrey Hepburn","Frank Sinatra","Bob Marley","John Lennon","Freddie Mercury","Prince","Whitney Houston","David Bowie","Madonna","Bruce Lee","Arnold Schwarzenegger","Meryl Streep","Morgan Freeman","Tom Cruise","Brad Pitt"],
+      4:["Steve Jobs","Bill Gates","Mark Zuckerberg","Jeff Bezos","Tim Cook","Lionel Messi","Cristiano Ronaldo","Taylor Swift","Beyoncé","Leonardo DiCaprio","Tom Hanks","Barack Obama","Queen Elizabeth II","Princess Diana","Warren Buffett","Kim Kardashian","Kanye West","Rihanna","Drake","LeBron James","Serena Williams","Roger Federer","Usain Bolt","Michael Phelps","Simone Biles","Greta Thunberg","Malala Yousafzai","Dalai Lama","Pope Francis","Vladimir Putin","Angela Merkel","Xi Jinping","Narendra Modi"],
+    },
+    science: {
+      1:["rocket","planet","atom","magnet","computer","phone","car","airplane","train","boat","wheel","engine","battery","light","electricity","fire","water","air","earth","metal","plastic","glass","paper","wood"],
+      2:["medicine","surgery","microscope","telescope","laboratory","chemistry","biology","physics","mathematics","engineering","internet","satellite","nuclear","laser","radar","GPS","drone","robotics","printer","webcam","Google search","link","vaccine","antibiotic","X-ray","MRI","ultrasound","thermometer","stethoscope","syringe","pill","virus","bacteria","cell","molecule","chemical","element","periodic table","experiment","hypothesis","theory"],
+      3:["DNA","chromosome","gene","protein","enzyme","black hole","galaxy","artificial intelligence","programming","space station","solar system","genome","neuron","stem cell","clone","genetic engineering","CRISPR","quantum","superconductor","nanotechnology","blockchain","cryptocurrency","machine learning","neural network","algorithm","big data","cloud computing","cybersecurity","virtual reality","augmented reality"],
+      4:["CRISPR-Cas9","mRNA vaccine","quantum entanglement","string theory","dark matter","dark energy","Higgs boson","gravitational waves","exoplanet","astrobiology","singularity","transhumanism","brain-computer interface","nuclear fusion","carbon capture"],
+    },
+  },
+  es: {
+    everyday: WORDS_ES,
+    food: {
+      1:["banana","uva","melocotón","queso","manzana","pan","leche","huevo","arroz","pollo","pescado","sopa","ensalada","pizza","pasta","sándwich","galleta","pastel","helado","café","té","zumo","agua","sal","pimienta","mantequilla","miel","mermelada","cereales","yogur","chocolate"],
+      2:["receta","ingrediente","menú","barbacoa","sushi","vino","cerveza","batido","dieta","vegetariano","vegano","orgánico","postre","entrante","desayuno","almuerzo","cena","merienda","marisco","filete","patatas fritas","pancake","gofre","schnitzel","perrito caliente","taco","burrito","falafel","shawarma","limonada","rollo de canela","aguacate","croissant","tortilla","risotto","curry","fideos","empanadilla","rollito de primavera","nachos","guacamole","hummus","pita","bagel","magdalena","brownie","tarta de queso","tiramisú"],
+      3:["cocina","gourmet","especia","marinada","gluten","lactosa","alergia","nutrición","mediterráneo","cocina japonesa","comida tailandesa","fusión","comida callejera","food truck","artesano","brunch","tapas","dim sum","sashimi","tempura","ramen","pho","paella","gazpacho","ceviche","carpaccio","jamón serrano","bruschetta","fondue","crème brûlée"],
+      4:["gastronomía molecular","sous vide","fermentación","umami","estrella Michelin","del campo a la mesa","locávoro","sumiller","charcutería","alioli","bechamel","holandesa","consomé","menú degustación","aperitivo sorpresa"],
+    },
+    nature: {
+      1:["río","piedra","hierba","hoja","seta","árbol","flor","montaña","océano","playa","bosque","lluvia","nieve","sol","luna","estrella","nube","viento","pájaro","pez","perro","gato","caballo","vaca","cerdo","oveja","gallina","mariposa","abeja","hormiga"],
+      2:["lobo","oso","ciervo","zorro","coral","volcán","isla","tornado","erizo","koala","panda","delfín","ardilla","pavo real","cabra montés","cactus","girasol","águila","tiburón","ballena","tigre","león","elefante","jirafa","cebra","mono","gorila","pingüino","búho","serpiente","cocodrilo","tortuga","pulpo","medusa","estrella de mar","cañón","cascada","glaciar","desierto","jungla","sabana","tundra","pantano","cueva","acantilado","valle"],
+      3:["especie","hábitat","migración","hibernación","depredador","presa","camuflaje","adaptación","extinción","en peligro","erosión","tsunami","terremoto","huracán","sequía","atmósfera","capa de ozono","arrecife de coral","selva tropical","biodiversidad","ecosistema","fotosíntesis","polinización","cadena alimentaria","huella de carbono","cambio climático","calentamiento global","deforestación","conservación","sostenible"],
+      4:["simbiosis","mutualismo","parasitismo","especie clave","depredador ápice","cascada trófica","bioacumulación","eutrofización","desertificación","permafrost","efecto albedo","El Niño","La Niña","corriente en chorro","efecto invernadero"],
+    },
+    sports: {
+      1:["balón","patear","lanzar","ganar","perder","gol","equipo","carrera","juego","puntuación","jugador","gimnasio","correr","saltar","nadar","tenis","fútbol","baloncesto","béisbol","hockey","golf","boxeo","lucha libre","voleibol","bádminton","críquet","rugby","bolos","tiro con arco","esgrima"],
+      2:["lucha","kárate","ciclismo","maratón","árbitro","entrenador","campeón","torneo","estadio","trofeo","penalti","aficionado","surf","esquí","natación","ping pong","monopatín","trampolín","comba","guante de portero","calentamiento","estiramiento","pista de atletismo","velocista","vallas","jabalina","disco","lanzamiento de peso","salto de altura","salto de longitud","salto con pértiga","decatlón","triatlón","biatlón","snowboard","patinaje sobre hielo","patinaje artístico","bobsled","curling","waterpolo","balonmano","lacrosse","hockey hierba"],
+      3:["Copa del Mundo","NBA","Grand Slam","Fórmula 1","Wimbledon","Super Bowl","triatlón","relevos","playoff","nocaut","hat trick","fuera de juego","mate","Tour de Francia","Champions League","Premier League","La Liga","Serie A","Bundesliga","UFC","MMA","CrossFit","Ironman","X Games","Paralímpicos","Juegos de la Commonwealth","PGA Tour","Masters","Copa Stanley","Serie Mundial"],
+      4:["escándalo de dopaje","VAR","foto finish","gol de oro","muerte súbita","tanda de penaltis","Trofeo Heisman","Balón de Oro","Triple Corona","Grand Chelem","juego perfecto","sin hits","walk-off","canasta sobre la bocina","Ave María"],
+    },
+    movies: {
+      1:["héroe","villano","robot","dibujos animados","acción","magia","película","actor","actriz","escena","cámara","estrella","drama","western","musical","fantasía","misterio","romance","aventura","ciencia ficción"],
+      2:["director","animación","comedia","terror","thriller","documental","secuela","tráiler","Hollywood","Óscar","estreno","superproducción","efectos especiales","banda sonora","guión","cine","streaming","superhéroe","remake","producción","maratón de series","episodio","serie","mando a distancia","pantalla de cine","entrada de cine","cómic","precuela","trilogía","franquicia","CGI","captura de movimiento","IMAX","gafas 3D","alfombra roja","paparazzi","tabloide","cameo","extra","doble de riesgo","vestuario","maquillador"],
+      3:["guionista","productor","montaje","Netflix","giro argumental","cliffhanger","narrador","monólogo","especialista","taquilla","festival de cine","subtítulos","doblaje","cinematografía","Cannes","Sundance","Globo de Oro","BAFTA","Emmy","Premios SAG","cine independiente","cine de autor","cine negro","clásico de culto","reinicio","spin-off","antología","miniserie","showrunner","episodio piloto"],
+      4:["teoría del autor","puesta en escena","sonido diegético","cuarta pared","MacGuffin","test de Bechdel","método de actuación","Stanislavski","hitchcockiano","tarantinesco","neo-noir","mumblecore","metraje encontrado","falso documental","carnaza de Óscar"],
+    },
+    music: {
+      1:["tambor","cantante","concierto","banda","melodía","ritmo","guitarra","piano","canción","baile","radio","voz","nota","tono","fuerte","suave","rápido","lento","feliz","triste"],
+      2:["violín","cello","armonía","jazz","rock","pop","clásico","reggae","hip-hop","ópera","orquesta","coro","álbum","micrófono","festival","DJ","sintetizador","playlist","karaoke","altavoz bluetooth","canción principal","estribillo","auriculares inalámbricos","saxofón","trompeta","flauta","arpa","acordeón","ukelele","banjo","armónica","electrónica","EDM","techno","house","dubstep","country","folk","blues","soul","R&B","gospel","punk","metal","grunge","alternativo","indie"],
+      3:["compositor","sinfonía","sonata","escala","acorde","tempo","tono","Grammy","productor musical","remix","versión","género","gira","videoclip","Billboard","Spotify","vinilo","estudio de grabación","acústico","amplificador","bajón","breakdown","puente","gancho","riff","sample","mashup","colaboración","featuring","álbum debut","disco de platino","disco de oro","streaming musical"],
+      4:["polirritmia","síncopa","modulación","contrapunto","atonalidad","leitmotiv","dodecafonía","minimalismo","Motown","Beatlemanía","Invasión Británica","era disco","generación MTV","Auto-Tune","regalías de streaming"],
+    },
+    people: {
+      1:["Einstein","Napoleón","Cleopatra","Shakespeare","Mozart","Da Vinci","Picasso","Mona Lisa","Rey Arturo","Robin Hood","Sherlock Holmes","Papá Noel","Harry Potter","James Bond","Spider-Man","Mujer Maravilla","Mickey Mouse","Homer Simpson","Shrek"],
+      2:["Gandhi","Darwin","Newton","Beethoven","Miguel Ángel","Edison","Aristóteles","Colón","Lincoln","Churchill","Mandela","Marie Curie","Freud","Marx","Platón","Sócrates","César","Alejandro Magno","Genghis Khan","Marco Polo","Galileo","Copérnico","Magallanes","Juana de Arco","Florence Nightingale","Ana Frank","Helen Keller","Rosa Parks","Amelia Earhart"],
+      3:["Martin Luther King","Stephen Hawking","Nikola Tesla","Salvador Dalí","Marilyn Monroe","Elvis Presley","Michael Jackson","Muhammad Ali","Pelé","Frida Kahlo","Andy Warhol","Charlie Chaplin","Walt Disney","Oprah Winfrey","Elon Musk","Audrey Hepburn","Frank Sinatra","Bob Marley","John Lennon","Freddie Mercury","Prince","Whitney Houston","David Bowie","Madonna","Bruce Lee","Arnold Schwarzenegger","Meryl Streep","Morgan Freeman","Tom Cruise","Brad Pitt"],
+      4:["Steve Jobs","Bill Gates","Mark Zuckerberg","Jeff Bezos","Tim Cook","Lionel Messi","Cristiano Ronaldo","Taylor Swift","Beyoncé","Leonardo DiCaprio","Tom Hanks","Barack Obama","Reina Isabel II","Princesa Diana","Warren Buffett","Kim Kardashian","Kanye West","Rihanna","Drake","LeBron James","Serena Williams","Roger Federer","Usain Bolt","Michael Phelps","Simone Biles","Greta Thunberg","Malala Yousafzai","Dalai Lama","Papa Francisco","Vladimir Putin","Angela Merkel","Xi Jinping","Narendra Modi"],
+    },
+    science: {
+      1:["cohete","planeta","átomo","imán","ordenador","teléfono","coche","avión","tren","barco","rueda","motor","batería","luz","electricidad","fuego","agua","aire","tierra","metal","plástico","vidrio","papel","madera"],
+      2:["medicina","cirugía","rayos X","microscopio","telescopio","laboratorio","química","biología","física","matemáticas","ingeniería","internet","satélite","nuclear","láser","GPS","dron","robótica","impresora","cámara web","búsqueda de Google","enlace","vacuna","antibiótico","resonancia magnética","ecografía","termómetro","estetoscopio","jeringa","pastilla","virus","bacteria","célula","molécula","químico","elemento","tabla periódica","experimento","hipótesis","teoría"],
+      3:["ADN","cromosoma","gen","proteína","enzima","agujero negro","galaxia","inteligencia artificial","programación","estación espacial","sistema solar","genoma","neurona","célula madre","clon","ingeniería genética","CRISPR","cuántico","superconductor","nanotecnología","blockchain","criptomoneda","aprendizaje automático","red neuronal","algoritmo","big data","computación en la nube","ciberseguridad","realidad virtual","realidad aumentada"],
+      4:["CRISPR-Cas9","vacuna ARNm","entrelazamiento cuántico","teoría de cuerdas","materia oscura","energía oscura","bosón de Higgs","ondas gravitacionales","exoplaneta","astrobiología","singularidad","transhumanismo","interfaz cerebro-ordenador","fusión nuclear","captura de carbono"],
+    },
+  },
+};
+
+const LANG_FLAGS = { he: "🇮🇱", en: "🇬🇧", es: "🇪🇸" };
+const LANG_NAMES = { he: "עברית", en: "English", es: "Español" };
+
+/* =====================================================
+   UI TRANSLATIONS
+   ===================================================== */
+const T_STRINGS = {
+  he: {
+    newGame:"משחק חדש", howToPlay:"איך משחקים?", mainMenu:"תפריט ראשי",
+    gameSettings:"הגדרות משחק", back:"← חזור", backToGame:"← חזור למשחק",
+    teams:"קבוצות", addTeam:"+ הוסף קבוצה", timePerTurn:"זמן לתור", seconds:"שניות",
+    gameLength:"אורך המשחק", winSquares:"ריבועים לניצחון", extraRules:"כללים נוספים",
+    skipPenalty:"קנס על דילוג", skipPenaltySub:"דילוג על מילה = −1 נקודה",
+    next:"הבא →",
+    startGame:"התחל משחק!", boardTitle:"לוח המשחק", round:"תור",
+    startTurn:"התחל תור", correct:"✓ נכון!", skip:"↷ דלג",
+    describeHint:"תאר ללא אמירת המילה עצמה", pause:"⏸ עצור", resume:"▶ המשך",
+    paused:"מושהה", turnResults:"תוצאות התור", squaresToAdvance:"ריבועים להתקדם",
+    guessedWords:"מילים שנוחשו", skippedWords:"דילוגים", nextTurn:"תור הבא ←",
+    bigBoard:"לוח המשחק הגדול 🗺", currentStandings:"מצב נוכחי",
+    returnToGame:"← חזור למשחק", editSettings:"⚙ ערוך הגדרות", endGame:"✕ סיים משחק",
+    bonusTitle:"⏱ הזמן נגמר!", bonusPrompt:"מי ניחש את המילה האחרונה?",
+    bonusNobody:"אף אחד לא ניחש", bonusMyTeam:"הקבוצה שלנו", bonusOtherTeam:"הקבוצה השנייה", bonusGuessed:"ניחשו את המילה האחרונה!", whoExplains:"מי מסביר?",
+    continueGame:"המשך משחק",
+    pressPlay:"לחץ שחק! כשמוכנים", wordPerSquare:"כל מילה שנוחשה = ✓ ריבוע אחד קדימה",
+    square:"ריבוע", of:"מתוך", nowExplaining:"מסביר/ה עכשיו",
+    player:"שחקן", playerOf:"מתוך", playBtn:"▶ שחק!",
+    difficulty:"רמת קושי", wordLevel:"רמת מילים לקבוצה זו", wordLang:"שפת המילים",
+    appLang:"שפת הממשק", winners:"המנצחים הם...", reachedEnd:"הגיעו לסוף הלוח!",
+    finalStandings:"דירוג סופי", confirmEndGame:"לסיים את המשחק? ההתקדמות תאבד.",
+    logoSubtitle:"משחקי מילים וחברים",
+    chooseMode:"בחרו משחק",
+    charadeTitle:"שרייד",
+    charadeDesc:"תארו מילים, דלגו על הקשות, התקדמו על הלוח!",
+    ptakimTitle:"פתקים",
+    ptakimDesc:"כתבו שמות על פתקים, נחשו ב-3 סיבובים — חופשי, מילה אחת, פנטומימה",
+    instrBack:"← חזור", instrTitle:"איך משחקים?",
+    instrGoal:"🎯 מטרת המשחק", instrGoalText:"כל קבוצה מנסה להגיע ראשונה לסוף לוח המשחק. מתקדמים על ידי ניחוש נכון של מילים שמסביר שחקן מהקבוצה.",
+    instrTurn:"🎲 מהלך התור",
+    instrTurn1:"בתחילת התור, שחקן מסביר אחד לוקח את הטלפון",
+    instrTurn2:"מספר הריבוע שהקבוצה נמצאת עליו קובע את רמת הקושי",
+    instrTurn3:"השחקן המסביר רואה מילה ומסביר אותה לצוות — ללא לחץ על \"שחק\"",
+    instrTurn4:"לחץ \"שחק!\" כשכולם מוכנים — שעון הדקות מתחיל",
+    instrTurn5:"על כל מילה שנוחשה נכון — הקבוצה מתקדמת ריבוע אחד קדימה",
+    instrRules:"🚫 כללים חשובים",
+    instrRule1:"אסור לומר את המילה עצמה או שורשה",
+    instrRule2:"אסור לתרגם לשפות אחרות",
+    instrRule3:"אסור לרמוז עם הידיים או לחקות",
+    instrRule4:"מותר לתאר, לספר, לשאול שאלות, לדמות",
+    instrRule5:"אפשר לדלג על מילה קשה — אך לא מתקדמים עליה",
+    instrDiff:"⭐ רמות קושי",
+    instrDiffText:"ככל שמתקדמים על הלוח, הריבועים הופכים לקשים יותר:",
+    instrWin:"🏆 ניצחון",
+    instrWinText:"הקבוצה הראשונה שמגיעה לסוף הלוח — מנצחת!",
+    letsPlay:"בואו נשחק!",
+    backToSetup:"← חזור למשחק",
+    addTeamBtn:"+ הוסף קבוצה",
+    addPlayerBtn:"+ הוסף שחקן",
+    gameLengthSub:"קצר (40) עד ארוך (65)",
+    playerPlaceholder:"שם שחקן",
+    teamPlaceholder:"שם קבוצה",
+    advanced:"התקדמה",
+    squares:"ריבועים →",
+    squareLbl:"ריבוע",
+    explainerLbl:"🎙 מסביר/ה:",
+    offsetVeryEasy:"קל מאוד",offsetEasy:"קל",offsetNormal:"רגיל",offsetHard:"קשה",offsetVeryHard:"קשה מאוד",
+    diff1:"קל מאוד",diff2:"קל",diff3:"בינוני",diff4:"בינוני-קשה",
+    legendEasy:"קל",legendMed:"בינוני",legendHard:"קשה",legendVHard:"קשה מאוד",
+    theWordWas:"המילה הייתה",boardPosition:"מיקום על הלוח",explainerTag:"מסביר",penaltyLabel:"קנס",correct_n:"נכון"
+  },
+  en: {
+    newGame:"New Game", howToPlay:"How to Play?", mainMenu:"Main Menu",
+    gameSettings:"Game Settings", back:"← Back", backToGame:"← Back to Game",
+    teams:"Teams", addTeam:"+ Add Team", timePerTurn:"Time per Turn", seconds:"sec",
+    gameLength:"Game Length", winSquares:"Squares to Win", extraRules:"Extra Rules",
+    skipPenalty:"Skip Penalty", skipPenaltySub:"Skip = −1 point",
+    next:"Next →",
+    startGame:"Start Game!", boardTitle:"Game Board", round:"Turn",
+    startTurn:"Start Turn", correct:"✓ Correct!", skip:"↷ Skip",
+    describeHint:"Describe without saying the word", pause:"⏸ Pause", resume:"▶ Resume",
+    paused:"Paused", turnResults:"Turn Results", squaresToAdvance:"squares to advance",
+    guessedWords:"Guessed ✓", skippedWords:"Skipped ↷", nextTurn:"Next Turn →",
+    bigBoard:"Big Board 🗺", currentStandings:"Current Standings",
+    returnToGame:"← Back to Game", editSettings:"⚙ Settings", endGame:"✕ End Game",
+    bonusTitle:"⏱ Time's Up!", bonusPrompt:"Who guessed the last word?",
+    bonusNobody:"Nobody guessed", bonusMyTeam:"Our team", bonusOtherTeam:"The other team", bonusGuessed:"Guessed the last word!", whoExplains:"Who explains?",
+    continueGame:"Continue Game",
+    pressPlay:"Press Play! when ready", wordPerSquare:"Each correct word = ✓ 1 square forward",
+    square:"Square", of:"of", nowExplaining:"Now explaining",
+    player:"Player", playerOf:"of", playBtn:"▶ Play!",
+    difficulty:"Difficulty", wordLevel:"Word level for this team", wordLang:"Word language",
+    appLang:"Interface language", winners:"The winners are...", reachedEnd:"Reached the end!",
+    finalStandings:"Final Standings", confirmEndGame:"End game? All progress will be lost.",
+    logoSubtitle:"Word & party games",
+    chooseMode:"Choose a game",
+    charadeTitle:"Charade",
+    charadeDesc:"Describe words, skip the hard ones, race across the board!",
+    ptakimTitle:"Ptakim",
+    ptakimDesc:"Write names on notes, guess in 3 rounds — free clue, one word, pantomime",
+    instrBack:"← Back", instrTitle:"How to Play?",
+    instrGoal:"🎯 Game Goal", instrGoalText:"Each team tries to reach the end of the board first. Advance by correctly guessing words that a player from the team describes.",
+    instrTurn:"🎲 Turn Flow",
+    instrTurn1:"At the start of a turn, one explainer takes the phone",
+    instrTurn2:"The team's current square determines the difficulty level",
+    instrTurn3:"The explainer sees a word and describes it — without pressing Play",
+    instrTurn4:"Press Play! when everyone is ready — the timer starts",
+    instrTurn5:"Each correctly guessed word = 1 square forward",
+    instrRules:"🚫 Important Rules",
+    instrRule1:"Cannot say the word itself or its root",
+    instrRule2:"Cannot translate to other languages",
+    instrRule3:"Cannot gesture or mime",
+    instrRule4:"May describe, tell, ask questions, or compare",
+    instrRule5:"May skip a hard word — but no advancement",
+    instrDiff:"⭐ Difficulty Levels",
+    instrDiffText:"As you advance on the board, squares become harder:",
+    instrWin:"🏆 Winning",
+    instrWinText:"The first team to reach the end of the board wins!",
+    letsPlay:"Let's Play!",
+    backToSetup:"← Back to Game",
+    addTeamBtn:"+ Add Team",
+    addPlayerBtn:"+ Add Player",
+    gameLengthSub:"Short (40) to Long (65)",
+    playerPlaceholder:"Player name",
+    teamPlaceholder:"Team name",
+    advanced:"advanced",
+    squares:"squares →",
+    squareLbl:"Square",
+    explainerLbl:"🎙 Explaining:",
+    offsetVeryEasy:"Very Easy",offsetEasy:"Easy",offsetNormal:"Normal",offsetHard:"Hard",offsetVeryHard:"Very Hard",
+    diff1:"Very Easy",diff2:"Easy",diff3:"Medium",diff4:"Med-Hard",
+    legendEasy:"Easy",legendMed:"Medium",legendHard:"Hard",legendVHard:"Very Hard",
+    theWordWas:"The word was",boardPosition:"Board Position",explainerTag:"Explaining",penaltyLabel:"penalty",correct_n:"correct"
+  },
+  es: {
+    newGame:"Nuevo Juego", howToPlay:"¿Cómo Jugar?", mainMenu:"Menú Principal",
+    gameSettings:"Configuración", back:"← Volver", backToGame:"← Volver al Juego",
+    teams:"Equipos", addTeam:"+ Añadir Equipo", timePerTurn:"Tiempo por Turno", seconds:"seg",
+    gameLength:"Duración del Juego", winSquares:"Casillas para Ganar", extraRules:"Reglas Extra",
+    skipPenalty:"Penalización por Pasar", skipPenaltySub:"Pasar = −1 punto",
+    next:"Siguiente →",
+    startGame:"¡Empezar!", boardTitle:"Tablero", round:"Turno",
+    startTurn:"Empezar Turno", correct:"✓ ¡Correcto!", skip:"↷ Pasar",
+    describeHint:"Describe sin decir la palabra", pause:"⏸ Pausar", resume:"▶ Continuar",
+    paused:"Pausado", turnResults:"Resultados del Turno", squaresToAdvance:"casillas para avanzar",
+    guessedWords:"Adivinadas ✓", skippedWords:"Pasadas ↷", nextTurn:"Siguiente Turno →",
+    bigBoard:"Tablero Grande 🗺", currentStandings:"Clasificación",
+    returnToGame:"← Volver al Juego", editSettings:"⚙ Ajustes", endGame:"✕ Terminar",
+    bonusTitle:"⏱ ¡Tiempo!", bonusPrompt:"¿Quién adivinó la última palabra?",
+    bonusNobody:"Nadie adivinó", bonusMyTeam:"Nuestro equipo", bonusOtherTeam:"El otro equipo", bonusGuessed:"¡Adivinaron la última palabra!", whoExplains:"¿Quién explica?",
+    continueGame:"Continuar Juego",
+    pressPlay:"¡Pulsa Jugar! cuando estén listos", wordPerSquare:"Cada palabra = ✓ 1 casilla",
+    square:"Casilla", of:"de", nowExplaining:"Explicando ahora",
+    player:"Jugador", playerOf:"de", playBtn:"▶ ¡Jugar!",
+    difficulty:"Dificultad", wordLevel:"Nivel de palabras", wordLang:"Idioma de palabras",
+    appLang:"Idioma de la interfaz", winners:"¡Los ganadores son...", reachedEnd:"¡Llegaron al final!",
+    finalStandings:"Clasificación Final", confirmEndGame:"¿Terminar el juego? Se perderá el progreso.",
+    logoSubtitle:"Juegos de palabras y amigos",
+    chooseMode:"Elige un juego",
+    charadeTitle:"Charada",
+    charadeDesc:"Describe palabras, salta las difíciles, avanza por el tablero!",
+    ptakimTitle:"Ptakim",
+    ptakimDesc:"Escribe nombres en notas, adivina en 3 rondas — libre, una palabra, pantomima",
+    instrBack:"← Volver", instrTitle:"¿Cómo Jugar?",
+    instrGoal:"🎯 Objetivo del Juego", instrGoalText:"Cada equipo intenta llegar primero al final del tablero. Se avanza adivinando correctamente palabras que describe un jugador del equipo.",
+    instrTurn:"🎲 Desarrollo del Turno",
+    instrTurn1:"Al inicio del turno, un explicador toma el teléfono",
+    instrTurn2:"La casilla actual del equipo determina el nivel de dificultad",
+    instrTurn3:"El explicador ve una palabra y la describe — sin pulsar Jugar",
+    instrTurn4:"Pulsa ¡Jugar! cuando todos estén listos — empieza el temporizador",
+    instrTurn5:"Cada palabra adivinada correctamente = 1 casilla hacia adelante",
+    instrRules:"🚫 Reglas Importantes",
+    instrRule1:"No se puede decir la palabra ni su raíz",
+    instrRule2:"No se puede traducir a otros idiomas",
+    instrRule3:"No se puede gesticular ni imitar",
+    instrRule4:"Se puede describir, contar, preguntar o comparar",
+    instrRule5:"Se puede pasar una palabra difícil — pero sin avanzar",
+    instrDiff:"⭐ Niveles de Dificultad",
+    instrDiffText:"A medida que avanzas en el tablero, las casillas se vuelven más difíciles:",
+    instrWin:"🏆 Victoria",
+    instrWinText:"¡El primer equipo en llegar al final del tablero gana!",
+    letsPlay:"¡A Jugar!",
+    backToSetup:"← Volver al Juego",
+    addTeamBtn:"+ Añadir Equipo",
+    addPlayerBtn:"+ Añadir Jugador",
+    gameLengthSub:"Corto (40) a Largo (65)",
+    playerPlaceholder:"Nombre del jugador",
+    teamPlaceholder:"Nombre del equipo",
+    advanced:"avanzó",
+    squares:"casillas →",
+    squareLbl:"Casilla",
+    explainerLbl:"🎙 Explicando:",
+    offsetVeryEasy:"Muy Fácil",offsetEasy:"Fácil",offsetNormal:"Normal",offsetHard:"Difícil",offsetVeryHard:"Muy Difícil",
+    diff1:"Muy Fácil",diff2:"Fácil",diff3:"Medio",diff4:"Medio-Difícil",
+    legendEasy:"Fácil",legendMed:"Medio",legendHard:"Difícil",legendVHard:"Muy Difícil",
+    theWordWas:"La palabra era",boardPosition:"Posición en tablero",explainerTag:"Explicando",penaltyLabel:"penaliz.",correct_n:"correcto"
+  }
+};
+function T(key) { return (T_STRINGS[G.uiLang] || T_STRINGS.he)[key] || T_STRINGS.he[key] || key; }
+function TT(lang, key) { return (T_STRINGS[lang] || T_STRINGS.he)[key] || T_STRINGS.he[key] || key; }
+
+/* =====================================================
+   BOARD CONFIG
+   ===================================================== */
+// Fallback static difficulty array (replaced by random layout at game start)
+const TILE_DIFFICULTY = [
+  1, 2, 1, 3, 2, 1, 4, 2, 3, 1,
+  2, 4, 3, 1, 4, 2, 3, 4, 1, 2,
+  4, 3, 4, 1, 2, 4, 3, 4, 2, 4,
+  1, 4, 3, 4, 2, 4, 1, 4, 3, 2,
+  4, 4, 1, 3, 4, 2, 4, 3, 4, 1,
+  4, 4, 2, 3, 4, 4, 1, 4, 3, 4, 2, 4, 3, 4, 4
+];
+
+function generateRandomBoard(total) {
+  const layout = [];
+  for (let i = 0; i < total; i++) layout.push(Math.ceil(Math.random() * 4));
+  return layout;
+}
+
+function DIFF_NAME(d) { return T(['','diff1','diff2','diff3','diff4'][d]); }
+
+const DIFF_STARS = {
+  1: "★☆☆☆",
+  2: "★★☆☆",
+  3: "★★★☆",
+  4: "★★★★"
+};
+
+const TEAM_COLORS = ["#FF4757","#2ED573","#FFA502","#1E90FF","#FF6EB4","#ECCC68","#A29BFE","#00CEC9","#E17055","#FDCB6E","#FD79A8","#74B9FF"];
+const TEAM_EMOJIS = ["🦁","🐯","🐺","🐻","🦊","🐸","🦋","🦄","🐲","🐧","🐬","🐼","🦅","🐴","🦀","🐙"];
+const PICKER_COLORS = TEAM_COLORS;
+const PICKER_EMOJIS = TEAM_EMOJIS;
+function TEAM_EMOJI_NAMES_LIST() {
+  return ({
+    he:["אריה","נמר","זאב","דוב","שועל","צפרדע"],
+    en:["Lion","Tiger","Wolf","Bear","Fox","Frog"],
+    es:["León","Tigre","Lobo","Oso","Zorro","Rana"]
+  })[G.uiLang] || ["אריה","נמר","זאב","דוב","שועל","צפרדע"];
+}
+
+/* =====================================================
+   GAME STATE
+   ===================================================== */
+let G = {
+  screen: "modeSelect",
+  gameActive: false,
+  uiLang: 'he',
+  adminMode: false,
+  teams: [],        // [{name,color,emoji,position,prevPosition,players:[],explainerIdx,diffOffset}]
+  currentTeam: 0,
+  turnNumber: 0,
+  lastMove: null,   // {teamIdx, from, to} — for board animation
+  tileLayout: null, // random difficulty array generated at game start
+  settings: {
+    timerSeconds: 60,
+    skipPenalty: false,
+    targetSteps: 40,
+    enabledCategories: ['everyday','food','nature','sports','movies','music','people','science']
+  },
+  wordPools: {},
+  usedWords: new Set(),
+  playing: {
+    word: "",
+    difficulty: 1,
+    timeLeft: 0,
+    timerInterval: null,
+    correct: [],
+    skipped: []
+  }
+};
+
+/* =====================================================
+   UTILITIES
+   ===================================================== */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getDifficulty(position) {
+  if (position <= 0) return 1;
+  if (position >= G.settings.targetSteps) return 4;
+  return (G.tileLayout || TILE_DIFFICULTY)[position - 1] || 1;
+}
+
+function getTeamDiff(teamIdx, position) {
+  const base = getDifficulty(position);
+  const offset = (G.teams[teamIdx] || {}).diffOffset || 0;
+  return Math.min(4, Math.max(1, base + offset));
+}
+
+function getExplainerName(teamIdx) {
+  const team = G.teams[teamIdx];
+  if (!team || !team.players || team.players.length === 0) return null;
+  return team.players[team.explainerIdx % team.players.length] || null;
+}
+
+// Build a TRAIL board: red background, circular tiles, emoji pawns
+function buildTrailBoard({ highlightTeamIdx = null, pathFrom = null, pathTo = null, tileSize = 0, bonusTeamIdx, bonusFrom } = {}) {
+  const total = G.settings.targetSteps;
+  const cols  = total / 5;   // 5 rows  (40→8 cols … 65→13 cols)
+
+  // Compute tile size so the full row fits exactly in the available width.
+  // CW = tileSize * CW_RATIO (minimum 6px), so:
+  //   availW = cols * tileSize + (cols-1) * max(6, tileSize * CW_RATIO)
+  // Solve assuming CW_RATIO dominates (check min afterwards):
+  //   tileSize = availW / (cols + CW_RATIO * (cols - 1))
+  if (!tileSize) {
+    const boardPad  = 28;  // trail-board-bg L+R padding
+    const isDesktop = window.innerWidth >= 769;
+    let containerW;
+    if (isDesktop) {
+      const screenW  = Math.min(window.innerWidth, 1100);
+      const contentW = screenW - 96;   // screen-inner padding 48*2
+      containerW     = contentW - 300 - 24; // minus right col + gap
+    } else {
+      containerW = Math.min(window.innerWidth, 480) - 40; // screen-inner padding
+    }
+    const availW   = containerW - boardPad;
+    const CW_RATIO = 0.26;
+    tileSize = Math.max(20, Math.floor(availW / (cols + CW_RATIO * (cols - 1))));
+  }
+
+  const CW = Math.max(6, Math.floor(tileSize * 0.26));  // connector width
+  const CV = Math.max(10, Math.floor(tileSize * 0.38)); // vertical connector height
+
+  const connectorStyle = `width:${CW}px;height:${tileSize}px;display:flex;align-items:center;
+    justify-content:center;color:rgba(0,0,0,0.25);font-size:0.95rem;
+    font-weight:900;flex-shrink:0;line-height:1;`;
+
+  let html = '<div class="trail-board">';
+
+  for (let d = 0; d < 5; d++) {
+    const r       = 4 - d;
+    const startT  = r * cols + 1;
+    const endT    = (r + 1) * cols;
+    const goRight = r % 2 === 0;
+
+    const tiles = goRight
+      ? Array.from({length: cols}, (_, i) => startT + i)
+      : Array.from({length: cols}, (_, i) => endT - i);
+
+    html += '<div class="trail-row">';
+    tiles.forEach((tile, idx) => {
+      const dl        = (G.tileLayout || TILE_DIFFICULTY)[tile - 1] || 4;
+      const isEnd     = tile === total;
+      const teamsHere = G.teams.filter(t => t.position === tile);
+      const isJust    = highlightTeamIdx !== null && tile === pathTo;
+      const isPath    = highlightTeamIdx !== null && pathFrom !== null
+                        && tile > pathFrom && tile < pathTo;
+      const isBonusJust = bonusTeamIdx != null && tile === (bonusFrom != null ? bonusFrom + 1 : -1);
+
+      const cls = `trail-tile tile-d${dl}${isJust ? ' just-moved' : isPath ? ' path-hl' : ''}${isBonusJust ? ' bonus-moved' : ''}`;
+      const hasPawns  = teamsHere.length > 0;
+      const avSize    = teamsHere.length > 1 ? ' small' : '';
+      const avs       = teamsHere.map(t => `<div class="tile-avatar${avSize}">${t.emoji}</div>`).join('');
+      const numFS     = Math.max(0.55, tileSize / 52).toFixed(2) + 'rem';
+      const avFS      = Math.max(0.85, tileSize / 36).toFixed(2) + 'rem';
+      const avFSsmall = Math.max(0.65, tileSize / 48).toFixed(2) + 'rem';
+
+      html += `<div class="${cls}" id="gtile-${tile}" style="width:${tileSize}px;height:${tileSize}px;">
+        ${isEnd
+          ? `<span style="font-size:${avFS};z-index:3;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));">🏁</span>`
+          : hasPawns
+            ? `<div class="tile-avatars" style="--av-fs:${avFS};--av-fs-sm:${avFSsmall};">${avs}</div>`
+            : `<span class="tile-num" style="font-size:${numFS};">${tile}</span>`
+        }
+      </div>`;
+
+      if (idx < cols - 1) {
+        html += `<div style="${connectorStyle}">${goRight ? '▶' : '◀'}</div>`;
+      }
+    });
+    html += '</div>';
+
+    // vertical turn connector — align to the end tile of this row
+    const connRight = (d % 2 !== 0); // connector is on right side when going R→L above
+    const connJust  = connRight ? 'flex-end' : 'flex-start';
+    html += `<div style="width:100%;height:${CV}px;display:flex;align-items:center;justify-content:${connJust};">
+      <div style="width:${tileSize}px;height:${CV}px;display:flex;align-items:center;
+                  justify-content:center;color:rgba(0,0,0,0.25);
+                  font-size:${Math.max(0.7,tileSize/44).toFixed(2)}rem;font-weight:900;">▲</div>
+    </div>`;
+  }
+
+  // START tile
+  const atStart  = G.teams.filter(t => t.position === 0);
+  const sAvFS    = Math.max(0.85, tileSize / 36).toFixed(2) + 'rem';
+  const sAvFSsm  = Math.max(0.65, tileSize / 48).toFixed(2) + 'rem';
+  const sAvSize  = atStart.length > 1 ? ' small' : '';
+  const sAvs     = atStart.map(t => `<div class="tile-avatar${sAvSize}">${t.emoji}</div>`).join('');
+  const sNumFS   = Math.max(0.42, tileSize / 64).toFixed(2) + 'rem';
+  html += `<div class="trail-row" style="justify-content:flex-start;">
+    <div class="trail-start-tile" style="width:${tileSize}px;height:${tileSize}px;">
+      ${sAvs
+        ? `<div class="tile-avatars" style="--av-fs:${sAvFS};--av-fs-sm:${sAvFSsm};">${sAvs}</div>`
+        : `<span style="font-size:${sNumFS};font-weight:900;color:#8B0000;">START</span>`}
+    </div>
+  </div>`;
+
+  html += '</div>'; // .trail-board
+  return `<div class="trail-board-bg">${html}</div>`;
+}
+
+/* =====================================================
+   BANNED WORDS (admin mode)
+   ===================================================== */
+const BANNED_KEY = 'alias_banned_words';
+let BANNED_WORDS = new Set(JSON.parse(localStorage.getItem(BANNED_KEY) || '[]'));
+function saveBanned() { try { localStorage.setItem(BANNED_KEY, JSON.stringify([...BANNED_WORDS])); } catch(e) {} }
+
+function banCurrentWord() {
+  const lang = G.playing.lang || 'he';
+  BANNED_WORDS.add(lang + ':' + G.playing.word);
+  saveBanned();
+  nextWord();
+}
+
+function unbanWord(key) {
+  BANNED_WORDS.delete(key);
+  saveBanned();
+  renderBannedWordsScreen();
+}
+
+function renderBannedWordsScreen() {
+  const app = document.getElementById('app');
+  const byLang = {};
+  for (const key of BANNED_WORDS) {
+    const [lang, ...rest] = key.split(':');
+    const word = rest.join(':');
+    if (!byLang[lang]) byLang[lang] = [];
+    byLang[lang].push({ key, word });
+  }
+  const sections = Object.entries(byLang).map(([lang, words]) => `
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.8rem;font-weight:700;color:var(--text-dim);margin-bottom:8px;">${LANG_FLAGS[lang] || ''} ${lang.toUpperCase()}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${words.map(({key,word}) => `
+          <div style="display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px;">
+            <span style="font-size:0.9rem;">${word}</span>
+            <button onclick="unbanWord('${key}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:1rem;padding:0 2px;">✕</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('') || '<div style="color:var(--text-muted);text-align:center;padding:24px;">No banned words yet.</div>';
+
+  app.innerHTML = `
+    <div class="screen">
+      <div class="screen-inner">
+        <div style="width:100%;display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;">
+          <button class="btn-ghost" onclick="goto(G.gameActive ? 'board' : 'home')">${T('back')}</button>
+          <div style="font-weight:800;">🚫 Banned Words</div>
+          <div style="width:60px;"></div>
+        </div>
+        <div style="width:100%;padding:4px 0;">${sections}</div>
+      </div>
+    </div>
+  `;
+}
+
+function drawWord(difficulty, lang) {
+  lang = lang || 'he';
+  const enabled = G.settings.enabledCategories || ['everyday'];
+  // Use a single pool per language that combines ALL difficulty levels
+  const cacheKey = lang + '_combined_' + [...enabled].sort().join(',');
+
+  if (!G.wordPools[cacheKey] || G.wordPools[cacheKey].length === 0) {
+    // Build a massive pool from ALL categories and ALL difficulty levels
+    const merged = new Set();
+    for (const cat of enabled) {
+      const catData = CATEGORY_WORDS[lang]?.[cat] || {};
+      // Add words from all difficulty levels (1-4)
+      for (let d = 1; d <= 4; d++) {
+        const catWords = catData[d];
+        if (catWords) catWords.forEach(w => merged.add(w));
+      }
+    }
+    // Also add everyday words from all levels
+    const everyday = WORD_LISTS[lang] || WORDS;
+    for (let d = 1; d <= 4; d++) {
+      if (everyday[d]) everyday[d].forEach(w => merged.add(w));
+    }
+    G.wordPools[cacheKey] = shuffle([...merged]);
+  }
+
+  const pool = G.wordPools[cacheKey];
+  // Filter out already-used words from the pool
+  let idx = pool.length;
+  while (idx--) {
+    if (G.usedWords.has(pool[idx])) pool.splice(idx, 1);
+  }
+
+  let word, attempts = 0;
+  do {
+    if (pool.length === 0) {
+      // Refill pool with ALL words, excluding used ones first
+      const refill = new Set();
+      for (const cat of enabled) {
+        const catData = CATEGORY_WORDS[lang]?.[cat] || {};
+        for (let d = 1; d <= 4; d++) {
+          const catWords = catData[d];
+          if (catWords) catWords.forEach(w => { if (!G.usedWords.has(w)) refill.add(w); });
+        }
+      }
+      const everyday = WORD_LISTS[lang] || WORDS;
+      for (let d = 1; d <= 4; d++) {
+        if (everyday[d]) everyday[d].forEach(w => { if (!G.usedWords.has(w)) refill.add(w); });
+      }
+      // If ALL words exhausted, allow full reuse
+      if (!refill.size) {
+        G.usedWords.clear();
+        for (const cat of enabled) {
+          const catData = CATEGORY_WORDS[lang]?.[cat] || {};
+          for (let d = 1; d <= 4; d++) {
+            const catWords = catData[d];
+            if (catWords) catWords.forEach(w => refill.add(w));
+          }
+        }
+        const everyday2 = WORD_LISTS[lang] || WORDS;
+        for (let d = 1; d <= 4; d++) {
+          if (everyday2[d]) everyday2[d].forEach(w => refill.add(w));
+        }
+      }
+      pool.push(...shuffle([...refill]));
+    }
+    word = pool.pop();
+    attempts++;
+  } while (BANNED_WORDS.has(lang + ':' + word) && attempts < 200);
+  G.usedWords.add(word);
+  return word;
+}
+
+function teamColor(idx) {
+  return (G.teams[idx] || {}).color || TEAM_COLORS[idx] || "#6C63FF";
+}
+
+function goto(screen) {
+  G.screen = screen;
+  render();
+}
+
+/* =====================================================
+   MAIN RENDER
+   ===================================================== */
+function render() {
+  const app = document.getElementById("app");
+  // Auto-save active game state whenever we're on a game screen
+  if (G.gameActive && ['board','turnIntro','turnResults','bonusGuess','playing','setup','gameOptions'].includes(G.screen)) {
+    saveGame();
+  }
+  // Clear saved game once a win occurs
+  if (G.screen === 'win') clearSavedGame();
+  const screens = {
+    modeSelect: renderModeSelect,
+    home: renderHome,
+    instructions: renderInstructions,
+    setup: renderSetup,
+    gameOptions: renderGameOptions,
+    board: renderBoard,
+    turnIntro: renderTurnIntro,
+    playing: renderPlaying,
+    bonusGuess: renderBonusGuess,
+    turnResults: renderTurnResults,
+    win: renderWin,
+    bannedWords: renderBannedWordsScreen
+  };
+  const fn = screens[G.screen] || (window.PTAKIM_SCREENS && window.PTAKIM_SCREENS[G.screen]);
+  if (fn) fn(app);
+}
+
+/* =====================================================
+   SAVE / RESUME GAME
+   ===================================================== */
+const SAVE_KEY = 'pwa_saved_game';
+
+function saveGame() {
+  if (!G.gameActive) return;
+  try {
+    const snapshot = JSON.parse(JSON.stringify(G));
+    // Don't save timer interval (not serializable); pause the timer state
+    if (snapshot.playing) {
+      snapshot.playing.timerInterval = null;
+      snapshot.playing.paused = true;
+    }
+    // Serialize usedWords Set as array so it can be restored
+    snapshot.usedWords = [...(G.usedWords || [])];
+    localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
+  } catch(e) {}
+}
+
+function hasSavedGame() {
+  try { return !!localStorage.getItem(SAVE_KEY); } catch(e) { return false; }
+}
+
+function resumeSavedGame() {
+  checkForUpdate();
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    // If saved while in settings, restore to the screen they came from
+    if (['setup','gameOptions'].includes(saved.screen) && saved._returnScreen) {
+      saved.screen = saved._returnScreen;
+      saved._returnScreen = null;
+    }
+    // Restore usedWords as a Set (JSON serializes Set as {})
+    if (saved.usedWords && !(saved.usedWords instanceof Set)) {
+      saved.usedWords = new Set(Array.isArray(saved.usedWords) ? saved.usedWords : []);
+    }
+    Object.assign(G, saved);
+    // Restore non-serializable defaults
+    if (G.playing) {
+      G.playing.timerInterval = null;
+      G.playing.paused = true;
+    }
+    // If resuming mid-turn, show playing screen in paused state
+    if (G.screen === 'playing' && G.playing) {
+      render();
+      // Visually show paused state: blur word, update button text
+      const wc = document.getElementById('word-card');
+      if (wc) wc.style.filter = 'blur(8px)';
+      const pb = document.getElementById('pause-btn');
+      if (pb) pb.textContent = TT(G.playing.lang || 'he', 'resume');
+      ['btn-skip','btn-correct'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) { b.disabled = true; b.style.opacity = '0.35'; b.style.pointerEvents = 'none'; }
+      });
+    } else {
+      render();
+    }
+  } catch(e) {}
+}
+
+function clearSavedGame() {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+}
+
+/* =====================================================
+   MODE SELECT SCREEN
+   ===================================================== */
+function renderModeSelect(app) {
+  app.innerHTML = `
+    <div class="screen" style="background: var(--bg);">
+      <div class="home-bg"></div>
+      <div class="screen-inner" style="justify-content:center; flex:1;">
+        <div class="logo-wrap">
+          <div class="logo-icon" style="padding:0;overflow:hidden;">
+            <svg viewBox="0 0 108 108" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <g transform="rotate(-13, 54, 60)">
+                <path d="M28,36 Q28,32 32,32 L76,32 Q80,32 80,36 L80,84 Q80,88 76,88 L32,88 Q28,88 28,84 Z" fill="#FFF8DC"/>
+                <line x1="36" y1="48" x2="72" y2="48" stroke="#D4C070" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="36" y1="57" x2="68" y2="57" stroke="#D4C070" stroke-width="3" stroke-linecap="round"/>
+                <line x1="36" y1="66" x2="70" y2="66" stroke="#D4C070" stroke-width="3" stroke-linecap="round"/>
+                <line x1="36" y1="75" x2="64" y2="75" stroke="#D4C070" stroke-width="3" stroke-linecap="round"/>
+              </g>
+              <g transform="rotate(11, 54, 58)">
+                <path d="M30,28 Q30,24 34,24 L78,24 Q82,24 82,28 L82,78 Q82,82 78,82 L34,82 Q30,82 30,78 Z" fill="#DFF0FF"/>
+                <line x1="37" y1="41" x2="75" y2="41" stroke="#90BBD9" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="37" y1="50" x2="71" y2="50" stroke="#90BBD9" stroke-width="3" stroke-linecap="round"/>
+                <line x1="37" y1="59" x2="73" y2="59" stroke="#90BBD9" stroke-width="3" stroke-linecap="round"/>
+                <line x1="37" y1="68" x2="67" y2="68" stroke="#90BBD9" stroke-width="3" stroke-linecap="round"/>
+              </g>
+              <path d="M20,22 Q20,18 24,18 L76,18 Q80,18 80,22 L80,78 Q80,82 76,82 L24,82 Q20,82 20,78 Z" fill="#FFFFFF" stroke="#D8D8D8" stroke-width="1"/>
+              <path d="M20,18 L24,18 L76,18 L80,18 L80,30 L20,30 Z" fill="#6C63FF"/>
+              <line x1="28" y1="40" x2="72" y2="40" stroke="#A89CF5" stroke-width="4" stroke-linecap="round"/>
+              <line x1="28" y1="51" x2="68" y2="51" stroke="#CCCCCC" stroke-width="3" stroke-linecap="round"/>
+              <line x1="28" y1="60" x2="70" y2="60" stroke="#CCCCCC" stroke-width="3" stroke-linecap="round"/>
+              <line x1="28" y1="69" x2="64" y2="69" stroke="#CCCCCC" stroke-width="3" stroke-linecap="round"/>
+              <line x1="28" y1="78" x2="66" y2="78" stroke="#CCCCCC" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="logo-text">פתקים</div>
+          <div class="logo-subtitle">${T('logoSubtitle')}</div>
+        </div>
+        <div class="gap40"></div>
+        <div style="font-size:0.85rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">
+          ${T('chooseMode')}
+        </div>
+        <div class="mode-cards">
+          <div class="mode-card" onclick="goto('home')">
+            <div class="mode-card-icon" style="background:linear-gradient(135deg,#16a34a,#65a30d);color:#fff;">🎙</div>
+            <div class="mode-card-info">
+              <div class="mode-card-title">${T('charadeTitle')}</div>
+              <div class="mode-card-desc">${T('charadeDesc')}</div>
+            </div>
+            <div class="mode-card-arrow">${G.uiLang === 'he' ? '◂' : '▸'}</div>
+          </div>
+          <div class="mode-card" onclick="goto('ptakimHome')">
+            <div class="mode-card-icon" style="background:linear-gradient(135deg,#6C63FF,#9B59B6);color:#fff;">📝</div>
+            <div class="mode-card-info">
+              <div class="mode-card-title">${T('ptakimTitle')}</div>
+              <div class="mode-card-desc">${T('ptakimDesc')}</div>
+            </div>
+            <div class="mode-card-arrow">${G.uiLang === 'he' ? '◂' : '▸'}</div>
+          </div>
+        </div>
+        <div class="gap16"></div>
+        <div style="display:flex;gap:6px;justify-content:center;">
+          ${['he','en','es'].map(l=>`
+            <button onclick="G.uiLang='${l}';render();"
+              style="padding:6px 14px;border-radius:10px;border:1.5px solid ${G.uiLang===l?'#6C63FF':'var(--border)'};
+                     background:${G.uiLang===l?'rgba(108,99,255,0.15)':'var(--card)'};
+                     color:${G.uiLang===l?'#a78bfa':'var(--text-dim)'};
+                     font-size:0.85rem;font-weight:700;cursor:pointer;font-family:inherit;">
+              ${LANG_FLAGS[l]} ${LANG_NAMES[l]}
+            </button>
+          `).join('')}
+        </div>
+        <div style="margin-top:auto;padding-top:12px;font-size:0.65rem;color:var(--text-muted);opacity:0.5;">v${APP_VERSION}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* =====================================================
+   HOME SCREEN (Charade)
+   ===================================================== */
+function renderHome(app) {
+  app.innerHTML = `
+    <div class="screen" style="background: var(--bg);">
+      <div class="home-bg"></div>
+      <div class="screen-inner" style="justify-content:center; flex:1;">
+        <button class="btn-ghost" onclick="goto('modeSelect')" style="position:absolute;top:16px;${G.uiLang==='he'?'right':'left'}:16px;z-index:1;">
+          ${T('back')}
+        </button>
+        <div class="logo-wrap">
+          <div class="logo-icon" style="background:linear-gradient(135deg,#16a34a,#65a30d);">
+            <span style="font-size:2.4rem;">🎙</span>
+          </div>
+          <div class="logo-text" style="background:linear-gradient(135deg,#16a34a,#65a30d);-webkit-background-clip:text;background-clip:text;">${T('charadeTitle')}</div>
+          <div class="logo-subtitle">${T('charadeDesc')}</div>
+        </div>
+        <div class="gap40"></div>
+        ${hasSavedGame() ? `
+        <button class="btn btn-primary" onclick="resumeSavedGame()" style="background:linear-gradient(135deg,#16a34a,#15803d);">
+          <span>▶</span> ${T('continueGame')}
+        </button>
+        <div class="gap8"></div>
+        <button class="btn btn-secondary" onclick="clearSavedGame();render()">
+          <span>🎮</span> ${T('newGame')}
+        </button>
+        ` : `
+        <button class="btn btn-primary" onclick="startSetup()">
+          <span>🎮</span> ${T('newGame')}
+        </button>
+        `}
+        <div class="gap12"></div>
+        <button class="btn btn-secondary" onclick="goto('instructions')">
+          <span>📖</span> ${T('howToPlay')}
+        </button>
+        ${BANNED_WORDS.size > 0 ? `
+        <div class="gap8"></div>
+        <button onclick="goto('bannedWords')" style="background:none;border:none;color:var(--text-muted);font-size:0.78rem;cursor:pointer;text-decoration:underline;">
+          🚫 ${BANNED_WORDS.size} banned word${BANNED_WORDS.size===1?'':'s'}
+        </button>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function diffColor(d) {
+  return ["","#16a34a","#65a30d","#ca8a04","#ea580c"][d];
+}
+
+function diffRgb(d) {
+  return ["","22,163,74","101,163,13","202,138,4","234,88,12"][d];
+}
+
+/* =====================================================
+   INSTRUCTIONS SCREEN
+   ===================================================== */
+function renderInstructions(app) {
+  app.innerHTML = `
+    <div class="screen">
+      <div class="screen-inner" style="height:100%;padding-bottom:16px;">
+        <div style="width:100%;display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0;">
+          <button class="btn-ghost" onclick="goto('home')">${T('instrBack')}</button>
+          <span style="font-size:1.2rem;font-weight:800;flex:1;">${T('instrTitle')}</span>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;width:100%;min-height:0;">
+          <div class="instructions-card">
+            <h3>${T('instrGoal')}</h3>
+            <p>${T('instrGoalText')}</p>
+          </div>
+
+          <div class="instructions-card">
+            <h3>${T('instrTurn')}</h3>
+            <ul>
+              <li>${T('instrTurn1')}</li>
+              <li>${T('instrTurn2')}</li>
+              <li>${T('instrTurn3')}</li>
+              <li>${T('instrTurn4')}</li>
+              <li>${T('instrTurn5')}</li>
+            </ul>
+          </div>
+
+          <div class="instructions-card">
+            <h3>${T('instrRules')}</h3>
+            <ul>
+              <li>${T('instrRule1')}</li>
+              <li>${T('instrRule2')}</li>
+              <li>${T('instrRule3')}</li>
+              <li>${T('instrRule4')}</li>
+              <li>${T('instrRule5')}</li>
+            </ul>
+          </div>
+
+          <div class="instructions-card">
+            <h3>${T('instrDiff')}</h3>
+            <p style="margin-bottom:10px;">${T('instrDiffText')}</p>
+            ${[1,2,3,4].map(d => `
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div style="padding:4px 10px;border-radius:8px;background:rgba(${diffRgb(d)},0.15);color:${diffColor(d)};font-weight:700;font-size:0.85rem;min-width:24px;text-align:center;">${d}</div>
+                <span style="font-size:0.85rem;color:var(--text-dim);">${DIFF_NAME(d)}</span>
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="instructions-card">
+            <h3>${T('instrWin')}</h3>
+            <p>${T('instrWinText')}</p>
+          </div>
+
+          <div class="gap8"></div>
+          <button class="btn btn-primary" onclick="startSetup()">
+            <span>🎮</span> ${T('letsPlay')}
+          </button>
+          <div class="gap8"></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* =====================================================
+   SETUP SCREEN
+   ===================================================== */
+let setupTeams = null; // initialized in startSetup()
+let setupAdvancedOpen = false;
+
+function startSetup() {
+  checkForUpdate();
+  if (!G.gameActive) {
+    const names = TEAM_EMOJI_NAMES_LIST();
+    setupTeams = [
+      { name: names[0], color: TEAM_COLORS[0], emoji: TEAM_EMOJIS[0], players: [], diffOffset: 0, lang: G.uiLang === 'he' ? 'he' : G.uiLang },
+      { name: names[1], color: TEAM_COLORS[1], emoji: TEAM_EMOJIS[1], players: [], diffOffset: 0, lang: G.uiLang === 'he' ? 'he' : G.uiLang }
+    ];
+  }
+  if (!setupTeams) {
+    const names = TEAM_EMOJI_NAMES_LIST();
+    setupTeams = [
+      { name: names[0], color: TEAM_COLORS[0], emoji: TEAM_EMOJIS[0], players: [], diffOffset: 0, lang: 'he' },
+      { name: names[1], color: TEAM_COLORS[1], emoji: TEAM_EMOJIS[1], players: [], diffOffset: 0, lang: 'he' }
+    ];
+  }
+  G.screen = "setup";
+  render();
+}
+
+function renderSetup(app) {
+  app.innerHTML = `
+    <div class="screen">
+      <div class="screen-inner" style="overflow:hidden;padding:10px 14px 10px;">
+
+        <!-- Header -->
+        <div style="width:100%;display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-shrink:0;">
+          <button class="btn-ghost" onclick="${G.gameActive ? "returnToGame()" : "goto('home')"}">${G.gameActive ? T('backToGame') : T('back')}</button>
+          <span style="font-size:1.1rem;font-weight:800;flex:1;">${T('teams')}</span>
+        </div>
+
+        <!-- Teams list — scrollable, takes remaining height -->
+        <div id="teams-list" style="flex:1;overflow-y:auto;width:100%;min-height:0;"></div>
+
+        <!-- Add team button -->
+        ${setupTeams.length < 6 ? `
+          <button class="add-team-btn" onclick="addTeam()" style="flex-shrink:0;padding:9px;margin-top:6px;">${T('addTeamBtn')}</button>
+        ` : ""}
+
+        <!-- Next / Continue button always visible at bottom -->
+        ${G.gameActive ? `
+        <button class="btn btn-primary" onclick="returnToGame()" style="margin-top:8px;max-width:100%;flex-shrink:0;">
+          <span>▶</span> ${T('continueGame')}
+        </button>
+        ` : `
+        <button class="btn btn-primary" onclick="goto('gameOptions')" style="margin-top:8px;max-width:100%;flex-shrink:0;">
+          ${T('next')}
+        </button>
+        `}
+
+      </div>
+    </div>
+  `;
+  renderTeamsList();
+}
+
+/* =====================================================
+   GAME OPTIONS SCREEN (settings + start)
+   ===================================================== */
+function renderGameOptions(app) {
+  const timerOpts = [30, 60, 90];
+  app.innerHTML = `
+    <div class="screen">
+      <div class="screen-inner" style="overflow:hidden;padding:10px 14px 10px;">
+
+        <!-- Header -->
+        <div style="width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-shrink:0;">
+          <button class="btn-ghost" onclick="${G.gameActive ? "returnToGame()" : "goto('setup')"}">${G.gameActive ? T('backToGame') : T('back')}</button>
+          <span style="font-size:1.1rem;font-weight:800;flex:1;">${T('gameSettings')}</span>
+        </div>
+
+        <!-- Big action button -->
+        ${G.gameActive ? `
+        <button class="btn btn-primary" onclick="returnToGame()"
+          style="max-width:100%;flex-shrink:0;margin-bottom:14px;padding:22px 32px;font-size:1.4rem;letter-spacing:0.5px;">
+          <span>▶</span> ${T('returnToGame')}
+        </button>
+        ` : `
+        <button class="btn btn-primary" onclick="startGame()"
+          style="max-width:100%;flex-shrink:0;margin-bottom:14px;padding:22px 32px;font-size:1.4rem;letter-spacing:0.5px;">
+          <span>▶</span> ${T('startGame')}
+        </button>
+        `}
+
+        <!-- Settings panel -->
+        <div style="width:100%;background:var(--card);border-radius:14px;padding:10px 12px;margin-bottom:8px;flex-shrink:0;border:1px solid var(--border);">
+
+          <!-- Skip penalty row -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--text-dim);flex:1;">${T('skipPenalty')}</span>
+            <label class="toggle" style="flex-shrink:0;">
+              <input type="checkbox" ${G.settings.skipPenalty ? 'checked' : ''} onchange="G.settings.skipPenalty=this.checked">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Timer row -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--text-dim);white-space:nowrap;min-width:60px;">${T('timePerTurn')}:</span>
+            <div style="display:flex;gap:5px;flex:1;">
+              ${timerOpts.map(s => `
+                <button id="timer-opt-${s}" onclick="selectTimer(${s})"
+                  style="flex:1;padding:5px 4px;border-radius:9px;border:1.5px solid ${G.settings.timerSeconds===s?'#6C63FF':'var(--border)'};
+                         background:${G.settings.timerSeconds===s?'rgba(108,99,255,0.15)':'transparent'};
+                         color:${G.settings.timerSeconds===s?'#a78bfa':'var(--text-dim)'};
+                         font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;">
+                  ${s} ${T('seconds')}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Game length row -->
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--text-dim);white-space:nowrap;min-width:60px;">${T('winSquares')}:</span>
+            <input type="range" min="20" max="80" step="5" value="${G.settings.targetSteps}"
+              oninput="G.settings.targetSteps=+this.value;document.getElementById('steps-val').textContent=this.value"
+              style="flex:1;accent-color:#6C63FF;cursor:pointer;height:6px;">
+            <span id="steps-val" style="font-size:1rem;font-weight:900;color:#a78bfa;min-width:28px;text-align:center;">${G.settings.targetSteps}</span>
+          </div>
+
+        </div>
+
+        <!-- Word Categories -->
+        <div class="section-label" style="width:100%;flex-shrink:0;margin-bottom:6px;">📂 Word Categories</div>
+        <div style="width:100%;display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;flex-shrink:0;">
+          ${Object.entries(CATEGORIES).map(([key, cat]) => {
+            const on = G.settings.enabledCategories.includes(key);
+            return `<button id="cat-btn-${key}" onclick="toggleCategory('${key}')"
+              style="padding:5px 12px;border-radius:20px;border:1.5px solid ${on?cat.color:'var(--border)'};
+                     background:${on?cat.color+'22':'transparent'};
+                     color:${on?cat.color:'var(--text-muted)'};
+                     font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">
+              ${cat.icon} ${cat.label[G.uiLang]||cat.label.en}
+            </button>`;
+          }).join('')}
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+function OFFSET_LABEL(v) { const k = ['offsetEasy','offsetNormal','offsetHard']; return T(k[v+1]); }
+
+function renderTeamsList() {
+  const el = document.getElementById("teams-list");
+  if (!el) return;
+  el.innerHTML = setupTeams.map((t, i) => {
+    const playersHTML = t.players.map((p, pi) => `
+      <div class="player-row">
+        <div class="player-num">${pi + 1}</div>
+        <input class="player-input" value="${p}" placeholder="${T('playerPlaceholder')} ${pi + 1}"
+          oninput="setupTeams[${i}].players[${pi}]=this.value" />
+        <button class="remove-btn" onclick="removePlayer(${i},${pi})" style="font-size:0.9rem;">✕</button>
+      </div>
+    `).join('');
+
+    const offsetBtns = [-1,0,1].map(v => {
+      const label = OFFSET_LABEL(v);
+      const active = t.diffOffset === v;
+      const accentColor = v < 0 ? '#4ade80' : v > 0 ? '#f87171' : '#a78bfa';
+      return `<button class="dob ${active ? 'dob-active' : ''}"
+        onclick="setTeamOffset(${i},${v})"
+        style="${active ? `border-color:${accentColor};color:${accentColor};background:${accentColor}18;` : ''}">
+        ${label}
+      </button>`;
+    }).join('');
+
+    const colorPicker = PICKER_COLORS.map(c => `
+      <div onclick="setupTeams[${i}].color='${c}';renderTeamsList();"
+        style="width:18px;height:18px;border-radius:50%;background:${c};cursor:pointer;flex-shrink:0;
+               border:2.5px solid ${t.color===c?'var(--text)':'transparent'};transition:border-color 0.15s;"></div>
+    `).join('');
+    const emojiPicker = PICKER_EMOJIS.map(e => `
+      <button onclick="setupTeams[${i}].emoji='${e}';renderTeamsList();"
+        style="background:${t.emoji===e?t.color+'22':'transparent'};border:${t.emoji===e?`1.5px solid ${t.color}`:'1.5px solid transparent'};
+               border-radius:6px;padding:1px 3px;font-size:0.9rem;cursor:pointer;line-height:1;">
+        ${e}
+      </button>
+    `).join('');
+
+    return `
+      <div style="width:100%;margin-bottom:4px;background:var(--card);border-radius:12px;padding:6px 10px;border:1px solid var(--border);overflow:hidden;">
+        <div class="team-row" style="margin-bottom:2px;">
+          <div class="team-dot" style="background:${t.color}"></div>
+          <input class="team-input" value="${t.name}"
+            oninput="setupTeams[${i}].name=this.value"
+            style="border-color:transparent;padding:5px 10px;"
+            onfocus="this.style.borderColor='${t.color}'"
+            onblur="this.style.borderColor='transparent'"
+            placeholder="${T('teamPlaceholder')} ${i + 1}" />
+          ${setupTeams.length > 2 ? `<button class="remove-btn" onclick="removeTeam(${i})">✕</button>` : ""}
+        </div>
+
+        <!-- Color & emoji pickers -->
+        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:3px;">${colorPicker}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:1px;margin-bottom:3px;">${emojiPicker}</div>
+
+        <!-- Word level -->
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+          <span class="diff-offset-label" style="margin:0;white-space:nowrap;">${T('wordLevel')}:</span>
+          <div class="diff-offset-btns" style="gap:3px;">${offsetBtns}</div>
+        </div>
+        <!-- Language -->
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+          <span class="diff-offset-label" style="margin:0;white-space:nowrap;">${T('wordLang')}:</span>
+          <div class="lang-btns" style="gap:3px;">
+            ${['he','en','es'].map(l => `
+              <button class="lang-btn ${t.lang === l ? 'lang-active' : ''}"
+                onclick="setupTeams[${i}].lang='${l}';renderTeamsList();"
+                style="padding:3px 6px;font-size:0.72rem;">
+                ${LANG_FLAGS[l]}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="players-wrap" style="padding:2px 0 4px 0;">
+          ${playersHTML}
+          ${t.players.length < 8 ? `<button class="add-player-btn" onclick="addPlayer(${i})" style="padding:5px;">${T('addPlayerBtn')}</button>` : ''}
+          ${(() => {
+            const saved = getSavedPlayers().filter(n => !t.players.includes(n));
+            if (!saved.length) return '';
+            return `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;">
+              ${saved.map(name => `
+                <button onclick="addSavedPlayerToTeam(${i},'${name.replace(/'/g,"\\'")}')"
+                  style="padding:2px 8px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);
+                         color:var(--text-dim);font-size:0.7rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px;">
+                  + ${name}
+                  <span onclick="event.stopPropagation();deleteSavedPlayer('${name.replace(/'/g,"\\'")}');"
+                    style="color:#ef4444;font-size:0.75rem;">✕</span>
+                </button>
+              `).join('')}
+            </div>`;
+          })()}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function addTeam() {
+  const i = setupTeams.length;
+  setupTeams.push({ name: (TEAM_EMOJI_NAMES_LIST()[i] || `${T('teams')} ${i+1}`), color: TEAM_COLORS[i], emoji: TEAM_EMOJIS[i], players: [], diffOffset: 0, lang: G.uiLang === 'he' ? 'he' : G.uiLang });
+  renderSetup(document.getElementById("app"));
+}
+
+/* =====================================================
+   SAVED PLAYER NAMES
+   ===================================================== */
+const SAVED_PLAYERS_KEY = 'alias_saved_players';
+function getSavedPlayers() {
+  try { return JSON.parse(localStorage.getItem(SAVED_PLAYERS_KEY) || '[]'); } catch(e) { return []; }
+}
+function savePlayers(names) {
+  const existing = getSavedPlayers();
+  const merged = [...new Set([...existing, ...names.map(n=>n.trim()).filter(Boolean)])];
+  try { localStorage.setItem(SAVED_PLAYERS_KEY, JSON.stringify(merged)); } catch(e) {}
+}
+function deleteSavedPlayer(name) {
+  const list = getSavedPlayers().filter(n => n !== name);
+  try { localStorage.setItem(SAVED_PLAYERS_KEY, JSON.stringify(list)); } catch(e) {}
+  renderTeamsList();
+}
+function addSavedPlayerToTeam(teamIdx, name) {
+  if (!setupTeams[teamIdx].players.includes(name)) {
+    setupTeams[teamIdx].players.push(name);
+  }
+  renderTeamsList();
+}
+
+function addPlayer(teamIdx) {
+  setupTeams[teamIdx].players.push("");
+  renderTeamsList();
+}
+
+function removePlayer(teamIdx, playerIdx) {
+  setupTeams[teamIdx].players.splice(playerIdx, 1);
+  renderTeamsList();
+}
+
+function setTeamOffset(teamIdx, val) {
+  setupTeams[teamIdx].diffOffset = val;
+  renderTeamsList();
+}
+
+function removeTeam(i) {
+  setupTeams.splice(i, 1);
+  renderSetup(document.getElementById("app"));
+}
+
+function setSetting(key, val) {
+  G.settings[key] = val;
+}
+
+function selectTimer(val) {
+  G.settings.timerSeconds = val;
+  [30, 60, 90].forEach(s => {
+    const btn = document.getElementById('timer-opt-' + s);
+    if (!btn) return;
+    const on = s === val;
+    btn.style.borderColor = on ? '#6C63FF' : 'var(--border)';
+    btn.style.background = on ? 'rgba(108,99,255,0.15)' : 'transparent';
+    btn.style.color = on ? '#a78bfa' : 'var(--text-dim)';
+  });
+}
+
+function toggleCategory(cat) {
+  const enabled = G.settings.enabledCategories;
+  const idx = enabled.indexOf(cat);
+  if (idx >= 0) {
+    if (enabled.length <= 1) return; // keep at least one
+    enabled.splice(idx, 1);
+  } else {
+    enabled.push(cat);
+  }
+  G.wordPools = {}; // reset pools so new selection takes effect immediately
+  // Update button style in-place
+  const btn = document.getElementById('cat-btn-' + cat);
+  const catDef = CATEGORIES[cat];
+  if (btn && catDef) {
+    const on = enabled.includes(cat);
+    btn.style.borderColor = on ? catDef.color : 'var(--border)';
+    btn.style.background = on ? catDef.color + '22' : 'transparent';
+    btn.style.color = on ? catDef.color : 'var(--text-muted)';
+  }
+}
+
+function startGame() {
+  // Save all player names for future sessions
+  const allNames = setupTeams.flatMap(t => t.players);
+  savePlayers(allNames);
+
+  G.teams = setupTeams.map(t => ({
+    ...t,
+    position: 0,
+    prevPosition: 0,
+    score: 0,
+    players: [...t.players],
+    explainerIdx: 0,
+    diffOffset: t.diffOffset || 0,
+    lang: t.lang || 'he'
+  }));
+  G.currentTeam = 0;
+  G.turnNumber = 1;
+  G.lastMove = null;
+  G.wordPools = {};
+  G.usedWords = new Set();
+  G.tileLayout = generateRandomBoard(G.settings.targetSteps);
+  G.gameActive = true;
+  goto("board");
+}
+
+/* =====================================================
+   BOARD SCREEN
+   ===================================================== */
+function renderBoard(app) {
+  const ct = G.currentTeam;
+  const team = G.teams[ct];
+  const lm = G.lastMove; // {teamIdx, from, to} — show animation if set
+
+  const boardHTML = buildTrailBoard({
+    highlightTeamIdx: lm ? lm.teamIdx : null,
+    pathFrom: lm ? lm.from : null,
+    pathTo:   lm ? lm.to   : null
+  });
+
+  // Legend (d1-d5 only)
+  const legendHTML = [1,2,3,4].map(d => `
+    <div class="diff-badge" style="background:rgba(${diffRgb(d)},0.12);color:${diffColor(d)};border:1px solid rgba(${diffRgb(d)},0.2);font-size:0.65rem;">
+      ${d} — ${DIFF_NAME(d)}
+    </div>
+  `).join("");
+
+  // Advancement callout if lastMove exists
+  const advanceHTML = lm ? (() => {
+    const mt = G.teams[lm.teamIdx];
+    const moved = lm.to - lm.from;
+    return `
+      <div style="width:100%;background:linear-gradient(135deg,${mt.color}18,${mt.color}08);border:1.5px solid ${mt.color}40;border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="font-size:2rem;">${mt.emoji}</div>
+        <div>
+          <div style="font-weight:800;font-size:0.95rem;">${mt.name}</div>
+          <div style="font-size:0.82rem;color:var(--text-dim);">${T('advanced')} <strong style="color:${mt.color};">+${moved}</strong> ${T('squares')} <strong style="color:${mt.color};">${lm.to}</strong></div>
+        </div>
+      </div>
+    `;
+  })() : '';
+
+  // Team standings
+  const teamCards = [...G.teams]
+    .map((t, i) => ({ t, i }))
+    .sort((a, b) => b.t.position - a.t.position)
+    .map(({ t, i }) => {
+      const pos = t.position;
+      const pct = Math.round((pos / G.settings.targetSteps) * 100);
+      const isActive = i === ct;
+      const explainerName = getExplainerName(i);
+      return `
+        <div class="team-board-card ${isActive ? 'active-team' : ''}"
+          ${isActive ? `style="--active-team-color:${t.color};--active-team-bg:${t.color}18;"` : ''}>
+          <div class="team-avatar" style="background:${t.color};box-shadow:0 4px 16px ${t.color}60;">${t.emoji}</div>
+          <div class="team-info">
+            <div class="team-name-text">${t.name}</div>
+            <div class="team-tile-info">
+              ${LANG_FLAGS[t.lang || 'he']} ${T('squareLbl')} ${pos} / ${G.settings.targetSteps}
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="width:${pct}%;background:${t.color};"></div>
+            </div>
+            ${isActive && explainerName ? `<div style="font-size:0.75rem;color:${t.color};margin-top:3px;">${T('explainerLbl')} <strong>${explainerName}</strong></div>` : ''}
+          </div>
+          <div class="team-score-display" style="color:${t.color};">${pos}</div>
+        </div>
+      `;
+    }).join("");
+
+  const explainerName = getExplainerName(ct);
+
+  app.innerHTML = `
+    <div class="screen" style="background:var(--bg);">
+      <div class="screen-inner">
+        <div class="board-header">
+          <div class="board-title">🎲 ${T('boardTitle')}</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="round-badge">${T('round')} ${G.turnNumber}</div>
+            <button class="btn-ghost" onclick="showGameMenu()" style="font-size:1.3rem;padding:4px 6px;" title="הגדרות">⚙</button>
+          </div>
+        </div>
+
+        <!-- LEGEND — sticky so it never scrolls away -->
+        <div style="width:100%;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:4px 0 8px;flex-shrink:0;position:sticky;top:0;z-index:10;background:var(--bg);">
+          ${[
+            {bg:'#16a34a',label:T('legendEasy')},
+            {bg:'#65a30d',label:''},
+            {bg:'#ca8a04',label:T('legendMed')},
+            {bg:'#ea580c',label:''},
+            {bg:'#dc2626',label:T('legendHard')}
+          ].map(({bg,label})=>label ? `<div style="display:flex;align-items:center;gap:3px;">
+            <div style="width:14px;height:14px;border-radius:4px;background:${bg};flex-shrink:0;"></div>
+            <span style="font-size:0.65rem;color:var(--text-muted);">${label}</span>
+          </div>` : `<div style="width:14px;height:14px;border-radius:4px;background:${bg};flex-shrink:0;"></div>`
+          ).join('')}
+        </div>
+
+        <div class="board-layout">
+          <!-- LEFT: board -->
+          <div class="board-left">
+            ${advanceHTML}
+
+            <!-- TRAIL BOARD -->
+            <div class="trail-board-outer">${boardHTML}</div>
+          </div>
+
+          <!-- RIGHT: standings + action -->
+          <div class="board-right">
+            <div class="divider" style="margin-bottom:12px;"></div>
+
+            <!-- TEAM STANDINGS -->
+            <div class="team-cards-grid">${teamCards}</div>
+
+            <div class="gap16"></div>
+
+            <button class="btn btn-primary" onclick="startTurn();G.lastMove=null;" style="max-width:100%;">
+              <span>${team.emoji}</span> ${T('startTurn')} — ${team.name}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Scroll to active tile
+  setTimeout(() => {
+    const tileEl = document.getElementById(`gtile-${team.position || 1}`);
+    if (tileEl) tileEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, 150);
+}
+
+/* =====================================================
+   TURN INTRO SCREEN
+   ===================================================== */
+function startTurn() {
+  goto("turnIntro");
+}
+
+function renderTurnIntro(app) {
+  const ct      = G.currentTeam;
+  const team    = G.teams[ct];
+  const tl = team.lang || 'he';
+  const explainer = getExplainerName(ct);
+
+  app.innerHTML = `
+    <div class="screen" style="background:var(--bg);">
+      <div class="screen-inner" style="flex:1;">
+        <div style="width:100%;display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;">
+          <button class="btn-ghost" onclick="goto('board')">${TT(tl,'back')}</button>
+          <button class="btn-ghost" onclick="showGameMenu()" style="font-size:1.2rem;">⚙</button>
+        </div>
+
+        <div class="turn-intro-wrap">
+          <div class="turn-team-display" style="background:linear-gradient(135deg,${team.color},${team.color}99);">
+            ${team.emoji}
+          </div>
+          <div class="turn-team-name" style="color:${team.color};">${team.name}</div>
+
+          ${explainer ? `
+            <div style="background:var(--card);border:1.5px solid ${team.color}60;border-radius:16px;padding:14px 28px;text-align:center;">
+              <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;">🎙 ${TT(tl,'nowExplaining')}</div>
+              <div style="font-size:1.8rem;font-weight:900;color:${team.color};">${explainer}</div>
+              ${team.players.length > 1 ? `<div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;">${TT(tl,'player')} ${(team.explainerIdx % team.players.length) + 1} ${TT(tl,'playerOf')} ${team.players.length}</div>` : ''}
+            </div>
+          ` : `
+            <div class="turn-instructions">
+              ${TT(tl,'whoExplains')} — ${TT(tl,'pressPlay')}
+            </div>
+          `}
+
+          <div style="font-size:0.82rem;color:var(--text-muted);text-align:center;">
+            ${TT(tl,'wordPerSquare')}
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <button class="btn btn-primary" onclick="beginPlaying()" style="max-width:100%;">
+          <span>▶</span> ${TT(tl,'playBtn')} — ${G.settings.timerSeconds} ${TT(tl,'seconds')}
+        </button>
+        <div class="gap8"></div>
+      </div>
+    </div>
+  `;
+}
+
+/* =====================================================
+   PLAYING SCREEN
+   ===================================================== */
+function beginPlaying() {
+  const ct = G.currentTeam;
+  const diff = getTeamDiff(ct, G.teams[ct].position);
+  const lang = G.teams[ct].lang || 'he';
+  G.playing = {
+    word: drawWord(diff, lang),
+    difficulty: diff,
+    lang: lang,
+    timeLeft: G.settings.timerSeconds,
+    timerInterval: null,
+    correct: [],
+    skipped: [],
+    paused: false
+  };
+  G.screen = "playing";
+  render();
+  startPlayingTimer();
+}
+
+function startPlayingTimer() {
+  if (G.playing.timerInterval) clearInterval(G.playing.timerInterval);
+  G.playing.timerInterval = setInterval(() => {
+    G.playing.timeLeft--;
+    updateTimerUI();
+    if (G.playing.timeLeft <= 0) {
+      endTurn();
+    }
+  }, 1000);
+}
+
+function togglePause() {
+  const setActionBtns = (disabled) => {
+    ['btn-skip','btn-correct'].forEach(id => {
+      const b = document.getElementById(id);
+      if (!b) return;
+      b.disabled = disabled;
+      b.style.opacity = disabled ? '0.35' : '';
+      b.style.pointerEvents = disabled ? 'none' : '';
+    });
+  };
+  if (G.playing.paused) {
+    G.playing.paused = false;
+    startPlayingTimer();
+    document.getElementById('pause-btn').textContent = TT(G.playing.lang, 'pause');
+    const wc = document.getElementById('word-card');
+    if (wc) wc.style.filter = '';
+    setActionBtns(false);
+  } else {
+    G.playing.paused = true;
+    clearInterval(G.playing.timerInterval);
+    G.playing.timerInterval = null;
+    document.getElementById('pause-btn').textContent = TT(G.playing.lang, 'resume');
+    const wc = document.getElementById('word-card');
+    if (wc) wc.style.filter = 'blur(8px)';
+    setActionBtns(true);
+    saveGame();
+  }
+}
+
+const CIRCUMFERENCE = 2 * Math.PI * 36; // r=36
+
+function renderPlaying(app) {
+  const ct = G.currentTeam;
+  const team = G.teams[ct];
+  const diff = G.playing.difficulty;
+  const t = G.playing.timeLeft;
+  const total = G.settings.timerSeconds;
+  const pct = t / total;
+  const col = pct > 0.5 ? "#22c55e" : pct > 0.25 ? "#fbbf24" : "#ef4444";
+  const offset = CIRCUMFERENCE * (1 - pct);
+
+  const tl = G.playing.lang || 'he';
+  app.innerHTML = `
+    <div class="playing-wrap">
+      <div class="playing-header">
+        <div class="playing-team-badge" style="background:${team.color};">
+          ${team.emoji} ${team.name} ${LANG_FLAGS[team.lang || 'he']}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="playing-score" style="color:${team.color};">${TT(tl,'square')} ${team.position}</div>
+          <button id="pause-btn" onclick="togglePause()"
+            style="background:rgba(0,0,0,0.08);border:none;border-radius:12px;padding:10px 20px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text);">
+            ${TT(tl,'pause')}
+          </button>
+        </div>
+      </div>
+
+      <div class="timer-wrap">
+        <div class="timer-circle-wrap">
+          <svg class="timer-svg" viewBox="0 0 90 90">
+            <circle class="timer-bg-circle" cx="45" cy="45" r="36"/>
+            <circle class="timer-progress-circle" id="timer-arc"
+              cx="45" cy="45" r="36"
+              stroke="${col}"
+              stroke-dasharray="${CIRCUMFERENCE}"
+              stroke-dashoffset="${offset}"/>
+          </svg>
+          <div class="timer-number" id="timer-num" style="color:${col};">${t}</div>
+        </div>
+
+        <div class="turn-mini-stats">
+          <span class="stat-ok">✓ <strong id="stat-ok">${G.playing.correct.length}</strong></span>
+          <span class="stat-sk">↷ <strong id="stat-sk">${G.playing.skipped.length}</strong></span>
+        </div>
+      </div>
+
+      <div class="word-card" id="word-card">
+        <div class="word-text" id="word-text">${G.playing.word}</div>
+        <div class="word-hint">${TT(tl,'describeHint')}</div>
+        ${G.adminMode ? `<button onclick="banCurrentWord()" title="Ban this word" style="position:absolute;top:8px;left:8px;background:rgba(239,68,68,0.12);border:1.5px solid #f87171;color:#ef4444;border-radius:8px;padding:4px 10px;font-size:0.75rem;font-weight:700;cursor:pointer;">🚫</button>` : ''}
+      </div>
+
+      <div class="action-btns">
+        <button id="btn-skip" class="btn btn-skip" onclick="handleSkip()">${TT(tl,'skip')}</button>
+        <button id="btn-correct" class="btn btn-correct" onclick="handleCorrect()">${TT(tl,'correct')}</button>
+      </div>
+    </div>
+  `;
+}
+
+function updateTimerUI() {
+  const t = G.playing.timeLeft;
+  const total = G.settings.timerSeconds;
+  const pct = t / total;
+  const col = pct > 0.5 ? "#22c55e" : pct > 0.25 ? "#fbbf24" : "#ef4444";
+  const offset = CIRCUMFERENCE * (1 - pct);
+
+  const arc = document.getElementById("timer-arc");
+  const num = document.getElementById("timer-num");
+  const okEl = document.getElementById("stat-ok");
+  const skEl = document.getElementById("stat-sk");
+
+  if (arc) { arc.style.stroke = col; arc.setAttribute("stroke-dashoffset", offset); }
+  if (num) { num.textContent = t; num.style.color = col; }
+  if (okEl) okEl.textContent = G.playing.correct.length;
+  if (skEl) skEl.textContent = G.playing.skipped.length;
+
+  // Pulse on last 5 seconds
+  if (t <= 5 && num) {
+    num.style.animation = "none";
+    num.offsetHeight;
+    num.style.animation = "wordIn 0.25s ease";
+  }
+}
+
+function handleCorrect() {
+  G.playing.correct.push(G.playing.word);
+  flashCard("flash-correct");
+  nextWord();
+}
+
+function handleSkip() {
+  G.playing.skipped.push(G.playing.word);
+  flashCard("flash-skip");
+  nextWord();
+}
+
+function flashCard(cls) {
+  const card = document.getElementById("word-card");
+  if (!card) return;
+  card.classList.add(cls);
+  setTimeout(() => card.classList.remove(cls), 300);
+}
+
+function nextWord() {
+  G.playing.word = drawWord(G.playing.difficulty, G.playing.lang);
+  const wordEl = document.getElementById("word-text");
+  if (wordEl) {
+    wordEl.style.animation = "none";
+    wordEl.offsetHeight;
+    wordEl.textContent = G.playing.word;
+    wordEl.style.animation = "wordIn 0.3s cubic-bezier(0.34,1.56,0.64,1)";
+  }
+  updateTimerUI();
+}
+
+/* =====================================================
+   END TURN
+   ===================================================== */
+function endTurn() {
+  if (G.playing.timerInterval) {
+    clearInterval(G.playing.timerInterval);
+    G.playing.timerInterval = null;
+  }
+  G.playing.paused = false;
+
+  const ct = G.currentTeam;
+  const correct = G.playing.correct.length;
+  const skipped = G.playing.skipped.length;
+  const penalty = G.settings.skipPenalty ? skipped : 0;
+  const advance = Math.max(0, correct - penalty);
+
+  const from = G.teams[ct].position;
+  G.teams[ct].score = (G.teams[ct].score || 0) + advance;
+  G.teams[ct].position = Math.min(from + advance, G.settings.targetSteps);
+  const to = G.teams[ct].position;
+
+  if (G.teams[ct].players && G.teams[ct].players.length > 1) {
+    G.teams[ct].explainerIdx = (G.teams[ct].explainerIdx + 1) % G.teams[ct].players.length;
+  }
+
+  G.lastMove = { teamIdx: ct, from, to };
+
+  // Show bonus guess screen before results
+  G.bonusWord = G.playing.word;
+  G.bonusTeamIdx = null;
+  G.screen = 'bonusGuess';
+  render();
+}
+
+function applyBonusAndFinish(bonusTeamIdx) {
+  if (bonusTeamIdx !== null && bonusTeamIdx !== G.currentTeam) {
+    const bt = G.teams[bonusTeamIdx];
+    G.bonusFrom = bt.position;
+    bt.score = (bt.score || 0) + 1;
+    bt.position = Math.min(bt.position + 1, G.settings.targetSteps);
+    G.bonusTeamIdx = bonusTeamIdx;
+    if (bt.position >= G.settings.targetSteps) {
+      goto('win');
+      return;
+    }
+  }
+  if (G.teams[G.currentTeam].position >= G.settings.targetSteps) {
+    goto('win');
+    return;
+  }
+  goto('turnResults');
+}
+
+function renderBonusGuess(app) {
+  const ct = G.currentTeam;
+  const tl = G.teams[ct].lang || 'he';
+  const twoTeams = G.teams.length === 2;
+  const teamBtns = G.teams.map((t, i) => {
+    const isCurrent = i === ct;
+    const label = twoTeams
+      ? (isCurrent ? TT(tl,'bonusMyTeam') : TT(tl,'bonusOtherTeam'))
+      : t.name;
+    return `
+      <button onclick="applyBonusAndFinish(${i})"
+        style="width:100%;max-width:360px;padding:20px 24px;border-radius:20px;border:2.5px solid ${t.color}${isCurrent?'99':'55'};
+               background:${t.color}${isCurrent?'28':'18'};color:${t.color};font-size:1.2rem;font-weight:800;cursor:pointer;
+               font-family:inherit;display:flex;align-items:center;gap:14px;margin-bottom:10px;
+               box-shadow:0 4px 16px ${t.color}22;">
+        <span style="font-size:2rem;">${t.emoji}</span>
+        <span style="flex:1;">${label}</span>
+      </button>
+    `;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="screen" style="background:var(--bg);">
+      <div class="screen-inner" style="align-items:center;text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:4px;">⏱</div>
+        <div style="font-size:1.4rem;font-weight:900;margin-bottom:4px;">${TT(tl,'bonusTitle')}</div>
+        <div style="font-size:0.9rem;color:var(--text-dim);margin-bottom:20px;">${TT(tl,'bonusPrompt')}</div>
+
+        <div style="background:var(--card);border-radius:20px;padding:16px 32px;margin-bottom:20px;border:2px solid var(--border);">
+          <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;">${TT(tl,'theWordWas')}</div>
+          <div style="font-size:2.2rem;font-weight:900;">${G.bonusWord}</div>
+        </div>
+
+        <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
+          ${teamBtns}
+          <div style="width:100%;max-width:360px;border-top:2px dashed var(--border);margin:14px 0 12px;"></div>
+          <button onclick="applyBonusAndFinish(null)"
+            style="width:100%;max-width:360px;padding:16px 20px;border-radius:18px;border:2px solid var(--text-dim);
+                   background:var(--card2);color:var(--text-dim);font-size:1.05rem;font-weight:700;cursor:pointer;font-family:inherit;">
+            ✗ ${TT(tl,'bonusNobody')}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* =====================================================
+   TURN RESULTS
+   ===================================================== */
+function renderTurnResults(app) {
+  const ct = G.currentTeam;
+  const team = G.teams[ct];
+  const tl = team.lang || 'he';
+  const correct = G.playing.correct;
+  const skipped = G.playing.skipped;
+  const penalty = G.settings.skipPenalty ? skipped.length : 0;
+  const advance = Math.max(0, correct.length - penalty);
+
+  const correctItems = correct.length ? `
+    <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;">
+      <span style="font-size:0.78rem;font-weight:700;color:var(--correct);">✓</span>
+      ${correct.map(w=>`<span style="background:rgba(22,163,74,0.12);color:#16a34a;border-radius:7px;padding:2px 8px;font-size:0.82rem;font-weight:600;">${w}</span>`).join('')}
+    </div>
+  ` : '';
+
+  const skippedItems = skipped.length ? `
+    <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:6px;">
+      <span style="font-size:0.78rem;font-weight:700;color:var(--skip-color);">↷</span>
+      ${skipped.map(w=>`<span style="background:rgba(220,38,38,0.08);color:var(--skip-color);border-radius:7px;padding:2px 8px;font-size:0.82rem;opacity:0.75;">${w}</span>`).join('')}
+    </div>
+  ` : '';
+
+  const scoreItems = G.teams.map((t, i) => {
+    const isLeader = G.teams.reduce((mx, x) => x.position > mx ? x.position : mx, 0) === t.position;
+    return `
+      <div class="score-item ${isLeader && t.position > 0 ? 'leader' : ''}">
+        ${isLeader && t.position > 0 ? '<span style="font-size:1rem;">🥇</span>' : `<div class="score-dot" style="background:${t.color};"></div>`}
+        <div class="score-name">${t.emoji} ${t.name}</div>
+        <div class="score-pts" style="color:${t.color};">${t.position}</div>
+      </div>
+    `;
+  }).join("");
+
+  app.innerHTML = `
+    <div class="screen">
+      <div class="screen-inner" style="overflow:hidden;padding:10px 14px;">
+
+        <!-- Results banner -->
+        <div style="width:100%;flex-shrink:0;background:linear-gradient(135deg,${team.color}18,${team.color}08);border:1.5px solid ${team.color}40;border-radius:16px;padding:10px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+          <div style="font-size:2rem;">${team.emoji}</div>
+          <div style="flex:1;">
+            <div style="font-weight:800;font-size:1rem;">${team.name}</div>
+            <div style="font-size:0.82rem;color:var(--text-dim);">
+              ${correct.length} ${TT(tl,'correct_n')}${penalty > 0 ? ` − ${penalty} ${TT(tl,'penaltyLabel')}` : ''} → ${TT(tl,'squareLbl')} ${team.position} ${TT(tl,'of')} ${G.settings.targetSteps}
+            </div>
+          </div>
+          <div style="font-size:2.2rem;font-weight:900;color:${team.color};">+${advance}</div>
+        </div>
+
+        <!-- Words guessed/skipped -->
+        ${(correct.length > 0 || skipped.length > 0) ? `
+          <div style="width:100%;flex-shrink:0;background:var(--card);border-radius:12px;padding:10px 12px;border:1px solid var(--border);margin-bottom:8px;">
+            ${correctItems}${skippedItems}
+          </div>
+        ` : ''}
+
+        <!-- Bonus team banner -->
+        ${G.bonusTeamIdx !== null && G.bonusTeamIdx !== undefined ? (() => {
+          const bt = G.teams[G.bonusTeamIdx];
+          return `
+          <div style="width:100%;flex-shrink:0;background:linear-gradient(135deg,${bt.color}18,${bt.color}08);border:1.5px solid ${bt.color}40;border-radius:16px;padding:10px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;animation:winFadeUp 0.5s ease both;animation-delay:0.3s;">
+            <div style="font-size:1.6rem;">${bt.emoji}</div>
+            <div style="flex:1;">
+              <div style="font-weight:800;font-size:0.95rem;">${bt.name}</div>
+              <div style="font-size:0.78rem;color:var(--text-dim);">${TT(tl,'bonusGuessed')}</div>
+            </div>
+            <div style="font-size:2rem;font-weight:900;color:${bt.color};">+1</div>
+          </div>`;
+        })() : ''}
+
+        <!-- Mini board -->
+        <div class="mini-board-section" style="flex-shrink:0;margin-bottom:8px;">
+          <div class="mini-board-title">🗺 ${TT(tl,'boardPosition')}</div>
+          <div class="mini-board-outer">
+            ${buildTrailBoard({
+              highlightTeamIdx: ct,
+              pathFrom: G.lastMove ? G.lastMove.from : team.position,
+              pathTo: team.position,
+              bonusTeamIdx: G.bonusTeamIdx != null ? G.bonusTeamIdx : undefined,
+              bonusFrom: G.bonusFrom != null ? G.bonusFrom : undefined
+            })}
+          </div>
+        </div>
+
+        <!-- Standings label -->
+        <div class="section-label" style="width:100%;flex-shrink:0;margin-bottom:4px;">${TT(tl,'currentStandings')}</div>
+
+        <!-- Standings — scrollable if needed -->
+        <div style="flex:1;overflow-y:auto;width:100%;min-height:0;">
+          <div class="scores-wrap">${scoreItems}</div>
+        </div>
+
+        <!-- Buttons -->
+        <button class="btn btn-primary" onclick="goDirectToNextTurn()" style="margin-top:8px;max-width:100%;flex-shrink:0;">
+          ${TT(tl,'nextTurn')}
+        </button>
+        <div style="height:6px;flex-shrink:0;"></div>
+        <button class="btn btn-secondary" onclick="nextTeamTurn()" style="max-width:100%;flex-shrink:0;">
+          ${TT(tl,'bigBoard')}
+        </button>
+
+      </div>
+    </div>
+  `;
+
+  // Animate avatar movement on the mini board after render
+  if (G.lastMove && G.lastMove.to > G.lastMove.from) setTimeout(animateAvatarOnBoard, 400);
+}
+
+function nextTeamTurn() {
+  G.currentTeam = (G.currentTeam + 1) % G.teams.length;
+  G.turnNumber++;
+  goto("board");
+}
+
+function goDirectToNextTurn() {
+  G.currentTeam = (G.currentTeam + 1) % G.teams.length;
+  G.turnNumber++;
+  G.lastMove = null;
+  goto("turnIntro");
+}
+
+/* =====================================================
+   WIN SCREEN
+   ===================================================== */
+function renderWin(app) {
+  const ct = G.currentTeam;
+  const team = G.teams[ct];
+
+  // Sort final standings by real score (uncapped)
+  const sorted = [...G.teams]
+    .map((t, i) => ({ ...t, idx: i }))
+    .sort((a, b) => (b.score || b.position) - (a.score || a.position));
+
+  const medals = ["🥇", "🥈", "🥉"];
+
+  const standings = sorted.map((t, rank) => `
+    <div class="score-item ${rank === 0 ? 'leader' : ''}">
+      <span style="font-size:1.2rem;">${medals[rank] || "  "}</span>
+      <div class="team-avatar" style="width:32px;height:32px;border-radius:10px;font-size:1rem;background:${t.color};">${t.emoji}</div>
+      <div class="score-name">${t.name}</div>
+      <div class="score-pts" style="color:${t.color};">${t.score || t.position}</div>
+    </div>
+  `).join("");
+
+  const playerChips = (team.players && team.players.length > 0)
+    ? `<div class="win-players">${team.players.map(p =>
+        `<span class="win-player-chip" style="color:${team.color};border-color:${team.color}30;background:${team.color}12;">${p}</span>`
+      ).join('')}</div>` : '';
+
+  app.innerHTML = `
+    <div class="screen" style="background:radial-gradient(ellipse at 50% 15%, ${team.color}25 0%, ${team.color}08 40%, var(--bg) 70%);">
+      <div class="screen-inner">
+        <div class="win-screen">
+          <div class="win-stars">&#10022; &#10022; &#10022;</div>
+          <div class="win-avatar-wrap">
+            <div class="win-avatar-glow" style="background:${team.color};"></div>
+            <div class="win-avatar" style="background:${team.color};">
+              ${team.emoji}
+            </div>
+            <div class="win-trophy">🏆</div>
+          </div>
+          <div class="win-subtitle">${T('winners')}</div>
+          <div class="win-team-name" style="color:${team.color};">${team.name}</div>
+          ${playerChips}
+          <div class="win-reached">${T('reachedEnd')}</div>
+          <div class="win-divider" style="background:${team.color}40;"></div>
+        </div>
+
+        <div class="section-label" style="width:100%;">${T('finalStandings')}</div>
+        <div class="scores-wrap" style="width:100%;">${standings}</div>
+
+        <div class="gap20"></div>
+        <button class="btn btn-primary" onclick="startSetup()" style="animation:winFadeUp 0.6s ease both;animation-delay:1.5s;">
+          <span>🎮</span> ${T('newGame')}
+        </button>
+        <div class="gap8"></div>
+        <button class="btn btn-secondary" onclick="goto('home')" style="animation:winFadeUp 0.6s ease both;animation-delay:1.6s;">
+          ${T('mainMenu')}
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Launch confetti
+  launchConfetti(team.color);
+}
+
+/* =====================================================
+   CONFETTI
+   ===================================================== */
+function launchConfetti(primaryColor) {
+  const canvas = document.getElementById("confetti-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = [primaryColor, "#FFD700", "#FF6B6B", "#4ade80", "#a78bfa", "#ffffff", "#fb923c", "#38bdf8", "#f472b6"];
+  const shapes = ['rect', 'circle', 'star'];
+
+  function makePiece(delay) {
+    return {
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 300 - delay * 2,
+      vx: (Math.random() - 0.5) * 7,
+      vy: Math.random() * 3 + 1.5,
+      size: Math.random() * 8 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      shape: shapes[Math.floor(Math.random() * shapes.length)],
+      rot: Math.random() * 360,
+      rotV: (Math.random() - 0.5) * 10,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleV: Math.random() * 0.08 + 0.03,
+      opacity: 1
+    };
+  }
+
+  const pieces = Array.from({ length: 250 }, (_, i) => makePiece(i));
+
+  function drawStar(ctx, cx, cy, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
+      const method = i === 0 ? 'moveTo' : 'lineTo';
+      ctx[method](cx + r * Math.cos(a), cy + r * Math.sin(a));
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.wobble += p.wobbleV;
+      p.x += p.vx + Math.sin(p.wobble) * 0.8;
+      p.y += p.vy;
+      p.rot += p.rotV;
+      p.vy += 0.04;
+      if (frame > 200) p.opacity = Math.max(0, p.opacity - 0.008);
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'rect') {
+        ctx.fillRect(-p.size / 2, -p.size * 0.3, p.size, p.size * 0.6);
+      } else if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        drawStar(ctx, 0, 0, p.size / 2);
+      }
+      ctx.restore();
+    });
+    frame++;
+    if (frame < 350) requestAnimationFrame(draw);
+    else { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+  }
+  draw();
+}
+
+/* =====================================================
+   GAME MENU (mid-game settings)
+   ===================================================== */
+function showGameMenu() {
+  // Remove any existing overlay
+  const existing = document.getElementById('game-menu-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'game-menu-overlay';
+  overlay.className = 'game-menu-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) closeGameMenu(); };
+
+  overlay.innerHTML = `
+    <div class="game-menu-sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3 style="margin:0;font-size:1.2rem;">${T('gameSettings')}</h3>
+        <button class="btn-ghost" onclick="closeGameMenu()" style="font-size:1.4rem;padding:2px 8px;">✕</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn" onclick="closeGameMenu();returnToGame();"
+          style="background:linear-gradient(135deg,#6C63FF,#9B59B6);color:#fff;border:none;">
+          ${T('returnToGame')}
+        </button>
+        <button class="btn" onclick="returnToSetup()"
+          style="background:transparent;border:1px solid var(--border);color:var(--text-muted);">
+          ${T('editSettings')}
+        </button>
+        <button class="btn" onclick="confirmEndGame()"
+          style="background:transparent;border:1px solid #f87171;color:#f87171;">
+          ${T('endGame')}
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+
+function closeGameMenu() {
+  const overlay = document.getElementById('game-menu-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  setTimeout(() => overlay.remove(), 250);
+}
+
+function returnToSetup() {
+  closeGameMenu();
+  // Save exact screen to return to
+  G._returnScreen = G.screen;
+  // Pause timer if mid-turn
+  if (G.playing && G.playing.timerInterval) {
+    clearInterval(G.playing.timerInterval);
+    G.playing.timerInterval = null;
+    G.playing.paused = true;
+  }
+  // Save full state including mid-turn progress
+  saveGame();
+  // Sync setupTeams from current game state so edits resume correctly
+  setupTeams = G.teams.map(t => ({
+    name: t.name, color: t.color, emoji: t.emoji,
+    players: [...(t.players||[])], diffOffset: t.diffOffset||0, lang: t.lang||'he'
+  }));
+  G.screen = 'gameOptions';
+  render();
+}
+
+function returnToGame() {
+  const dest = G._returnScreen || 'board';
+  G._returnScreen = null;
+  G.screen = dest;
+  render();
+  // If returning to mid-turn, show in paused state so player can resume when ready
+  if (dest === 'playing' && G.playing) {
+    G.playing.paused = true;
+    if (G.playing.timerInterval) { clearInterval(G.playing.timerInterval); G.playing.timerInterval = null; }
+    const wc = document.getElementById('word-card');
+    if (wc) wc.style.filter = 'blur(8px)';
+    const pb = document.getElementById('pause-btn');
+    if (pb) pb.textContent = TT(G.playing.lang || 'he', 'resume');
+    ['btn-skip','btn-correct'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) { b.disabled = true; b.style.opacity = '0.35'; b.style.pointerEvents = 'none'; }
+    });
+  }
+}
+
+function exitToHome() {
+  closeGameMenu();
+  clearSavedGame();
+  G.gameActive = false;
+  G._returnScreen = null;
+  G.screen = 'modeSelect';
+  render();
+}
+
+function confirmEndGame() {
+  // Remove any existing confirm dialog
+  const existing = document.getElementById('end-game-dialog');
+  if (existing) existing.remove();
+
+  const dlg = document.createElement('div');
+  dlg.id = 'end-game-dialog';
+  dlg.style.cssText = `
+    position:fixed;inset:0;z-index:3000;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);
+    animation:screenIn 0.2s ease;
+  `;
+
+  dlg.innerHTML = `
+    <div style="
+      background:var(--surface);border-radius:24px;padding:28px 24px;
+      max-width:320px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.35);
+      display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;
+    ">
+      <div style="font-size:2.8rem;line-height:1;">⚠️</div>
+      <div style="font-size:1.15rem;font-weight:900;color:var(--text);">${T('endGame')}</div>
+      <div style="font-size:0.9rem;color:var(--text-dim);line-height:1.5;">${T('confirmEndGame')}</div>
+      <div style="display:flex;gap:10px;width:100%;margin-top:8px;">
+        <button onclick="document.getElementById('end-game-dialog').remove();"
+          style="flex:1;padding:13px;border-radius:14px;border:1.5px solid var(--border);
+                 background:transparent;color:var(--text-dim);font-size:0.95rem;font-weight:700;
+                 cursor:pointer;font-family:inherit;">
+          ${T('back')}
+        </button>
+        <button onclick="document.getElementById('end-game-dialog').remove();clearSavedGame();closeGameMenu();G.gameActive=false;G.screen='modeSelect';render();"
+          style="flex:1;padding:13px;border-radius:14px;border:none;
+                 background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;
+                 font-size:0.95rem;font-weight:700;cursor:pointer;font-family:inherit;
+                 box-shadow:0 4px 16px rgba(220,38,38,0.4);">
+          ${T('endGame')}
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(dlg);
+}
+
+/* =====================================================
+   AVATAR ANIMATION
+   ===================================================== */
+function animateAvatarOnBoard() {
+  const lm = G.lastMove;
+  if (!lm || lm.to <= lm.from) return;
+  const team = G.teams[lm.teamIdx];
+  if (!team) return;
+
+  const pathEls = [];
+  for (let t = lm.from; t <= lm.to; t++) {
+    const el = t === 0
+      ? document.querySelector('.trail-start-tile')
+      : document.getElementById('gtile-' + t);
+    if (el) pathEls.push(el);
+  }
+  if (pathEls.length < 2) return;
+
+  const pawn = document.createElement('div');
+  pawn.style.cssText = 'position:fixed;z-index:999;pointer-events:none;font-size:1.8rem;line-height:1;' +
+    'filter:drop-shadow(0 2px 8px rgba(0,0,0,0.85));transition:left 0.15s ease,top 0.15s ease,transform 0.15s ease;' +
+    'transform:translate(-50%,-55%) scale(1.4);will-change:left,top;';
+  pawn.textContent = team.emoji;
+  document.body.appendChild(pawn);
+
+  const center = el => {
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  };
+
+  const c0 = center(pathEls[0]);
+  pawn.style.left = c0.x + 'px';
+  pawn.style.top  = c0.y + 'px';
+
+  const stepMs = Math.max(70, Math.min(250, 1600 / (lm.to - lm.from)));
+  let i = 1;
+
+  function step() {
+    if (i >= pathEls.length) {
+      pawn.style.transition = 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s ease';
+      pawn.style.transform = 'translate(-50%,-55%) scale(2.2)';
+      setTimeout(() => { pawn.style.opacity = '0'; setTimeout(() => pawn.remove(), 300); }, 350);
+      return;
+    }
+    const c = center(pathEls[i]);
+    pawn.style.left = c.x + 'px';
+    pawn.style.top  = c.y + 'px';
+    pawn.style.transform = 'translate(-50%,-55%) scale(' + (1.3 + (i % 2) * 0.15) + ')';
+    i++;
+    setTimeout(step, stepMs);
+  }
+
+  setTimeout(step, 80);
+}
+
+/* =====================================================
+   BACK NAVIGATION
+   ===================================================== */
+function goBack() {
+  const backMap = {
+    home: 'modeSelect',
+    instructions: 'home',
+    setup: G.gameActive ? 'board' : 'home',
+    gameOptions: 'setup',
+    board: null,
+    turnIntro: 'board',
+    playing: null,
+    bonusGuess: null,
+    turnResults: 'board',
+    win: 'modeSelect'
+  };
+  const dest = backMap[G.screen];
+  if (dest === null) return;
+  if (dest) { G.screen = dest; render(); }
+}
+
+/* =====================================================
+   VERSION CHECK — auto-update on new deploy
+   ===================================================== */
+function checkForUpdate() {
+  // 1. Ask the SW to check for updates (handles the case where
+  //    the OLD code didn't have version.json logic at all)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.update().catch(() => {});
+    });
+  }
+  // 2. Fetch version.json directly from network, bypassing SW
+  //    Using a full URL with cache-bust to avoid any SW interception
+  fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (!data || !data.version) return;
+      if (data.version === APP_VERSION) return;
+      console.log('[Update] New version ' + data.version + ' (current: ' + APP_VERSION + ')');
+      forceUpdate();
+    })
+    .catch(() => {}); // offline — skip check silently
+}
+
+function forceUpdate() {
+  var done = Promise.resolve();
+  // Clear all SW caches
+  if ('caches' in window) {
+    done = caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))));
+  }
+  // Unregister all service workers
+  if ('serviceWorker' in navigator) {
+    done = done.then(() =>
+      navigator.serviceWorker.getRegistrations().then(regs =>
+        Promise.all(regs.map(r => r.unregister()))
+      )
+    );
+  }
+  // Reload after cleanup
+  done.then(() => location.reload(true));
+}
+
+/* =====================================================
+   INIT
+   ===================================================== */
+// Expose globals so module scripts can access them
+window.WORD_LISTS = WORD_LISTS;
+window.render = render;
+window.G = G;
+window.launchConfetti = launchConfetti;
+render();
+checkForUpdate();
+</script>
+<!-- PWA install banner — inline classic script, zero module dependencies -->
+<script>
+(function() {
+  var DISMISSED_KEY = 'pwa_install_dismissed_v2';
+  var DISMISSED_TTL = 7 * 24 * 60 * 60 * 1000;
+
+  function shouldShow() {
+    if (window.matchMedia('(display-mode: standalone)').matches) return false;
+    if (window.navigator.standalone) return false;
+    if (!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return false;
+    try {
+      var ts = localStorage.getItem(DISMISSED_KEY);
+      if (ts && Date.now() - Number(ts) < DISMISSED_TTL) return false;
+    } catch(e) {}
+    return true;
+  }
+
+  function dismiss() {
+    try { localStorage.setItem(DISMISSED_KEY, String(Date.now())); } catch(e) {}
+    var banner = document.getElementById('pwa-banner');
+    if (!banner) return;
+    banner.style.transform = 'translateY(120%)';
+    setTimeout(function() { if (banner.parentNode) banner.parentNode.removeChild(banner); }, 400);
+  }
+
+  function showBanner(type, prompt) {
+    if (document.getElementById('pwa-banner')) return;
+    var lang = (window.G && window.G.uiLang) || 'he';
+    var isRTL = lang === 'he';
+    var copy = {
+      he: { title: 'הוסף לדף הבית', native: 'התקן כאפליקציה לגישה מהירה', menu: 'לחץ ⋮ ← "הוסף למסך הבית"', ios: 'לחץ שיתוף ← "הוסף למסך הבית"', install: 'התקן' },
+      en: { title: 'Add to Home Screen', native: 'Install the app for quick access', menu: 'Tap ⋮ → "Add to Home Screen"', ios: 'Tap Share → "Add to Home Screen"', install: 'Install' },
+      es: { title: 'Añadir al inicio', native: 'Instala la app para acceso rápido', menu: 'Toca ⋮ → "Añadir a pantalla de inicio"', ios: 'Toca Compartir → "Agregar a inicio"', install: 'Instalar' }
+    };
+    var t = copy[lang] || copy.he;
+    var desc = type === 'ios' ? t.ios : type === 'android-native' ? t.native : t.menu;
+    var showInstallBtn = type === 'android-native';
+
+    var banner = document.createElement('div');
+    banner.id = 'pwa-banner';
+    banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#6C63FF 0%,#9B59B6 100%);color:#fff;padding:14px 16px env(safe-area-inset-bottom,0px);display:flex;align-items:center;gap:12px;box-shadow:0 -4px 24px rgba(108,99,255,0.35);direction:' + (isRTL ? 'rtl' : 'ltr') + ';font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);';
+
+    var installBtnHTML = showInstallBtn ? '<button id="pwa-install-btn" style="background:#fff;color:#6C63FF;border:none;border-radius:12px;padding:9px 15px;font-weight:700;font-size:0.88rem;cursor:pointer;font-family:inherit;flex-shrink:0;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.15);">' + t.install + '</button>' : '';
+    banner.innerHTML = '<div style="font-size:2rem;flex-shrink:0;line-height:1">📝</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:0.95rem;line-height:1.2">' + t.title + '</div><div style="font-size:0.78rem;opacity:0.88;margin-top:3px;line-height:1.4">' + desc + '</div></div>' + installBtnHTML + '<button id="pwa-dismiss-btn" style="background:rgba(255,255,255,0.18);border:none;border-radius:8px;width:30px;height:30px;color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>';
+
+    document.body.appendChild(banner);
+    requestAnimationFrame(function() { requestAnimationFrame(function() { banner.style.transform = 'translateY(0)'; }); });
+
+    document.getElementById('pwa-dismiss-btn').onclick = dismiss;
+    var installBtn = document.getElementById('pwa-install-btn');
+    if (installBtn) {
+      installBtn.onclick = function() {
+        if (prompt) { prompt.prompt(); prompt.userChoice.then(function() { window.__pwaPrompt = null; }); }
+        dismiss();
+      };
+    }
+  }
+
+  if (!shouldShow()) return;
+
+  var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
+
+  setTimeout(function() {
+    if (isIOS) showBanner('ios', null);
+    else if (window.__pwaPrompt) showBanner('android-native', window.__pwaPrompt);
+    else showBanner('android-menu', null);
+  }, 1500);
+
+  window.addEventListener('appinstalled', dismiss);
+})();
+</script>
+<!-- Ptakim multiplayer game mode -->
+<script type="module" src="/src/ptakim.js"></script>
+<!-- Base44 integration: loads custom word packs when online, gracefully skipped offline -->
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

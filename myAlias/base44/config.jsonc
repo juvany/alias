@@ -1,0 +1,12 @@
+// Base44 Project Configuration
+{
+  "name": "Alias",
+
+  // Site/hosting configuration
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}

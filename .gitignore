@@ -1,0 +1,27 @@
+# Dependencies
+myAlias/node_modules/
+
+# Build output
+myAlias/dist/
+
+# Environment / secrets
+myAlias/.env
+myAlias/.env.debug
+myAlias/.env.local
+
+# Android vendored binaries (download via setup scripts)
+myAlias-android/android-sdk/
+myAlias-android/jdk17/
+myAlias-android/jdk17.zip
+myAlias-android/gradle-dist/
+myAlias-android/gradle-dist.zip
+myAlias-android/.gradle/
+myAlias-android/app/build/
+myAlias-android/app/src/main/assets/
+
+# Windows
+desktop.ini
+Thumbs.db
+
+# Claude Code
+.claude/

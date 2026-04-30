@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Purple background -->
+    <path
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z"
+        android:fillColor="#5B52E8"/>
+
+    <!-- Note 1 — back left, rotated ~-12 deg, warm cream -->
+    <group
+        android:pivotX="54"
+        android:pivotY="60"
+        android:rotation="-13">
+        <path
+            android:pathData="M28,36 Q28,32 32,32 L76,32 Q80,32 80,36 L80,84 Q80,88 76,88 L32,88 Q28,88 28,84 Z"
+            android:fillColor="#FFF8DC"/>
+        <path android:pathData="M36,48 L72,48" android:strokeColor="#D4C070" android:strokeWidth="3.5" android:strokeLineCap="round" android:fillColor="#00000000"/>
+        <path android:pathData="M36,57 L68,57" android:strokeColor="#D4C070" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+        <path android:pathData="M36,66 L70,66" android:strokeColor="#D4C070" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+        <path android:pathData="M36,75 L64,75" android:strokeColor="#D4C070" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+    </group>
+
+    <!-- Note 2 — back right, rotated ~+11 deg, light blue -->
+    <group
+        android:pivotX="54"
+        android:pivotY="58"
+        android:rotation="11">
+        <path
+            android:pathData="M30,28 Q30,24 34,24 L78,24 Q82,24 82,28 L82,78 Q82,82 78,82 L34,82 Q30,82 30,78 Z"
+            android:fillColor="#DFF0FF"/>
+        <path android:pathData="M37,41 L75,41" android:strokeColor="#90BBD9" android:strokeWidth="3.5" android:strokeLineCap="round" android:fillColor="#00000000"/>
+        <path android:pathData="M37,50 L71,50" android:strokeColor="#90BBD9" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+        <path android:pathData="M37,59 L73,59" android:strokeColor="#90BBD9" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+        <path android:pathData="M37,68 L67,68" android:strokeColor="#90BBD9" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+    </group>
+
+    <!-- Note 3 — front center, white, straight -->
+    <path
+        android:pathData="M20,22 Q20,18 24,18 L76,18 Q80,18 80,22 L80,78 Q80,82 76,82 L24,82 Q20,82 20,78 Z"
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#D8D8D8"
+        android:strokeWidth="1"/>
+
+    <!-- Top coloured header strip -->
+    <path
+        android:pathData="M20,18 Q20,18 24,18 L76,18 Q80,18 80,18 L80,30 L20,30 Z"
+        android:fillColor="#6C63FF"/>
+
+    <!-- Text lines on front note -->
+    <path android:pathData="M28,40 L72,40" android:strokeColor="#A89CF5" android:strokeWidth="4" android:strokeLineCap="round" android:fillColor="#00000000"/>
+    <path android:pathData="M28,51 L68,51" android:strokeColor="#CCCCCC" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+    <path android:pathData="M28,60 L70,60" android:strokeColor="#CCCCCC" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+    <path android:pathData="M28,69 L64,69" android:strokeColor="#CCCCCC" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+    <path android:pathData="M28,78 L66,78" android:strokeColor="#CCCCCC" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000"/>
+
+</vector>
