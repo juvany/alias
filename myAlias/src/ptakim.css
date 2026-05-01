@@ -11,7 +11,6 @@
   align-items: center;
   overflow: hidden;
   background: var(--bg);
-  animation: screenIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ptk-inner {
@@ -817,6 +816,13 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
+  min-height: 44px;
+  padding: 8px;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  background: rgba(108,99,255,0.02);
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .ptk-draggable-player {
@@ -918,7 +924,6 @@
   border: 2px dashed var(--border);
   border-radius: 12px;
   background: rgba(108,99,255,0.02);
-  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1648,7 +1653,20 @@
 }
 
 .ptk-spectator-icon {
-  font-size: 3rem;
+  font-size: 2.4rem;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  animation: ptk-spectator-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ptk-spectator-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 .ptk-spectator-text {
@@ -1864,3 +1882,531 @@
   border-color: #6C63FF;
   background: rgba(108,99,255,0.06);
 }
+
+/* =====================================================
+   ROOM SCREEN (unified lobby + note-writing)
+   ===================================================== */
+.ptk-room-inner {
+  padding: 12px 16px 96px;
+}
+
+.ptk-room-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.ptk-room-header-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  flex: 1;
+  text-align: center;
+  color: #6C63FF;
+}
+
+.ptk-room-code-hero {
+  width: 100%;
+  text-align: center;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(155,89,182,0.08));
+  border-radius: 18px;
+  border: 2px dashed rgba(108,99,255,0.35);
+  margin-bottom: 14px;
+}
+
+.ptk-room-code-hero-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ptk-room-code-hero-value {
+  font-size: 2.4rem;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+  color: #6C63FF;
+  cursor: pointer;
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+
+.ptk-section-label {
+  width: 100%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.ptk-chip-edit {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 0.7rem;
+  padding: 2px 4px;
+  margin-inline-start: 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+  opacity: 0.6;
+}
+
+.ptk-chip-edit:hover {
+  opacity: 1;
+  background: rgba(108,99,255,0.15);
+}
+
+.ptk-write-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ptk-room-footer {
+  width: 100%;
+  margin-top: 16px;
+  position: sticky;
+  bottom: 0;
+  padding: 12px 0;
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+}
+
+/* Add some spacing around note counter in the room */
+.ptk-write-section .ptk-note-counter {
+  margin-top: 4px;
+}
+
+/* Team preview (on Round Intro) */
+.ptk-teams-preview {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ptk-team-preview-card {
+  flex: 1 1 140px;
+  min-width: 140px;
+  max-width: 220px;
+  border: 2px solid;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+}
+
+.ptk-team-preview-header {
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.ptk-team-preview-players {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ptk-team-preview-player {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  padding: 3px 6px;
+  color: var(--text);
+}
+
+.ptk-edit-teams-btn {
+  margin-top: 10px;
+  font-size: 0.85rem !important;
+  padding: 6px 14px !important;
+}
+
+/* Team edit modal */
+.ptk-modal-large {
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px 18px !important;
+  text-align: start !important;
+}
+
+.ptk-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.ptk-modal-header .ptk-modal-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-align: start;
+  margin: 0;
+}
+
+.ptk-modal-close {
+  background: rgba(0,0,0,0.06);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+.ptk-modal-close:hover {
+  background: rgba(0,0,0,0.12);
+}
+
+.ptk-modal-sub {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  text-align: start;
+}
+
+.ptk-team-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ptk-team-edit-actions .btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+}
+
+.btn-sm {
+  padding: 8px 12px !important;
+  font-size: 0.82rem !important;
+}
+
+.ptk-team-edit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ptk-team-edit-row {
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.ptk-team-edit-header {
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ptk-team-edit-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ptk-team-edit-player {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text);
+  transition: all 0.15s;
+}
+
+.ptk-team-edit-player:hover {
+  border-color: #6C63FF;
+  background: rgba(108,99,255,0.06);
+  transform: scale(1.03);
+}
+
+.ptk-team-edit-player:active {
+  transform: scale(0.97);
+}
+
+/* Waiting-room "notes done" banner */
+.ptk-done-banner {
+  width: 100%;
+  margin-top: 16px;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, rgba(22,163,74,0.08), rgba(34,197,94,0.05));
+  border: 1.5px solid rgba(22,163,74,0.3);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.ptk-done-banner-icon {
+  font-size: 2.4rem;
+  margin-bottom: 4px;
+}
+
+.ptk-done-banner-text {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #166534;
+  margin-bottom: 4px;
+}
+
+.ptk-done-banner-sub {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+/* Next-up card on Turn Result screen */
+.ptk-next-up-card {
+  width: 100%;
+  max-width: 360px;
+  margin: 16px auto 0;
+  padding: 14px 16px;
+  border: 2px solid;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.ptk-next-up-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.ptk-next-up-player {
+  font-size: 1.05rem;
+  font-weight: 800;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.ptk-next-up-line {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  flex-wrap: wrap;
+}
+
+.ptk-next-up-key {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.ptk-next-up-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+/* Final screen: per-team cards with player list */
+.ptk-final-teams {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ptk-final-team-card {
+  width: 100%;
+  border: 2px solid;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.ptk-final-team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ptk-final-team-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.ptk-final-team-total {
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.ptk-final-team-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.ptk-final-team-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ptk-final-team-rounds {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.ptk-final-round b {
+  color: var(--text);
+}
+
+/* "Your turn!" banner (active player, pre-start) */
+.ptk-your-turn-banner {
+  width: 100%;
+  max-width: 360px;
+  padding: 24px 20px;
+  background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(155,89,182,0.12));
+  border: 2px solid rgba(108,99,255,0.5);
+  border-radius: 20px;
+  text-align: center;
+  animation: ptk-your-turn-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes ptk-your-turn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(108,99,255,0.3); }
+  50% { box-shadow: 0 0 0 10px rgba(108,99,255,0); }
+}
+
+.ptk-your-turn-icon {
+  font-size: 2.6rem;
+  margin-bottom: 4px;
+}
+
+.ptk-your-turn-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #a78bfa, #6C63FF, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ptk-your-turn-sub {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.ptk-next-up-you {
+  margin-inline-start: 6px;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  background: rgba(108,99,255,0.15);
+  color: #6C63FF;
+  border-radius: 10px;
+}
+
+/* Team setup: drag-and-drop interaction */
+.ptk-draggable-player,
+.ptk-team-player[data-device-id] {
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ptk-draggable-player:active,
+.ptk-team-player[data-device-id]:active {
+  cursor: grabbing;
+}
+
+.ptk-dnd-source {
+  opacity: 0.35;
+  border-style: dashed !important;
+}
+
+.ptk-dnd-ghost {
+  pointer-events: none;
+  border-radius: 10px;
+  background: var(--card);
+  border: 2px solid #6C63FF !important;
+  padding: 8px 12px;
+  box-shadow: 0 12px 32px rgba(108,99,255,0.35);
+  transition: transform 0.03s linear;
+  opacity: 0.98;
+}
+
+/* Drop targets: team zones + unassigned area glow, insert-before shows a bar */
+.ptk-dnd-target {
+  background: rgba(108,99,255,0.1) !important;
+  box-shadow: inset 0 0 0 2px #6C63FF !important;
+  border-radius: 12px;
+}
+
+.ptk-team-player.ptk-dnd-insert-before {
+  box-shadow: 0 -4px 0 0 #6C63FF !important;
+  border-radius: 10px;
+}
+
+.ptk-team-player.ptk-dnd-insert-after {
+  box-shadow: 0 4px 0 0 #6C63FF !important;
+  border-radius: 10px;
+}
+
+/* Delete-team button (host) */
+.ptk-remove-team-btn {
+  margin-inline-start: auto;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: #dc2626;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.ptk-remove-team-btn:hover,
+.ptk-remove-team-btn:active {
+  background: rgba(220,38,38,0.15);
+  transform: scale(1.08);
+}
+
+

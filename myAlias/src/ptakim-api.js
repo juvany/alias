@@ -313,6 +313,7 @@ export async function getRoom(roomCode) {
   return rooms.length > 0 ? rooms[0] : null;
 }
 
+
 export async function getRoomById(roomId) {
   const client = getClient();
   if (!client) return null;
@@ -416,7 +417,10 @@ export async function gameAction(roomCode, deviceId, action, data) {
       });
       const deckEmpty = room.deck_index >= room.deck_order.length;
       updates.teams = teams;
-      updates.phase = deckEmpty ? 'round_result' : 'turn_result';
+      // If deck is empty and we're on the last round, skip 'round_result' and
+      // go straight to 'game_finished' so clients jump to the celebration screen.
+      const isFinal = deckEmpty && (room.current_round >= 3);
+      updates.phase = isFinal ? 'game_finished' : (deckEmpty ? 'round_result' : 'turn_result');
       updates.turn_results = {
         team_idx: turn.team_idx,
         player_idx: turn.player_idx,
@@ -523,8 +527,20 @@ export async function gameAction(roomCode, deviceId, action, data) {
           explainer_idx: t.explainerIdx || t.explainer_idx || 0,
           scores: t.scores || [0, 0, 0],
         }));
+        // Skip the post-write fetch — the Base44 get can return a stale
+        // snapshot right after a write, which would wipe our local update.
+        // Subscription will carry the authoritative state shortly anyway.
+        if (Object.keys(updates).length > 0) {
+          await client.entities.PtakimRoom.update(room.id, updates);
+        }
+        return { success: true, server_time: new Date().toISOString() };
       }
       break;
+    }
+
+    case 'ping': {
+      // Clock-sync probe: return server time; no mutation, no refetch
+      return { success: true, server_time: new Date().toISOString() };
     }
 
     default:

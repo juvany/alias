@@ -1,6 +1,9 @@
 @echo off
 setlocal
 
+rem Always run from the script's own directory, regardless of caller's cwd
+cd /d "%~dp0"
+
 set PROD_APP_ID=69bb0f318b7ad64ca3b003e7
 set DEBUG_APP_ID=69c1cdab5828d16e9b07fbb8
 set DEBUG_URL=https://alias-debug-9b07fbb8.base44.app

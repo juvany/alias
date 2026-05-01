@@ -56,9 +56,16 @@
       font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
-      direction: rtl;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+    }
+    /* Left-align text in LTR languages (en/es); Hebrew keeps its RTL alignment. */
+    html[dir="ltr"] body,
+    html[dir="ltr"] #app,
+    html[dir="ltr"] input,
+    html[dir="ltr"] textarea,
+    html[dir="ltr"] button {
+      text-align: start;
     }
 
     #app {
@@ -76,7 +83,6 @@
       flex-direction: column;
       align-items: center;
       overflow: hidden;
-      animation: screenIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes screenIn {
@@ -105,7 +111,6 @@
       cursor: pointer;
       transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
       font-family: inherit;
-      direction: rtl;
       width: 100%;
       max-width: 340px;
       display: flex;
@@ -271,7 +276,6 @@
       border-radius: 10px;
       color: var(--text);
       font-size: 0.95rem;
-      direction: rtl;
       outline: none;
       font-family: inherit;
       transition: border-color 0.2s;
@@ -1231,7 +1235,7 @@
 /* =====================================================
    APP VERSION — update this on each deploy
    ===================================================== */
-const APP_VERSION = "1.4.9";
+const APP_VERSION = "1.6.6";
 
 /* =====================================================
    WORD LISTS — organized by difficulty 1–4
@@ -1918,7 +1922,7 @@ function TEAM_EMOJI_NAMES_LIST() {
 let G = {
   screen: "modeSelect",
   gameActive: false,
-  uiLang: 'he',
+  uiLang: localStorage.getItem('alias_ui_lang') || 'he',
   adminMode: false,
   teams: [],        // [{name,color,emoji,position,prevPosition,players:[],explainerIdx,diffOffset}]
   currentTeam: 0,
@@ -2223,6 +2227,12 @@ function goto(screen) {
    ===================================================== */
 function render() {
   const app = document.getElementById("app");
+  // Sync html dir/lang with current UI language so LTR text aligns left
+  const isRtl = G.uiLang === 'he';
+  if (document.documentElement.getAttribute('dir') !== (isRtl ? 'rtl' : 'ltr')) {
+    document.documentElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', G.uiLang || 'he');
+  }
   // Auto-save active game state whenever we're on a game screen
   if (G.gameActive && ['board','turnIntro','turnResults','bonusGuess','playing','setup','gameOptions'].includes(G.screen)) {
     saveGame();
@@ -2376,7 +2386,7 @@ function renderModeSelect(app) {
         <div class="gap16"></div>
         <div style="display:flex;gap:6px;justify-content:center;">
           ${['he','en','es'].map(l=>`
-            <button onclick="G.uiLang='${l}';render();"
+            <button onclick="G.uiLang='${l}';localStorage.setItem('alias_ui_lang','${l}');render();"
               style="padding:6px 14px;border-radius:10px;border:1.5px solid ${G.uiLang===l?'#6C63FF':'var(--border)'};
                      background:${G.uiLang===l?'rgba(108,99,255,0.15)':'var(--card)'};
                      color:${G.uiLang===l?'#a78bfa':'var(--text-dim)'};
@@ -2385,7 +2395,7 @@ function renderModeSelect(app) {
             </button>
           `).join('')}
         </div>
-        <div style="margin-top:auto;padding-top:12px;font-size:0.65rem;color:var(--text-muted);opacity:0.5;">v${APP_VERSION}</div>
+        <div style="position:fixed;top:8px;${G.uiLang==='he'?'left':'right'}:8px;padding:4px 10px;border-radius:8px;background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.35);color:#a78bfa;font-size:0.75rem;font-weight:700;z-index:100;font-family:monospace;">v${APP_VERSION}</div>
       </div>
     </div>
   `;
