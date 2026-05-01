@@ -6,7 +6,7 @@ Re-install these on a new PC via `/install-skill` or the skill marketplace.
 - `frontend-design@claude-plugins-official`
 
 ## Global Settings
-- Model: `us.anthropic.claude-opus-4-6-v1`
+- Model: `us.anthropic.claude-opus-4-7`
 - Language: english
 - Voice: enabled
 

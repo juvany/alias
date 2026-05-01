@@ -73,7 +73,13 @@ const PT = {
     startGame: 'התחילו משחק!',
     forceStart: 'התחילו עכשיו',
     writeNotes: 'כתבו פתקים',
-    notePlaceholder: 'כתבו שם...',
+    notePlaceholder: 'כתבו שם של דמות',
+    shareWhatsapp: 'שתפו ב-WhatsApp',
+    shareMessage: 'הצטרפו למשחק פתקים שלי! קוד: {code}\n{url}',
+    editName: '✏️ שנו שם',
+    saveName: '✓ שמור',
+    cancelEdit: '✕',
+    copyCode: '📋 העתק קוד',
     submitNote: 'הבא →',
     submitNoteDone: 'סיום ✓',
     notesDone: 'כל הפתקים נשלחו!',
@@ -183,7 +189,13 @@ const PT = {
     startGame: 'Start Game!',
     forceStart: 'Start Now',
     writeNotes: 'Write Notes',
-    notePlaceholder: 'Write a name...',
+    notePlaceholder: 'Write a character name',
+    shareWhatsapp: 'Share on WhatsApp',
+    shareMessage: 'Join my Ptakim game! Code: {code}\n{url}',
+    editName: '✏️ Edit name',
+    saveName: '✓ Save',
+    cancelEdit: '✕',
+    copyCode: '📋 Copy code',
     submitNote: 'Next →',
     submitNoteDone: 'Done ✓',
     notesDone: 'All notes submitted!',
@@ -293,7 +305,13 @@ const PT = {
     startGame: '¡Empezar!',
     forceStart: 'Empezar ya',
     writeNotes: 'Escribir Notas',
-    notePlaceholder: 'Escribe un nombre...',
+    notePlaceholder: 'Escribe el nombre de un personaje',
+    shareWhatsapp: 'Compartir en WhatsApp',
+    shareMessage: '¡Únete a mi juego de Ptakim! Código: {code}\n{url}',
+    editName: '✏️ Cambiar nombre',
+    saveName: '✓ Guardar',
+    cancelEdit: '✕',
+    copyCode: '📋 Copiar código',
     submitNote: 'Siguiente →',
     submitNoteDone: 'Listo ✓',
     notesDone: '¡Todas las notas enviadas!',
@@ -1451,8 +1469,13 @@ function renderPtakimLobby(app) {
         <!-- Room Code Card -->
         <div class="ptk-lobby-code-card">
           <div class="ptk-lobby-code-label">${t('shareCode')}</div>
-          <div class="ptk-lobby-code">${room.roomCode}</div>
-          <button id="ptk-copy-code" class="ptk-copy-btn">📋 ${t('roomCode')}</button>
+          <div class="ptk-lobby-code" id="ptk-lobby-code-value" title="${t('copied')}">${room.roomCode}</div>
+          <div class="ptk-share-row">
+            <button id="ptk-copy-code" class="ptk-copy-btn">${t('copyCode')}</button>
+            <button id="ptk-share-whatsapp" class="ptk-share-whatsapp-btn">
+              <span class="ptk-wa-icon">🟢</span> ${t('shareWhatsapp')}
+            </button>
+          </div>
         </div>
 
         <!-- Players List -->
@@ -1470,9 +1493,10 @@ function renderPtakimLobby(app) {
                   </div>
                   <div class="ptk-lobby-player-info">
                     <div class="ptk-lobby-player-name">
-                      ${escHtml(p.name)}
+                      <span class="ptk-lobby-name-text">${escHtml(p.name)}</span>
                       ${isHost ? '<span class="ptk-badge-small host">👑</span>' : ''}
                       ${isMe ? '<span class="ptk-badge-small me">' + t('you') + '</span>' : ''}
+                      ${isMe ? '<button class="ptk-edit-name-btn" id="ptk-edit-name-btn" title="' + t('editName') + '">✏️</button>' : ''}
                     </div>
                     <div class="ptk-lobby-player-status ${isReady ? 'ready' : 'writing'}">
                       ${isReady ? t('doneWriting') : t('writingNotes')}
@@ -1509,11 +1533,15 @@ function renderPtakimLobby(app) {
 
         <div style="flex:1;"></div>
 
-        ${P.isHost ? `
-          <button class="btn btn-primary" id="ptk-start-btn" style="margin-bottom:16px;" ${!allReady ? 'disabled style="opacity:0.5;pointer-events:none;margin-bottom:16px;"' : ''}>
-            ${allReady ? t('teamSetup') + ' →' : t('waitingForOthers')}
+        ${P.isHost ? (allReady ? `
+          <button class="btn btn-primary" id="ptk-start-btn" style="margin-bottom:16px;">
+            ${t('teamSetup')} →
           </button>
         ` : `
+          <div class="ptk-waiting-note" style="margin-bottom:16px;">
+            ⏳ ${t('waitingForOthers')}
+          </div>
+        `) : `
           <div style="text-align:center;font-size:0.85rem;color:var(--text-dim);margin-bottom:16px;">
             ${t('waitingForHost')}
           </div>
@@ -1528,46 +1556,76 @@ function renderPtakimLobby(app) {
   };
 
   document.getElementById('ptk-copy-code').onclick = () => {
-    navigator.clipboard.writeText(room.roomCode).then(() => {
-      const btn = document.getElementById('ptk-copy-code');
-      if (btn) btn.textContent = '✓ ' + t('copied');
-      setTimeout(() => { if (btn) btn.textContent = '📋 ' + t('roomCode'); }, 1500);
-    }).catch(() => {});
+    copyToClipboard(room.roomCode);
+    const btn = document.getElementById('ptk-copy-code');
+    if (btn) {
+      btn.textContent = '✓ ' + t('copied');
+      setTimeout(() => { if (btn) btn.textContent = t('copyCode'); }, 1500);
+    }
   };
+
+  // Tap on the big code to copy
+  const codeValue = document.getElementById('ptk-lobby-code-value');
+  if (codeValue) {
+    codeValue.onclick = () => {
+      copyToClipboard(room.roomCode);
+      codeValue.classList.add('ptk-copied-flash');
+      setTimeout(() => codeValue.classList.remove('ptk-copied-flash'), 600);
+    };
+  }
+
+  const shareBtn = document.getElementById('ptk-share-whatsapp');
+  if (shareBtn) {
+    shareBtn.onclick = () => shareOnWhatsapp(room.roomCode);
+  }
+
+  const editNameBtn = document.getElementById('ptk-edit-name-btn');
+  if (editNameBtn) {
+    editNameBtn.onclick = () => showEditNameModal();
+  }
 
   // DEBUG: Add mock players
   if (P.isHost) {
     const addMockBtn = document.getElementById('ptk-add-mock-btn');
     const mockCountSelect = document.getElementById('ptk-mock-count');
     if (addMockBtn && mockCountSelect) {
-      addMockBtn.onclick = () => {
+      addMockBtn.onclick = async () => {
         const count = parseInt(mockCountSelect.value) || 3;
-        const mockNames = ['Alice', 'Bob', 'Charlie', 'David', 'Emma', 'Frank', 'Grace', 'Henry'];
-        const mockNoteWords = ['Einstein', 'Napoleon', 'Cleopatra', 'Shakespeare', 'Mozart', 'Batman', 'Superman', 'Harry Potter', 'Sherlock Holmes', 'James Bond'];
-
-        for (let i = 0; i < count; i++) {
-          const name = mockNames[room.players.length % mockNames.length] + '_' + (room.players.length);
-          const emoji = PLAYER_EMOJIS[(room.players.length) % PLAYER_EMOJIS.length];
-
-          // Add mock player
-          const mockPlayer = {
-            deviceId: 'mock_' + Math.random().toString(36).substr(2, 8),
-            name: name,
-            ready: true,
-            notesSubmitted: true,
-            emoji: emoji,
-          };
-          room.players.push(mockPlayer);
-
-          // Add mock notes for this player
-          const notesPerPlayer = room.settings?.notesPerPlayer || 5;
-          for (let j = 0; j < notesPerPlayer; j++) {
-            const noteText = mockNoteWords[(room.notes.length) % mockNoteWords.length];
-            room.notes.push({ id: room.notes.length, text: noteText, authorDeviceId: mockPlayer.deviceId });
+        if (api.isOnline()) {
+          addMockBtn.disabled = true;
+          addMockBtn.style.opacity = '0.6';
+          const result = await api.addMockPlayers(P.roomCode, count);
+          addMockBtn.disabled = false;
+          addMockBtn.style.opacity = '1';
+          if (result?.success) {
+            applyRoomUpdate(result.room, 'mock');
+            ptkRender();
           }
+        } else {
+          const mockNames = ['Alice', 'Bob', 'Charlie', 'David', 'Emma', 'Frank', 'Grace', 'Henry'];
+          const mockWords = ['Einstein', 'Napoleon', 'Cleopatra', 'Shakespeare', 'Mozart', 'Batman', 'Superman', 'Harry Potter'];
+          for (let i = 0; i < count; i++) {
+            const base = room.players.length;
+            const mockPlayer = {
+              deviceId: 'mock_' + Math.random().toString(36).substr(2, 8),
+              name: mockNames[base % mockNames.length] + '_' + base,
+              ready: true,
+              notesSubmitted: true,
+              emoji: PLAYER_EMOJIS[base % PLAYER_EMOJIS.length],
+            };
+            room.players.push(mockPlayer);
+            const notesPerPlayer = room.settings?.notesPerPlayer || 5;
+            for (let j = 0; j < notesPerPlayer; j++) {
+              room.notes.push({
+                id: room.notes.length,
+                text: mockWords[room.notes.length % mockWords.length],
+                authorDeviceId: mockPlayer.deviceId,
+              });
+            }
+          }
+          room.noteCount = room.notes.length;
+          ptkGoto('ptakimLobby');
         }
-        room.noteCount = room.notes.length;
-        ptkGoto('ptakimLobby');
       };
     }
   }
@@ -1576,11 +1634,18 @@ function renderPtakimLobby(app) {
     const startBtn = document.getElementById('ptk-start-btn');
     if (startBtn) {
       startBtn.onclick = async () => {
+        startBtn.disabled = true;
+        startBtn.style.opacity = '0.6';
         if (api.isOnline()) {
-          await doAction('set_phase', { phase: 'team_setup' });
-        } else {
-          P.room.phase = 'team_setup';
+          try {
+            await doAction('set_phase', { phase: 'team_setup' });
+          } catch (err) {
+            // Server may reject 'team_setup' until the entity schema is pushed;
+            // fall through and navigate locally so play isn't blocked.
+            console.warn('[Ptakim] set_phase(team_setup) failed, continuing locally:', err);
+          }
         }
+        if (P.room) P.room.phase = 'team_setup';
         ptkGoto('ptakimTeamSetup');
       };
     }
@@ -1925,10 +1990,13 @@ function renderPtakimNotes(app) {
         <!-- Room code for sharing -->
         <div style="text-align:center;margin-bottom:16px;">
           <div style="font-size:0.78rem;color:var(--text-dim);margin-bottom:4px;">${t('shareCode')}</div>
-          <div class="ptk-room-code" style="font-size:2rem;">${P.roomCode}</div>
-          <button id="ptk-copy-code-notes" style="margin-top:4px;background:none;border:none;color:#6C63FF;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;">
-            📋 ${t('roomCode')}
-          </button>
+          <div class="ptk-room-code" id="ptk-notes-code-value" style="font-size:2rem;cursor:pointer;">${P.roomCode}</div>
+          <div class="ptk-share-row" style="margin-top:8px;justify-content:center;">
+            <button id="ptk-copy-code-notes" class="ptk-copy-btn">${t('copyCode')}</button>
+            <button id="ptk-share-whatsapp-notes" class="ptk-share-whatsapp-btn">
+              <span class="ptk-wa-icon">🟢</span> ${t('shareWhatsapp')}
+            </button>
+          </div>
         </div>
 
         <div class="ptk-note-counter">${t('noteOf')} ${submitted} ${t('of')} ${total}</div>
@@ -1972,11 +2040,22 @@ function renderPtakimNotes(app) {
   const copyBtn = document.getElementById('ptk-copy-code-notes');
   if (copyBtn) {
     copyBtn.onclick = () => {
-      navigator.clipboard.writeText(P.roomCode).then(() => {
-        copyBtn.textContent = '✓ ' + t('copied');
-        setTimeout(() => { copyBtn.textContent = '📋 ' + t('roomCode'); }, 1500);
-      }).catch(() => {});
+      copyToClipboard(P.roomCode);
+      copyBtn.textContent = '✓ ' + t('copied');
+      setTimeout(() => { copyBtn.textContent = t('copyCode'); }, 1500);
     };
+  }
+  const notesCodeValue = document.getElementById('ptk-notes-code-value');
+  if (notesCodeValue) {
+    notesCodeValue.onclick = () => {
+      copyToClipboard(P.roomCode);
+      notesCodeValue.classList.add('ptk-copied-flash');
+      setTimeout(() => notesCodeValue.classList.remove('ptk-copied-flash'), 600);
+    };
+  }
+  const notesShareBtn = document.getElementById('ptk-share-whatsapp-notes');
+  if (notesShareBtn) {
+    notesShareBtn.onclick = () => shareOnWhatsapp(P.roomCode);
   }
 
   if (!done) {
@@ -2728,6 +2807,103 @@ function escHtml(str) {
   return div.innerHTML;
 }
 
+function copyToClipboard(text) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+    } else {
+      fallbackCopy(text);
+    }
+  } catch (_) {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch (_) {}
+}
+
+function buildJoinUrl(roomCode) {
+  // Link opens the game and auto-joins the room.
+  const origin = (window.location && window.location.origin) || '';
+  const path = (window.location && window.location.pathname) || '/';
+  return `${origin}${path}?ptk=${encodeURIComponent(roomCode)}`;
+}
+
+function shareOnWhatsapp(roomCode) {
+  const url = buildJoinUrl(roomCode);
+  const msg = t('shareMessage')
+    .replace('{code}', roomCode)
+    .replace('{url}', url);
+  const waUrl = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  // Try Web Share API first (mobile native share sheet)
+  if (navigator.share) {
+    navigator.share({ text: msg, url }).catch(() => { window.open(waUrl, '_blank'); });
+  } else {
+    window.open(waUrl, '_blank');
+  }
+}
+
+function showEditNameModal() {
+  const modal = document.createElement('div');
+  modal.className = 'ptk-modal-overlay';
+  modal.innerHTML = `
+    <div class="ptk-modal">
+      <div class="ptk-modal-icon">✏️</div>
+      <div class="ptk-modal-text">${t('yourName')}</div>
+      <input class="ptk-edit-name-input" id="ptk-edit-name-input" maxlength="20" value="${escHtml(P.playerName)}">
+      <div class="ptk-edit-name-error" id="ptk-edit-name-error"></div>
+      <div class="ptk-modal-buttons" style="margin-top:12px;">
+        <button class="btn btn-secondary" id="ptk-edit-name-cancel">${t('cancelEdit')}</button>
+        <button class="btn btn-primary" id="ptk-edit-name-save">${t('saveName')}</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  const input = document.getElementById('ptk-edit-name-input');
+  setTimeout(() => { input.focus(); input.select(); }, 50);
+
+  document.getElementById('ptk-edit-name-cancel').onclick = () => modal.remove();
+
+  document.getElementById('ptk-edit-name-save').onclick = async () => {
+    const newName = (input.value || '').trim();
+    const errorEl = document.getElementById('ptk-edit-name-error');
+    if (!newName) { errorEl.textContent = t('enterName'); return; }
+    if (newName === P.playerName) { modal.remove(); return; }
+
+    const saveBtn = document.getElementById('ptk-edit-name-save');
+    saveBtn.disabled = true;
+    saveBtn.style.opacity = '0.6';
+
+    if (api.isOnline() && P.roomCode) {
+      const result = await api.updatePlayerName(P.roomCode, P.deviceId, newName);
+      if (!result || result.error) {
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = '1';
+        errorEl.textContent = result?.error === 'Name already taken' ? t('nameTaken') : (result?.error || 'Failed');
+        return;
+      }
+      applyRoomUpdate(result.room, 'rename');
+    } else if (P.room) {
+      const me = P.room.players.find(p => p.deviceId === P.deviceId);
+      if (me) me.name = newName;
+    }
+    P.playerName = newName;
+    localStorage.setItem('ptakim_player_name', newName);
+    modal.remove();
+    ptkRender();
+  };
+}
+
 function cleanupRoom() {
   if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
   clearInterval(P.localTimer);
@@ -2770,6 +2946,35 @@ window.forceEndGame = forceEndGame; // Emergency exit
    INITIALIZATION — Restore state on page load
    ===================================================== */
 (function initPtakim() {
+  // Check for ?ptk=CODE in URL → jump straight to Join screen with code prefilled
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const code = (params.get('ptk') || '').toUpperCase().trim();
+    if (code && /^[A-Z0-9]{4}$/.test(code)) {
+      // Wait for main app to boot, then navigate and prefill
+      const go = () => {
+        if (window.G && typeof window.render === 'function') {
+          window.G.screen = 'ptakimJoin';
+          P.screen = 'ptakimJoin';
+          window.render();
+          setTimeout(() => {
+            const codeInput = document.getElementById('ptk-join-code');
+            if (codeInput) codeInput.value = code;
+          }, 50);
+        } else {
+          setTimeout(go, 80);
+        }
+      };
+      go();
+      // Clean the URL so refresh doesn't keep re-routing
+      try {
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, '', cleanUrl);
+      } catch (_) {}
+      return; // Skip state restore — deep-link takes priority
+    }
+  } catch (_) {}
+
   // Try to restore saved game state
   const restored = restoreGameState();
   if (restored && P.roomCode) {

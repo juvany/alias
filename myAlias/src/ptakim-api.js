@@ -234,6 +234,74 @@ export async function submitNotes(roomCode, deviceId, notes) {
   return { success: true, noteCount: startIdx + notes.length };
 }
 
+export async function updatePlayerName(roomCode, deviceId, newName) {
+  const client = getClient();
+  if (!client) return null;
+
+  const rooms = await client.entities.PtakimRoom.filter({ room_code: roomCode }, null, 1);
+  if (rooms.length === 0) return { error: 'Room not found' };
+  const room = rooms[0];
+
+  const trimmed = (newName || '').trim();
+  if (!trimmed) return { error: 'Empty name' };
+  if (room.players.some(p => p.name === trimmed && p.device_id !== deviceId)) {
+    return { error: 'Name already taken' };
+  }
+
+  const updatedPlayers = room.players.map(p =>
+    p.device_id === deviceId ? { ...p, name: trimmed } : p
+  );
+  await client.entities.PtakimRoom.update(room.id, { players: updatedPlayers });
+  const updated = await client.entities.PtakimRoom.get(room.id);
+  return { success: true, room: updated };
+}
+
+export async function addMockPlayers(roomCode, count) {
+  const client = getClient();
+  if (!client) return null;
+
+  const rooms = await client.entities.PtakimRoom.filter({ room_code: roomCode }, null, 1);
+  if (rooms.length === 0) return { error: 'Room not found' };
+  const room = rooms[0];
+
+  const mockNames = ['Alice', 'Bob', 'Charlie', 'David', 'Emma', 'Frank', 'Grace', 'Henry'];
+  const mockWords = ['Einstein', 'Napoleon', 'Cleopatra', 'Shakespeare', 'Mozart', 'Batman', 'Superman', 'Harry Potter', 'Sherlock Holmes', 'James Bond'];
+  const notesPerPlayer = room.settings?.notes_per_player || 5;
+
+  const newPlayers = [];
+  const newNotes = [...(room.notes || [])];
+  let noteIdx = room.note_count || 0;
+
+  for (let i = 0; i < count; i++) {
+    const base = room.players.length + newPlayers.length;
+    const deviceId = 'mock_' + Math.random().toString(36).slice(2, 10);
+    const name = mockNames[base % mockNames.length] + '_' + base;
+    newPlayers.push({
+      device_id: deviceId,
+      name,
+      ready: true,
+      notes_submitted: true,
+      emoji: EMOJIS[base % EMOJIS.length],
+    });
+    for (let j = 0; j < notesPerPlayer; j++) {
+      newNotes.push({
+        text: mockWords[noteIdx % mockWords.length],
+        author_device_id: deviceId,
+        note_index: noteIdx,
+      });
+      noteIdx++;
+    }
+  }
+
+  await client.entities.PtakimRoom.update(room.id, {
+    players: [...room.players, ...newPlayers],
+    notes: newNotes,
+    note_count: noteIdx,
+  });
+  const updated = await client.entities.PtakimRoom.get(room.id);
+  return { success: true, room: updated };
+}
+
 export async function getRoom(roomCode) {
   const client = getClient();
   if (!client) return null;
