@@ -92,6 +92,9 @@ const PT = {
     round3desc: 'אסור לדבר או להשמיע קול.\nרק תנועות גוף!',
     startRound: 'התחל/י סיבוב',
     startTurn: '▶ התחל/י תור',
+    pauseTurn: '⏸ השהה',
+    resumeTurn: '▶ המשך',
+    paused: 'מושהה',
     holdToReveal: 'לחצו והחזיקו לחשיפה',
     correct: '✓ נכון!',
     skip: '↷ דלג/י',
@@ -212,6 +215,9 @@ const PT = {
     round3desc: 'No speaking or sounds.\nGestures only!',
     startRound: 'Start Round',
     startTurn: '▶ Start Turn',
+    pauseTurn: '⏸ Pause',
+    resumeTurn: '▶ Resume',
+    paused: 'Paused',
     holdToReveal: 'Hold to reveal',
     correct: '✓ Correct!',
     skip: '↷ Skip',
@@ -332,6 +338,9 @@ const PT = {
     round3desc: 'Sin hablar.\n¡Solo gestos!',
     startRound: 'Empezar Ronda',
     startTurn: '▶ Empezar Turno',
+    pauseTurn: '⏸ Pausa',
+    resumeTurn: '▶ Continuar',
+    paused: 'Pausado',
     holdToReveal: 'Mantén para ver',
     correct: '✓ ¡Correcto!',
     skip: '↷ Saltar',
@@ -584,6 +593,8 @@ function normalizeRoom(raw) {
       playerIdx: raw.current_turn.player_idx,
       startTime: raw.current_turn.start_time ? new Date(raw.current_turn.start_time).getTime() : null,
       endTime: raw.current_turn.end_time ? new Date(raw.current_turn.end_time).getTime() : null,
+      paused: !!raw.current_turn.paused,
+      pausedRemainingMs: raw.current_turn.paused_remaining_ms || 0,
     } : null,
     deck: raw.deck_order || [],
     deckIndex: raw.deck_index || 0,
@@ -628,6 +639,7 @@ function applyRoomUpdate(raw) {
   const id = P.room?.id;
   const oldPhase = P.room?.phase;
   const oldTurnStartTime = P.room?.currentTurn?.startTime;
+  const oldPaused = !!P.room?.currentTurn?.paused;
   const newRoom = normalizeRoom(raw);
   if (id) newRoom.id = id;
   else if (raw.id) newRoom.id = raw.id;
@@ -673,7 +685,16 @@ function applyRoomUpdate(raw) {
       // by local state (counters, note text) and patched in-place by
       // handleTurnAction; spectators update their UI via startLocalTimer ticks.
       if (P.screen === 'ptakimPlaying') {
-        updatePlayingCounters();
+        // Full re-render needed when the waiting-card → timer transition fires,
+        // or when pause state flips (buttons and labels change).
+        const newPaused = !!newRoom.currentTurn?.paused;
+        if ((newTurnStartTime && newTurnStartTime !== oldTurnStartTime) || newPaused !== oldPaused) {
+          ptkRender();
+          // Resume: restart local timer so ticks resume against the new endTime.
+          if (oldPaused && !newPaused) startLocalTimer(isActivePlayer());
+        } else {
+          updatePlayingCounters();
+        }
       } else if (P.screen === 'ptakimTeamSetup' && window._ptkDragging) {
         // Skip re-render mid-drag so pointer capture isn't destroyed.
       } else {
@@ -834,6 +855,9 @@ function startLocalTimer(autoEnd = false) {
   clearInterval(P.localTimer);
   const endTime = P.room?.currentTurn?.endTime;
   const compute = () => {
+    if (P.room?.currentTurn?.paused) {
+      return Math.max(0, Math.min(TURN_SECONDS, Math.ceil((P.room.currentTurn.pausedRemainingMs || 0) / 1000)));
+    }
     if (!endTime) return TURN_SECONDS;
     const rawSec = Math.ceil((endTime - Date.now()) / 1000);
     return Math.max(0, Math.min(TURN_SECONDS, rawSec));
@@ -842,6 +866,11 @@ function startLocalTimer(autoEnd = false) {
   let lastTickSecond = -1;
   P.localTimer = setInterval(() => {
     if (!P.room || !P.room.currentTurn) return;
+    if (P.room.currentTurn.paused) {
+      // Hold the display at the frozen remaining time; don't tick down.
+      P.timeLeft = Math.max(0, Math.min(TURN_SECONDS, Math.ceil((P.room.currentTurn.pausedRemainingMs || 0) / 1000)));
+      return;
+    }
     if (!P.room.currentTurn.endTime) return;
     const remaining = Math.max(0, Math.min(TURN_SECONDS, Math.ceil((P.room.currentTurn.endTime - Date.now()) / 1000)));
     P.timeLeft = remaining;
@@ -1601,7 +1630,7 @@ function renderPtakimNotes(app) {
           </div>
           ${P.noteInputs.length > 0 ? `
             <div class="ptk-submitted-notes">
-              ${P.noteInputs.map(n => `<div class="ptk-mini-note">${escHtml(n)}</div>`).join('')}
+              ${P.noteInputs.map(() => `<div class="ptk-mini-note ptk-mini-note-hidden">✓</div>`).join('')}
             </div>
           ` : ''}
         </div>
@@ -1675,6 +1704,13 @@ async function doSubmitNote(input) {
     chip.className = 'ptk-mini-note';
     chip.textContent = text;
     chipsWrap.appendChild(chip);
+    // Hide the text after 2 seconds so shoulder-surfers can't read it.
+    setTimeout(() => {
+      if (chip.isConnected) {
+        chip.classList.add('ptk-mini-note-hidden');
+        chip.textContent = '✓';
+      }
+    }, 2000);
   }
 
   // Update submit-button label when the next tap will be the last
@@ -2553,6 +2589,7 @@ function renderPtakimPlaying(app) {
   const round = P.room.currentRound;
   const roundNames = [null, t('round1name'), t('round2name'), t('round3name')];
   const timerStarted = !!turn.startTime;
+  const isPaused = !!turn.paused;
   const active = isActivePlayer();
   const note = active ? getCurrentNote() : null;
   const deckSize = P.room.deck?.length || P.room.noteCount || 0;
@@ -2621,6 +2658,7 @@ function renderPtakimPlaying(app) {
         <div class="ptk-spectator-text">${escHtml(player.name)} ${t('turnInProgress')}</div>
       </div>
       <div class="ptk-deck-count">${notesRemaining} ${t('notes')}</div>
+      ${isPaused ? `<div class="ptk-paused-label">⏸ ${t('paused')}</div>` : ''}
     `;
 
     app.innerHTML = `
@@ -2662,10 +2700,10 @@ function renderPtakimPlaying(app) {
             </button>
           ` : `
             <div class="ptk-note-card" id="ptk-note-card">
-              ${note && !isLoading ? `<div class="ptk-note-text">${escHtml(note.text)}</div>` :
-                isLoading ? `<div class="ptk-note-text ptk-loading">⏳</div>` :
-                `<div class="ptk-note-text">${t('deckEmpty')}</div>`}
-              ${note && !isLoading ? `
+              ${note && note.text && !isLoading ? `<div class="ptk-note-text">${escHtml(note.text)}</div>` :
+                notesRemaining <= 0 ? `<div class="ptk-note-text">${t('deckEmpty')}</div>` :
+                `<div class="ptk-note-text ptk-loading">⏳</div>`}
+              ${note && note.text && !isLoading ? `
                 <div class="ptk-note-hidden-overlay" id="ptk-note-overlay"
                   style="opacity:${overlayVisible ? '0' : '1'};pointer-events:${overlayVisible ? 'none' : 'auto'};">
                   <div class="ptk-note-hidden-icon">👁️</div>
@@ -2674,17 +2712,21 @@ function renderPtakimPlaying(app) {
               ` : ''}
             </div>
             <div class="ptk-deck-count">${notesRemaining} ${t('notes')}</div>
-            ${note && !isLoading ? `
+            ${isPaused ? `<div class="ptk-paused-label">⏸ ${t('paused')}</div>` : ''}
+            ${notesRemaining > 0 ? `
               <div class="ptk-play-buttons">
                 ${P.room.settings.skipAllowed ? `
-                  <button class="btn btn-skip" id="ptk-skip-btn" type="button" style="flex:1;">
+                  <button class="btn btn-skip" id="ptk-skip-btn" type="button" style="flex:1;" ${!note || isLoading || isPaused ? 'disabled' : ''}>
                     ${t('skip')}
                   </button>
                 ` : ''}
-                <button class="btn btn-correct" id="ptk-correct-btn" type="button" style="flex:${P.room.settings.skipAllowed ? '2' : '1'};">
+                <button class="btn btn-correct" id="ptk-correct-btn" type="button" style="flex:${P.room.settings.skipAllowed ? '2' : '1'};" ${!note || isLoading || isPaused ? 'disabled' : ''}>
                   ${t('correct')}
                 </button>
               </div>
+              <button class="btn btn-secondary" id="ptk-pause-btn" type="button" style="max-width:280px;margin-top:10px;">
+                ${isPaused ? t('resumeTurn') : t('pauseTurn')}
+              </button>
             ` : ''}
           `}
         </div>
@@ -2715,6 +2757,34 @@ function renderPtakimPlaying(app) {
   if (correctBtn) correctBtn.onclick = () => handleTurnAction('correct');
   const skipBtn = document.getElementById('ptk-skip-btn');
   if (skipBtn) skipBtn.onclick = () => handleTurnAction('skip');
+
+  const pauseBtn = document.getElementById('ptk-pause-btn');
+  if (pauseBtn) {
+    pauseBtn.onclick = async () => {
+      pauseBtn.disabled = true;
+      pauseBtn.style.opacity = '0.6';
+      const action = P.room?.currentTurn?.paused ? 'resume_turn' : 'pause_turn';
+      // Apply optimistic local update so spectators + active player see the
+      // state flip immediately; server broadcast will reconcile.
+      if (P.room?.currentTurn) {
+        if (action === 'pause_turn') {
+          const remaining = Math.max(0, (P.room.currentTurn.endTime || 0) - Date.now());
+          P.room.currentTurn = { ...P.room.currentTurn, paused: true, pausedRemainingMs: remaining };
+        } else {
+          const remaining = P.room.currentTurn.pausedRemainingMs || 0;
+          P.room.currentTurn = {
+            ...P.room.currentTurn,
+            paused: false,
+            pausedRemainingMs: 0,
+            endTime: Date.now() + remaining,
+          };
+        }
+      }
+      if (api.isOnline()) await doAction(action);
+      if (P.room?.currentTurn?.paused === false) startLocalTimer(isActivePlayer());
+      ptkRender();
+    };
+  }
 
   // Press-and-hold reveal
   const noteCard = document.getElementById('ptk-note-card');
@@ -2767,11 +2837,12 @@ async function handleTurnAction(kind) {
   try {
     if (api.isOnline()) {
       const action = kind === 'correct' ? 'correct' : 'skip';
-      // Fire the server action and the next-note fetch in parallel
-      const [_res, noteResult] = await Promise.all([
-        doAction(action, { turnCorrect: P.turnCorrect, turnSkipped: P.turnSkipped }),
-        api.getNote(P.roomCode, P.deviceId),
-      ]);
+      // Sequential: the 'correct'/'skip' action advances deck_index on the
+      // server. Fetching the next note must happen AFTER that write commits,
+      // otherwise the filter query reads the old deck_index and returns the
+      // note we just guessed (duplicate-note bug).
+      await doAction(action, { turnCorrect: P.turnCorrect, turnSkipped: P.turnSkipped });
+      const noteResult = await api.getNote(P.roomCode, P.deviceId);
       if (noteResult && noteResult.text) {
         P._currentNoteText = noteResult.text;
         swapNoteText(noteResult.text);
@@ -3315,56 +3386,101 @@ window.forceEndGame = forceEndGame;
    INITIALIZATION — URL deeplink + state restore
    ===================================================== */
 (function initPtakim() {
-  // Check for ?ptk=CODE → jump into Setup(join) with code prefilled
+  const waitForShell = (cb) => {
+    if (window.G && typeof window.render === 'function') cb();
+    else setTimeout(() => waitForShell(cb), 80);
+  };
+
+  const goTo = (screen) => waitForShell(() => {
+    P.screen = screen;
+    window.G.screen = screen;
+    window.render();
+  });
+
+  const goHome = (alertMsg) => {
+    cleanupRoom();
+    if (alertMsg) {
+      waitForShell(() => {
+        window.G.screen = 'modeSelect';
+        window.render();
+        setTimeout(() => { try { alert(alertMsg); } catch (_) {} }, 50);
+      });
+    } else {
+      goTo('modeSelect');
+    }
+  };
+
+  // 1) Deep-link: ?ptk=CODE — join immediately, no setup form.
+  let linkCode = '';
   try {
     const params = new URLSearchParams(window.location.search);
-    const code = (params.get('ptk') || '').toUpperCase().trim();
-    if (code && /^[A-Z0-9]{4}$/.test(code)) {
-      // Deep-link: wipe any prior saved game so we don't accidentally restore it.
-      // Identity (name/avatar/deviceId) in localStorage is preserved by cleanupRoom().
-      cleanupRoom();
-      const go = () => {
-        if (window.G && typeof window.render === 'function') {
-          P.setupMode = 'join';
-          window.G.screen = 'ptakimSetup';
-          P.screen = 'ptakimSetup';
-          window.render();
-          setTimeout(() => {
-            const codeInput = document.getElementById('ptk-setup-code');
-            if (codeInput) codeInput.value = code;
-          }, 50);
-        } else {
-          setTimeout(go, 80);
-        }
-      };
-      go();
-      try {
-        const cleanUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, '', cleanUrl);
-      } catch (_) {}
-      return;
+    linkCode = (params.get('ptk') || '').toUpperCase().trim();
+    if (linkCode) {
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
     }
   } catch (_) {}
 
-  // Restore saved state
-  const restored = restoreGameState();
-  if (restored && P.roomCode) {
-    if (api.isOnline()) {
-      api.getRoom(P.roomCode).then(raw => {
-        if (raw) {
-          applyRoomUpdate(raw);
-          subscribeToRoom();
-          if (window.G && P.screen.startsWith('ptakim')) {
-            window.G.screen = P.screen;
-            if (typeof window.render === 'function') window.render();
-          }
-        } else {
-          cleanupRoom();
-          P.screen = 'ptakimHome';
-        }
-      }).catch(err => {
-        console.warn('[Ptakim] Failed to restore room:', err);
+  if (linkCode && /^[A-Z0-9]{4}$/.test(linkCode)) {
+    cleanupRoom();
+    if (!api.isOnline()) { goHome(); return; }
+
+    const savedName = (P.playerName || '').trim();
+    if (!savedName) {
+      // First-time user with no saved name — send them through the setup form
+      // with the code prefilled so they can pick a name.
+      P.setupMode = 'join';
+      waitForShell(() => {
+        P.screen = 'ptakimSetup';
+        window.G.screen = 'ptakimSetup';
+        window.render();
+        setTimeout(() => {
+          const codeInput = document.getElementById('ptk-setup-code');
+          if (codeInput) codeInput.value = linkCode;
+        }, 50);
       });
+      return;
     }
+
+    api.joinRoom(linkCode, P.deviceId, savedName).then(result => {
+      if (!result || !result.success) {
+        goHome(t('roomNotFound'));
+        return;
+      }
+      P.roomCode = linkCode;
+      P.isHost = result.room.host_device_id === P.deviceId;
+      P.joined = true;
+      P.room = normalizeRoom(result.room);
+      if (P.room) P.room.id = result.roomId;
+      P.notesSubmitted = 0;
+      P.noteInputs = [];
+      subscribeToRoom();
+      goTo('ptakimNotes');
+    }).catch(() => goHome(t('roomNotFound')));
+    return;
   }
+
+  // 2) Returning user (no link) — try to reconnect to a saved session.
+  const restored = restoreGameState();
+  if (!restored || !P.roomCode) return;
+  if (!api.isOnline()) { cleanupRoom(); return; }
+
+  api.getRoom(P.roomCode).then(raw => {
+    if (!raw || raw.phase === 'game_ended' || raw.phase === 'ended' || raw.phase === 'cancelled' || raw.phase === 'game_finished') {
+      cleanupRoom();
+      goTo('modeSelect');
+      return;
+    }
+    applyRoomUpdate(raw);
+    subscribeToRoom();
+    waitForShell(() => {
+      if (P.screen && P.screen.startsWith('ptakim')) {
+        window.G.screen = P.screen;
+        window.render();
+      }
+    });
+  }).catch(() => {
+    cleanupRoom();
+    goTo('modeSelect');
+  });
 })();

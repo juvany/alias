@@ -1309,6 +1309,26 @@
 .ptk-mini-note:nth-child(even) { --rotate: 2deg; }
 .ptk-mini-note:nth-child(3n) { --rotate: -1deg; }
 
+.ptk-mini-note-hidden {
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
+  color: #16a34a !important;
+  min-width: 36px;
+  text-align: center;
+  transition: background 0.4s, color 0.4s;
+}
+
+.ptk-paused-label {
+  margin-top: 12px;
+  padding: 8px 20px;
+  background: rgba(202, 138, 4, 0.15);
+  color: #ca8a04;
+  border: 1.5px solid rgba(202, 138, 4, 0.35);
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .ptk-notes-done {
   display: flex;
   flex-direction: column;

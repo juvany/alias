@@ -76,7 +76,9 @@
         "team_idx": { "type": "number" },
         "player_idx": { "type": "number" },
         "start_time": { "type": "string" },
-        "end_time": { "type": "string" }
+        "end_time": { "type": "string" },
+        "paused": { "type": "boolean" },
+        "paused_remaining_ms": { "type": "number" }
       }
     },
     "deck_order": {

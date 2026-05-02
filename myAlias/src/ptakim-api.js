@@ -388,6 +388,28 @@ export async function gameAction(roomCode, deviceId, action, data) {
       break;
     }
 
+    case 'pause_turn': {
+      const turn = room.current_turn;
+      if (!turn || turn.paused) break;
+      const endTime = turn.end_time ? new Date(turn.end_time).getTime() : 0;
+      const remaining = Math.max(0, endTime - Date.now());
+      updates.current_turn = { ...turn, paused: true, paused_remaining_ms: remaining };
+      break;
+    }
+
+    case 'resume_turn': {
+      const turn = room.current_turn;
+      if (!turn || !turn.paused) break;
+      const remaining = turn.paused_remaining_ms || 0;
+      updates.current_turn = {
+        ...turn,
+        paused: false,
+        paused_remaining_ms: 0,
+        end_time: new Date(Date.now() + remaining).toISOString(),
+      };
+      break;
+    }
+
     case 'correct': {
       updates.deck_index = room.deck_index + 1;
       break;
