@@ -14,7 +14,10 @@ copy /Y .env .env.prod.bak > nul
 copy /Y base44\.app.jsonc base44\.app.prod.bak.jsonc > nul
 
 echo [DEBUG DEPLOY] Switching to debug app...
-echo VITE_BASE44_APP_ID=%DEBUG_APP_ID% > .env
+(
+  echo VITE_BASE44_APP_ID=%DEBUG_APP_ID%
+  echo VITE_ENABLE_DEBUG=1
+) > .env
 (
   echo // Base44 App Configuration - DEBUG
   echo {

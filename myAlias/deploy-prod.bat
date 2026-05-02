@@ -12,7 +12,18 @@ echo [PROD DEPLOY] Verifying production config...
 findstr /C:"%PROD_APP_ID%" .env > nul 2>&1
 if errorlevel 1 (
     echo [WARN] .env does not contain production app ID. Fixing...
-    echo VITE_BASE44_APP_ID=%PROD_APP_ID% > .env
+    (
+      echo VITE_BASE44_APP_ID=%PROD_APP_ID%
+      echo VITE_ENABLE_DEBUG=0
+    ) > .env
+)
+findstr /C:"VITE_ENABLE_DEBUG=0" .env > nul 2>&1
+if errorlevel 1 (
+    echo [WARN] .env missing VITE_ENABLE_DEBUG=0. Rewriting...
+    (
+      echo VITE_BASE44_APP_ID=%PROD_APP_ID%
+      echo VITE_ENABLE_DEBUG=0
+    ) > .env
 )
 findstr /C:"%PROD_APP_ID%" base44\.app.jsonc > nul 2>&1
 if errorlevel 1 (

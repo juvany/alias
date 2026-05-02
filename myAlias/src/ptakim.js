@@ -1749,7 +1749,7 @@ function renderPtakimWait(app) {
           ` : ''}
         </div>
 
-        ${P.isHost && api.isOnline() ? `
+        ${P.isHost && api.isOnline() && import.meta.env.VITE_ENABLE_DEBUG === '1' ? `
           <div class="ptk-debug-section" style="margin-top:12px;">
             <div class="ptk-debug-label">🔧 DEBUG</div>
             <div class="ptk-debug-row">
