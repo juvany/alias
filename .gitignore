@@ -25,3 +25,4 @@ Thumbs.db
 
 # Claude Code (machine-specific)
 .claude/settings.local.json
+alias/
