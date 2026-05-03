@@ -644,6 +644,15 @@ function applyRoomUpdate(raw) {
   if (id) newRoom.id = id;
   else if (raw.id) newRoom.id = raw.id;
 
+  // Host is editing teams — local state is authoritative. Base44 .get() and
+  // subscription events can echo stale snapshots from before our most recent
+  // write, which would revert in-progress edits (drag, remove, delete team).
+  // Since joinRoom is blocked during team_setup, `players` can't change either,
+  // so there's nothing here the host needs from the server until phase changes.
+  if (P.isHost && P.screen === 'ptakimTeamSetup' && newRoom.phase === 'team_setup') {
+    return;
+  }
+
   const newHash = roomHash(newRoom);
   if (newHash === _lastRoomHash) return;
   // Also suppress if the new state matches what we already have in P.room.
@@ -3444,7 +3453,11 @@ window.forceEndGame = forceEndGame;
 
     api.joinRoom(linkCode, P.deviceId, savedName).then(result => {
       if (!result || !result.success) {
-        goHome(t('roomNotFound'));
+        const err = result?.error;
+        const msg = err === 'Game already started' ? t('gameStarted')
+          : err === 'Name already taken' ? t('nameTaken')
+          : t('roomNotFound');
+        goHome(msg);
         return;
       }
       P.roomCode = linkCode;
@@ -3452,10 +3465,19 @@ window.forceEndGame = forceEndGame;
       P.joined = true;
       P.room = normalizeRoom(result.room);
       if (P.room) P.room.id = result.roomId;
-      P.notesSubmitted = 0;
+      // If we're an existing player who already finished notes, restore that
+      // so we land on the waiting room / current phase instead of the notes screen.
+      const me = P.room?.players?.find(p => p.deviceId === P.deviceId);
+      const total = P.room?.settings?.notesPerPlayer || P.settings.notesPerPlayer;
+      P.notesSubmitted = me?.notesSubmitted ? total : 0;
       P.noteInputs = [];
       subscribeToRoom();
-      goTo('ptakimNotes');
+      // Route by the room's current phase — if the game is already past the
+      // lobby (team_setup, playing, etc.) don't force this player back to notes.
+      waitForShell(() => {
+        navigateByPhase();
+        if (!P.screen || !P.screen.startsWith('ptakim')) goTo('ptakimNotes');
+      });
     }).catch(() => goHome(t('roomNotFound')));
     return;
   }

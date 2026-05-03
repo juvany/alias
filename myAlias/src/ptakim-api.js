@@ -119,15 +119,16 @@ export async function joinRoom(roomCode, deviceId, playerName) {
   if (rooms.length === 0) return { error: 'Room not found' };
   const room = rooms[0];
 
-  if (room.phase !== 'lobby') return { error: 'Game already started' };
-
-  // Check if already in room (rejoin)
+  // Always allow existing players to rejoin (reconnect after reload / deeplink),
+  // regardless of phase. Only block BRAND-NEW joiners once the game is underway.
   const existingIdx = room.players.findIndex(p => p.device_id === deviceId);
   if (existingIdx >= 0) {
     room.players[existingIdx].name = playerName;
     await client.entities.PtakimRoom.update(room.id, { players: room.players });
     return { success: true, room, roomId: room.id };
   }
+
+  if (room.phase !== 'lobby') return { error: 'Game already started' };
 
   // Check duplicate name
   if (room.players.some(p => p.name === playerName)) {
@@ -159,9 +160,8 @@ export async function joinAndSubmitNotes(roomCode, deviceId, playerName, notes) 
   if (rooms.length === 0) return { error: 'Room not found' };
   const room = rooms[0];
 
-  if (room.phase !== 'lobby') return { error: 'Game already started' };
-
-  // Check if already in room (rejoin)
+  // Always allow existing players to rejoin (reconnect after reload / deeplink),
+  // regardless of phase. Only block BRAND-NEW joiners once the game is underway.
   const existingIdx = room.players.findIndex(p => p.device_id === deviceId);
   if (existingIdx >= 0) {
     room.players[existingIdx].name = playerName;
@@ -170,6 +170,8 @@ export async function joinAndSubmitNotes(roomCode, deviceId, playerName, notes) 
     const updated = await client.entities.PtakimRoom.get(room.id);
     return { success: true, room: updated, roomId: room.id };
   }
+
+  if (room.phase !== 'lobby') return { error: 'Game already started' };
 
   // Check duplicate name
   if (room.players.some(p => p.name === playerName)) {
