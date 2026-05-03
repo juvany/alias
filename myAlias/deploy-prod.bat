@@ -36,6 +36,13 @@ if errorlevel 1 (
     ) > base44\.app.jsonc
 )
 
+echo [PROD DEPLOY] Bumping version...
+call node bump-version.mjs
+if errorlevel 1 (
+    echo [ERROR] Version bump failed.
+    exit /b 1
+)
+
 echo [PROD DEPLOY] Building...
 call npm run build
 if errorlevel 1 (
