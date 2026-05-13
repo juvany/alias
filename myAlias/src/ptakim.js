@@ -36,7 +36,7 @@ const PLAYER_AVATARS = [
 ];
 const PLAYER_EMOJIS = PLAYER_AVATARS.map(a => a.icon);
 const TEAM_COLORS = ['#6C63FF', '#16a34a', '#ea580c', '#dc2626', '#7c3aed', '#0ea5e9', '#d946ef', '#f59e0b'];
-const TEAM_EMOJIS = ['🟣', '🟢', '🟠', '🔴', '🔵', '💜', '💛', '🔷'];
+const TEAM_EMOJIS = ['🦁', '🐯', '🦊', '🐺', '🐻', '🦅', '🐉', '🦈', '🐼', '🦋', '🦄', '🐸'];
 const CIRCUMFERENCE = 2 * Math.PI * 52;
 
 /* =====================================================
@@ -67,7 +67,7 @@ const PT = {
     writeNotes: 'כתיבת פתקים',
     notePlaceholder: 'שם של דמות/אישיות',
     shareWhatsapp: 'שתפו',
-    shareMessage: 'הצטרפו למשחק פתקים שלי! קוד: {code}\n{url}',
+    shareMessage: '📝 הצטרפו למשחק פתקים שלי! קוד: {code}\n{url}',
     editName: '✏️ שנו שם',
     saveName: 'שמור',
     cancelEdit: 'ביטול',
@@ -135,6 +135,7 @@ const PT = {
     yes: 'כן',
     no: 'לא',
     cancel: 'ביטול',
+    ok: 'אישור',
     timeUp: 'הזמן נגמר!',
     didTeamGuess: 'הקבוצה ניחשה את המילה האחרונה?',
     lastWord: 'מילה אחרונה',
@@ -156,6 +157,8 @@ const PT = {
     waitingForPlayer: 'ממתינים ש-{name} יתחיל/תתחיל...',
     selectTeams: 'בחירת קבוצות',
     dragToMove: 'גררו שחקנים/ות בין הקבוצות',
+    editTeamName: 'שם קבוצה',
+    changeEmoji: 'שנה/י אמוג\'י',
     nextTeam: 'הקבוצה הבאה',
     nextPlayerLabel: 'השחקן/ית',
     moveUp: 'מעלה',
@@ -190,7 +193,7 @@ const PT = {
     writeNotes: 'Write Notes',
     notePlaceholder: 'Character or celebrity name',
     shareWhatsapp: 'Share',
-    shareMessage: 'Join my Ptakim game! Code: {code}\n{url}',
+    shareMessage: '📝 Join my Ptakim game! Code: {code}\n{url}',
     editName: '✏️ Edit name',
     saveName: 'Save',
     cancelEdit: 'Cancel',
@@ -258,6 +261,7 @@ const PT = {
     yes: 'Yes',
     no: 'No',
     cancel: 'Cancel',
+    ok: 'OK',
     timeUp: 'Time\'s Up!',
     didTeamGuess: 'Did your team guess the last word?',
     lastWord: 'Last word',
@@ -279,6 +283,8 @@ const PT = {
     waitingForPlayer: 'Waiting for {name} to start...',
     selectTeams: 'Select Teams',
     dragToMove: 'Drag players between teams',
+    editTeamName: 'Team name',
+    changeEmoji: 'Change emoji',
     nextTeam: 'Next team',
     nextPlayerLabel: 'Player',
     moveUp: 'Move up',
@@ -313,7 +319,7 @@ const PT = {
     writeNotes: 'Escribir Notas',
     notePlaceholder: 'Nombre de personaje',
     shareWhatsapp: 'Compartir',
-    shareMessage: '¡Únete a mi juego de Ptakim! Código: {code}\n{url}',
+    shareMessage: '📝 ¡Únete a mi juego de Ptakim! Código: {code}\n{url}',
     editName: '✏️ Cambiar nombre',
     saveName: 'Guardar',
     cancelEdit: 'Cancelar',
@@ -381,6 +387,7 @@ const PT = {
     yes: 'Sí',
     no: 'No',
     cancel: 'Cancelar',
+    ok: 'OK',
     timeUp: '¡Se acabó el tiempo!',
     didTeamGuess: '¿Tu equipo adivinó la última palabra?',
     lastWord: 'Última palabra',
@@ -402,6 +409,8 @@ const PT = {
     waitingForPlayer: 'Esperando a {name}...',
     selectTeams: 'Elegir Equipos',
     dragToMove: 'Arrastra jugadores entre equipos',
+    editTeamName: 'Nombre del equipo',
+    changeEmoji: 'Cambiar emoji',
     nextTeam: 'Siguiente equipo',
     nextPlayerLabel: 'Jugador',
     moveUp: 'Subir',
@@ -803,6 +812,34 @@ function serverNow() {
   return Date.now() + (P.clockOffset || 0);
 }
 
+/* =====================================================
+   WAKE LOCK — keep screen on while in an active turn
+   ===================================================== */
+let _wakeLock = null;
+
+async function acquireWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    if (_wakeLock && !_wakeLock.released) return;
+    _wakeLock = await navigator.wakeLock.request('screen');
+    _wakeLock.addEventListener('release', () => { _wakeLock = null; });
+  } catch (_) {}
+}
+
+function releaseWakeLock() {
+  if (_wakeLock && !_wakeLock.released) {
+    _wakeLock.release().catch(() => {});
+  }
+  _wakeLock = null;
+}
+
+// Re-acquire on tab visibility change (wake lock is released when tab is hidden)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && P.room?.phase === 'turn_active') {
+    acquireWakeLock();
+  }
+});
+
 function startTurn() {
   if (!P.room) return;
   const turn = P.room.currentTurn;
@@ -815,6 +852,7 @@ function startTurn() {
   P.turnSkipped = 0;
   P.noteVisibility = 'hidden';
   P.room.phase = 'turn_active';
+  acquireWakeLock();
   startLocalTimer(true);
   showAutoReveal();
   ptkRender();
@@ -977,6 +1015,7 @@ function handleSkip() {
 async function endTurn(deckEmpty, skipServerAction = false) {
   clearInterval(P.localTimer);
   clearTimeout(P.autoRevealTimeout);
+  releaseWakeLock();
   P.noteVisibility = 'hidden';
   P._currentNoteText = null;
   const turn = P.room.currentTurn;
@@ -1027,11 +1066,22 @@ function advanceToNextRound() {
   if (!P.room) return;
   const nextRound = P.room.currentRound + 1;
   if (nextRound > 3) { P.room.phase = 'game_finished'; ptkRender(); return; }
+  // Advance each team's explainerIdx so a different player starts next round
+  P.room.teams.forEach(team => {
+    team.explainerIdx = (team.explainerIdx + 1) % Math.max(1, team.players.length);
+  });
+  const prevStartTeam = P.room.currentTurn?.teamIdx ?? 0;
+  const nextStartTeam = (prevStartTeam + 1) % P.room.teams.length;
   P.room.currentRound = nextRound;
   const noteIndices = P.room.notes.map((_, i) => i);
   P.room.deck = shuffleArray(noteIndices);
   P.room.deckIndex = 0;
-  P.room.currentTurn = null;
+  P.room.currentTurn = {
+    teamIdx: nextStartTeam,
+    playerIdx: P.room.teams[nextStartTeam].explainerIdx,
+    startTime: null,
+    endTime: null,
+  };
   P.room.phase = 'round_intro';
   ptkRender();
 }
@@ -1359,6 +1409,11 @@ function renderPtakimSetup(app) {
 
   document.getElementById('ptk-setup-back').onclick = () => ptkGoto('ptakimHome');
 
+  function snapshotName() {
+    const val = (document.getElementById('ptk-setup-name')?.value || '').trim();
+    if (val) P.playerName = val;
+  }
+
   // Avatar picker
   const avatarPicker = document.getElementById('ptk-avatar-picker');
   document.getElementById('ptk-change-avatar').onclick = () => {
@@ -1366,6 +1421,7 @@ function renderPtakimSetup(app) {
   };
   document.querySelectorAll('[data-avatar]').forEach(btn => {
     btn.onclick = () => {
+      snapshotName();
       P.playerAvatar = btn.dataset.avatar;
       localStorage.setItem('ptakim_player_avatar', P.playerAvatar);
       ptkGoto('ptakimSetup');
@@ -1375,11 +1431,13 @@ function renderPtakimSetup(app) {
   if (isCreate) {
     document.querySelectorAll('[data-notes]').forEach(btn => {
       btn.onclick = () => {
+        snapshotName();
         s.notesPerPlayer = parseInt(btn.dataset.notes);
         ptkGoto('ptakimSetup');
       };
     });
     document.getElementById('ptk-skip-toggle').onclick = () => {
+      snapshotName();
       s.skipAllowed = !s.skipAllowed;
       ptkGoto('ptakimSetup');
     };
@@ -1566,7 +1624,7 @@ function renderPlayerChips(room) {
         const isHostBadge = p.deviceId === room.hostDeviceId;
         return `
           <div class="ptk-player-chip ${isDone ? 'done' : 'writing'} ${isMe ? 'me' : ''}">
-            <span class="ptk-player-chip-emoji">${p.emoji || PLAYER_EMOJIS[i % PLAYER_EMOJIS.length]}</span>
+            <span class="ptk-player-chip-emoji ${isMe ? 'ptk-chip-emoji-btn' : ''}" id="${isMe ? 'ptk-chip-emoji' : ''}">${p.emoji || PLAYER_EMOJIS[i % PLAYER_EMOJIS.length]}</span>
             <span class="ptk-player-chip-name">${escHtml(p.name)}${isHostBadge ? ' 👑' : ''}</span>
             <span class="ptk-player-chip-status">${isDone ? '✓' : '✏️'}</span>
             ${isMe ? `<button class="ptk-chip-edit" id="ptk-chip-edit" type="button" title="${t('editName')}">✏️</button>` : ''}
@@ -1591,6 +1649,47 @@ function wireLeaveButton() {
   if (nameEditBtn) {
     nameEditBtn.onclick = (e) => { e.stopPropagation(); showEditNameModal(); };
   }
+  const emojiBtn = document.getElementById('ptk-chip-emoji');
+  if (emojiBtn) {
+    emojiBtn.onclick = (e) => { e.stopPropagation(); showPlayerEmojiModal(); };
+  }
+}
+
+function showPlayerEmojiModal() {
+  const modal = document.createElement('div');
+  modal.className = 'ptk-modal-overlay';
+  modal.innerHTML = `
+    <div class="ptk-modal">
+      <div class="ptk-modal-icon">😀</div>
+      <div class="ptk-modal-text">${t('changeEmoji')}</div>
+      <div class="ptk-avatar-grid-compact" style="margin-top:12px;">
+        ${PLAYER_AVATARS.map(a => `
+          <button class="ptk-avatar-btn-small ${P.playerAvatar === a.icon ? 'selected' : ''}" data-pick-emoji="${a.icon}" type="button">${a.icon}</button>
+        `).join('')}
+      </div>
+      <button class="btn btn-secondary" id="ptk-emoji-cancel" type="button" style="margin-top:14px;width:100%;">${t('cancel')}</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById('ptk-emoji-cancel').onclick = () => modal.remove();
+  modal.querySelectorAll('[data-pick-emoji]').forEach(btn => {
+    btn.onclick = async () => {
+      const emoji = btn.dataset.pickEmoji;
+      P.playerAvatar = emoji;
+      localStorage.setItem('ptakim_player_avatar', emoji);
+      // Update in local room state
+      if (P.room) {
+        const me = P.room.players.find(p => p.deviceId === P.deviceId);
+        if (me) me.emoji = emoji;
+      }
+      if (api.isOnline() && P.roomCode) {
+        const result = await doAction('update_player_emoji', { emoji });
+        if (result?.room) applyRoomUpdate(result.room);
+      }
+      modal.remove();
+      ptkRender();
+    };
+  });
 }
 
 /* =====================================================
@@ -1842,13 +1941,14 @@ function renderPtakimWait(app) {
         { name: t('team') + ' A', color: TEAM_COLORS[0], emoji: TEAM_EMOJIS[0], players: [], playerDeviceIds: [], explainerIdx: 0, scores: [0,0,0] },
         { name: t('team') + ' B', color: TEAM_COLORS[1], emoji: TEAM_EMOJIS[1], players: [], playerDeviceIds: [], explainerIdx: 0, scores: [0,0,0] },
       ];
+      // Set teams locally BEFORE any awaits so that any subscription echo
+      // arriving during the server round-trips renders with valid team data.
       room.teams = initialTeams;
+      room.phase = 'team_setup';
 
       if (api.isOnline()) {
         await doAction('update_teams', { teams: initialTeams });
         await doAction('set_phase', { phase: 'team_setup' });
-      } else {
-        room.phase = 'team_setup';
       }
       ptkGoto('ptakimTeamSetup');
     };
@@ -1881,8 +1981,16 @@ function renderTeamsHtml(teams, players, editable) {
   return teams.map((team, teamIdx) => `
     <div class="ptk-team-setup-col">
       <div class="ptk-team-setup-header" style="background:${team.color}20;border-color:${team.color};">
-        <span class="ptk-team-emoji">${team.emoji}</span>
-        <span class="ptk-team-name">${escHtml(team.name)}</span>
+        ${editable ? `
+          <button class="ptk-team-emoji-btn" data-team-idx="${teamIdx}" type="button" title="${t('changeEmoji')}">${team.emoji}</button>
+          <div class="ptk-team-emoji-picker" id="ptk-team-emoji-picker-${teamIdx}" style="display:none;">
+            ${TEAM_EMOJIS.map(e => `<button class="ptk-avatar-btn-small ${team.emoji===e?'selected':''}" data-team-emoji="${e}" data-team-idx="${teamIdx}" type="button">${e}</button>`).join('')}
+          </div>
+          <input class="ptk-team-name-input" data-team-idx="${teamIdx}" value="${escHtml(team.name)}" maxlength="16" type="text" style="flex:1;border:none;background:transparent;font-weight:700;font-size:0.95rem;color:${team.color};min-width:0;">
+        ` : `
+          <span class="ptk-team-emoji">${team.emoji}</span>
+          <span class="ptk-team-name">${escHtml(team.name)}</span>
+        `}
         <span class="ptk-team-count">(${team.playerDeviceIds?.length || 0})</span>
         ${editable && teams.length > 1 ? `
           <button class="ptk-remove-team-btn" data-team-idx="${teamIdx}" type="button" title="${t('removeTeam')}">🗑</button>
@@ -2120,6 +2228,48 @@ function renderPtakimTeamSetup(app) {
         placePlayer(removePlayerBtn.dataset.deviceId, -1);
         return;
       }
+      // Toggle team emoji picker
+      const emojiBtn = e.target.closest('.ptk-team-emoji-btn');
+      if (emojiBtn) {
+        e.stopPropagation();
+        const teamIdx = parseInt(emojiBtn.dataset.teamIdx);
+        const picker = document.getElementById(`ptk-team-emoji-picker-${teamIdx}`);
+        if (picker) picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+        return;
+      }
+      // Select team emoji from picker
+      const emojiPickBtn = e.target.closest('[data-team-emoji]');
+      if (emojiPickBtn) {
+        e.stopPropagation();
+        const teamIdx = parseInt(emojiPickBtn.dataset.teamIdx);
+        const emoji = emojiPickBtn.dataset.teamEmoji;
+        room.teams[teamIdx].emoji = emoji;
+        applyAndPersist();
+        if (api.isOnline()) doAction('update_team_emoji', { teamIdx, emoji });
+        return;
+      }
+    });
+
+    // Team name editing via input (delegated — survives patches)
+    screenRoot.addEventListener('change', (e) => {
+      const nameInput = e.target.closest('.ptk-team-name-input');
+      if (nameInput) {
+        const teamIdx = parseInt(nameInput.dataset.teamIdx);
+        const name = (nameInput.value || '').trim();
+        if (name) {
+          room.teams[teamIdx].name = name;
+          if (api.isOnline()) doAction('update_team_name', { teamIdx, name });
+          syncTeamsToServer();
+        }
+      }
+    });
+    screenRoot.addEventListener('input', (e) => {
+      const nameInput = e.target.closest('.ptk-team-name-input');
+      if (nameInput) {
+        const teamIdx = parseInt(nameInput.dataset.teamIdx);
+        const name = (nameInput.value || '').trim();
+        if (name) room.teams[teamIdx].name = name;
+      }
     });
   }
 
@@ -2156,13 +2306,13 @@ function renderPtakimTeamSetup(app) {
 
     // Compute what's under the pointer. Ghost has pointer-events:none so
     // elementFromPoint naturally ignores it.
-    function findTargetAt(x, y) {
+    function findTargetAt(x, y, sourceTile) {
       const el = document.elementFromPoint(x, y);
       if (!el) return null;
 
       // Over another player tile → before/after based on which half we're in
       const overPlayer = el.closest('.ptk-team-player[data-device-id]');
-      if (overPlayer && overPlayer !== state.tile) {
+      if (overPlayer && overPlayer !== sourceTile) {
         const r = overPlayer.getBoundingClientRect();
         const half = r.top + r.height / 2;
         const position = y < half ? 'before' : 'after';
@@ -2212,6 +2362,8 @@ function renderPtakimTeamSetup(app) {
       if (!state) return;
       const s = state; state = null;
       window._ptkDragging = false;
+      // Release pointer capture before DOM surgery so there's no lost-capture event
+      try { if (s.tile && s.tile.hasPointerCapture(s.pointerId)) s.tile.releasePointerCapture(s.pointerId); } catch (_) {}
       // Remove ALL ghost elements, not just the tracked one — safety against
       // any orphan ghost that slipped through from a previous drag.
       document.querySelectorAll('.ptk-dnd-ghost').forEach(g => g.remove());
@@ -2221,7 +2373,7 @@ function renderPtakimTeamSetup(app) {
       });
 
       if (!commit || !s.started) return;
-      const target = findTargetAt(e.clientX, e.clientY);
+      const target = findTargetAt(e.clientX, e.clientY, s.tile);
       if (!target) return;
 
       if (target.kind === 'team') {
@@ -2262,7 +2414,7 @@ function renderPtakimTeamSetup(app) {
       if (e.cancelable) e.preventDefault();
       const rect = state.ghost.getBoundingClientRect();
       state.ghost.style.transform = `translate(${e.clientX - rect.width / 2}px, ${e.clientY - rect.height / 2}px) scale(1.06)`;
-      applyHoverForTarget(findTargetAt(e.clientX, e.clientY));
+      applyHoverForTarget(findTargetAt(e.clientX, e.clientY, state.tile));
     };
     const onUp = (e) => {
       if (!state || e.pointerId !== state.pointerId) return;
@@ -2295,17 +2447,25 @@ function renderPtakimTeamSetup(app) {
     // we only react to real player tiles.
     screenRoot.addEventListener('pointerdown', (e) => {
       if (e.target.closest('.ptk-remove-from-team')) return;
+      if (e.target.closest('.ptk-team-name-input')) return;
+      if (e.target.closest('.ptk-team-emoji-btn')) return;
       const tile = e.target.closest('.ptk-draggable-player, .ptk-team-player[data-device-id]');
       if (!tile) return;
       if (e.button !== undefined && e.button !== 0) return;
       if (state) endDrag(e, false);
+      // Capture the pointer on the tile so we keep receiving move/up events
+      // even after the finger leaves the element. Without this, Android WebView
+      // cancels the pointer sequence as soon as the touch drifts, which breaks
+      // both drag-to-team and same-team reorder.
+      try { tile.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
       state = {
         tile, did: tile.dataset.deviceId,
         startX: e.clientX, startY: e.clientY,
         ghost: null, started: false, pointerId: e.pointerId,
         hover: null,
       };
-    });
+    }, { passive: false });
   }
 
   // Start game
@@ -2323,7 +2483,8 @@ function renderPtakimTeamSetup(app) {
       const noteIndices = room.notes.map((_, i) => i);
       room.deck = shuffleArray(noteIndices);
       room.deckIndex = 0;
-      room.currentTurn = { teamIdx: 0, playerIdx: 0, startTime: null, endTime: null };
+      const startTeamIdx = Math.floor(Math.random() * room.teams.length);
+      room.currentTurn = { teamIdx: startTeamIdx, playerIdx: 0, startTime: null, endTime: null };
       room.phase = 'round_intro';
     }
     ptkGoto('ptakimRoundIntro');
@@ -2772,13 +2933,16 @@ function renderPtakimPlaying(app) {
     pauseBtn.onclick = async () => {
       pauseBtn.disabled = true;
       pauseBtn.style.opacity = '0.6';
-      const action = P.room?.currentTurn?.paused ? 'resume_turn' : 'pause_turn';
-      // Apply optimistic local update so spectators + active player see the
-      // state flip immediately; server broadcast will reconcile.
+      const isPausing = !P.room?.currentTurn?.paused;
+      const action = isPausing ? 'pause_turn' : 'resume_turn';
+
+      // Apply optimistic local update immediately
       if (P.room?.currentTurn) {
-        if (action === 'pause_turn') {
+        if (isPausing) {
           const remaining = Math.max(0, (P.room.currentTurn.endTime || 0) - Date.now());
           P.room.currentTurn = { ...P.room.currentTurn, paused: true, pausedRemainingMs: remaining };
+          // Stop the local countdown immediately — don't wait for the server
+          clearInterval(P.localTimer);
         } else {
           const remaining = P.room.currentTurn.pausedRemainingMs || 0;
           P.room.currentTurn = {
@@ -2789,9 +2953,15 @@ function renderPtakimPlaying(app) {
           };
         }
       }
-      if (api.isOnline()) await doAction(action);
-      if (P.room?.currentTurn?.paused === false) startLocalTimer(isActivePlayer());
+
       ptkRender();
+
+      if (api.isOnline()) await doAction(action);
+
+      // After server confirms resume, restart the timer with the authoritative endTime
+      if (!isPausing && P.room?.currentTurn) {
+        startLocalTimer(isActivePlayer());
+      }
     };
   }
 
@@ -2834,14 +3004,12 @@ async function handleTurnAction(kind) {
   if (kind === 'correct') P.turnCorrect++;
   else P.turnSkipped++;
 
-  // Flash & hide the current note before we know the next one
+  // Flash the current card and hide it visually, but keep the old text visible
+  // behind the overlay so there's no blank/hourglass gap.
   flashCard(kind);
   P.noteVisibility = 'hidden';
-  P._currentNoteText = null;
   updateNoteOverlay();
   updatePlayingCounters();
-  // Show ⏳ while we fetch the next note
-  setNoteCardLoading();
 
   try {
     if (api.isOnline()) {
@@ -2855,7 +3023,6 @@ async function handleTurnAction(kind) {
       if (noteResult && noteResult.text) {
         P._currentNoteText = noteResult.text;
         swapNoteText(noteResult.text);
-        showAutoReveal();
       } else {
         P._currentNoteText = null;
         // Deck empty — end turn (server will transition phase)
@@ -2895,6 +3062,7 @@ function swapNoteText(newText) {
   const overlay = document.getElementById('ptk-note-overlay');
   if (overlay) overlay.style.display = '';
   updatePlayingCounters();
+  showAutoReveal();
 }
 
 function updatePlayingCounters() {
@@ -3100,50 +3268,71 @@ function renderPtakimRoundResult(app) {
   if (!P.room) { ptkGoto('ptakimHome'); return; }
   const round = P.room.currentRound;
   const roundNames = [null, t('round1name'), t('round2name'), t('round3name')];
+  const roundIcons = [null, '🗣️', '☝️', '🤫'];
+
+  // This-round scores and totals
+  const roundScores = P.room.teams.map(team => team.scores[round - 1] || 0);
+  const totals = P.room.teams.map((_, i) => getTeamTotalScore(i));
+  const maxRound = Math.max(...roundScores, 1);
+  const maxTotal = Math.max(...totals, 1);
+  const winnerTotalIdx = totals.indexOf(Math.max(...totals));
 
   app.innerHTML = `
     <div class="ptk-screen">
-      <div class="ptk-inner" style="justify-content:center;">
-        <div style="text-align:center;margin-bottom:24px;">
-          <div class="ptk-round-badge">${t('round')} ${round} / 3</div>
-          <div style="font-size:1.3rem;font-weight:800;margin-top:8px;">${t('roundResults')}</div>
-          <div style="font-size:0.88rem;color:var(--text-dim);">${roundNames[round] || ''}</div>
+      <div class="ptk-inner ptk-rr-inner">
+
+        <!-- Header -->
+        <div class="ptk-rr-header">
+          <div class="ptk-rr-icon">${roundIcons[round]}</div>
+          <div class="ptk-rr-title">${t('roundResults')}</div>
+          <div class="ptk-rr-subtitle">${t('round')} ${round} · ${roundNames[round] || ''}</div>
         </div>
-        <div class="ptk-result-card">
+
+        <!-- This round: big bars -->
+        <div class="ptk-rr-section-label">${t('round')} ${round}</div>
+        <div class="ptk-rr-bars">
           ${P.room.teams.map((team, i) => `
-            <div class="ptk-score-row">
-              <div class="ptk-score-team">
-                <div class="ptk-score-dot" style="background:${team.color};"></div>
-                ${team.emoji} ${escHtml(team.name)}
+            <div class="ptk-rr-bar-row">
+              <div class="ptk-rr-bar-label">
+                <span class="ptk-rr-team-emoji">${team.emoji}</span>
+                <span class="ptk-rr-team-name">${escHtml(team.name)}</span>
               </div>
-              <div class="ptk-score-val" style="color:${team.color};">${team.scores[round - 1]}</div>
+              <div class="ptk-rr-bar-track">
+                <div class="ptk-rr-bar-fill" style="width:${Math.round((roundScores[i]/maxRound)*100)}%;background:${team.color};"></div>
+              </div>
+              <div class="ptk-rr-bar-score" style="color:${team.color};">${roundScores[i]}</div>
             </div>
           `).join('')}
         </div>
-        <div class="ptk-result-card">
-          <div class="ptk-result-title">${t('totalScore')}</div>
+
+        <!-- Cumulative totals -->
+        <div class="ptk-rr-section-label">${t('totalScore')}</div>
+        <div class="ptk-rr-totals">
           ${P.room.teams.map((team, i) => `
-            <div class="ptk-score-row">
-              <div class="ptk-score-team">
-                <div class="ptk-score-dot" style="background:${team.color};"></div>
-                ${team.emoji} ${escHtml(team.name)}
+            <div class="ptk-rr-total-row ${i === winnerTotalIdx ? 'leading' : ''}" style="border-color:${team.color}20;background:${team.color}0d;">
+              <div class="ptk-rr-total-left">
+                <span class="ptk-rr-team-emoji">${team.emoji}</span>
+                <span class="ptk-rr-team-name">${escHtml(team.name)}</span>
+                ${i === winnerTotalIdx ? `<span class="ptk-rr-leading-badge">👑</span>` : ''}
               </div>
-              <div class="ptk-score-round-cols">
-                <div class="ptk-score-round-col">${t('r1short')}<br><b>${team.scores[0]}</b></div>
-                <div class="ptk-score-round-col">${t('r2short')}<br><b>${team.scores[1]}</b></div>
-                <div class="ptk-score-round-col">${t('r3short')}<br><b>${team.scores[2]}</b></div>
+              <div class="ptk-rr-round-pips">
+                ${[0,1,2].map(r => `
+                  <div class="ptk-rr-pip ${r < round ? 'filled' : ''}" style="${r < round ? `background:${team.color};` : ''}"></div>
+                `).join('')}
               </div>
-              <div class="ptk-score-val" style="color:${team.color};">${getTeamTotalScore(i)}</div>
+              <div class="ptk-rr-total-score" style="color:${team.color};">${totals[i]}</div>
             </div>
           `).join('')}
         </div>
-        <div style="height:20px;"></div>
+
+        <div style="flex:1;min-height:16px;"></div>
+
         ${P.isHost ? `
-          <button class="btn btn-primary" id="ptk-next-round-btn" type="button">
+          <button class="btn btn-primary ptk-sticky-bottom-btn" id="ptk-next-round-btn" type="button">
             ${round >= 3 ? t('gameOver') : t('nextRound')}
           </button>
         ` : `
-          <div style="font-size:0.88rem;color:var(--text-dim);text-align:center;">${t('waitingForHost')}</div>
+          <div class="ptk-waiting-note">⏳ ${t('waitingForHost')}</div>
         `}
       </div>
     </div>
@@ -3276,13 +3465,32 @@ function buildJoinUrl(roomCode) {
 
 function shareOnWhatsapp(roomCode) {
   const url = buildJoinUrl(roomCode);
+  // Keep the URL only in `text` — passing it separately in `url` causes
+  // some apps (WhatsApp, iOS share sheet) to append a second copy.
   const msg = t('shareMessage').replace('{code}', roomCode).replace('{url}', url);
   const waUrl = 'https://wa.me/?text=' + encodeURIComponent(msg);
   if (navigator.share) {
-    navigator.share({ text: msg, url }).catch(() => { window.open(waUrl, '_blank'); });
+    navigator.share({ text: msg }).catch(() => { window.open(waUrl, '_blank'); });
   } else {
     window.open(waUrl, '_blank');
   }
+}
+
+function showInfoModal(message) {
+  const modal = document.createElement('div');
+  modal.className = 'ptk-modal-overlay';
+  modal.innerHTML = `
+    <div class="ptk-modal">
+      <div class="ptk-modal-icon">ℹ️</div>
+      <div class="ptk-modal-text">${escHtml(message)}</div>
+      <div class="ptk-modal-buttons">
+        <button class="btn btn-primary" id="ptk-info-ok" type="button" style="width:100%;">${t('ok')}</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById('ptk-info-ok').onclick = () => modal.remove();
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }
 
 function showConfirmModal(message, onYes) {
@@ -3412,7 +3620,7 @@ window.forceEndGame = forceEndGame;
       waitForShell(() => {
         window.G.screen = 'modeSelect';
         window.render();
-        setTimeout(() => { try { alert(alertMsg); } catch (_) {} }, 50);
+        setTimeout(() => showInfoModal(alertMsg), 50);
       });
     } else {
       goTo('modeSelect');
@@ -3431,7 +3639,9 @@ window.forceEndGame = forceEndGame;
   } catch (_) {}
 
   if (linkCode && /^[A-Z0-9]{4}$/.test(linkCode)) {
+    // Always start fresh — tear down any game the user was in
     cleanupRoom();
+    clearGameState();
     if (!api.isOnline()) { goHome(); return; }
 
     const savedName = (P.playerName || '').trim();
@@ -3454,10 +3664,8 @@ window.forceEndGame = forceEndGame;
     api.joinRoom(linkCode, P.deviceId, savedName).then(result => {
       if (!result || !result.success) {
         const err = result?.error;
-        const msg = err === 'Game already started' ? t('gameStarted')
-          : err === 'Name already taken' ? t('nameTaken')
-          : t('roomNotFound');
-        goHome(msg);
+        if (err === 'Name already taken') { goHome(t('nameTaken')); return; }
+        goHome(t('roomNotFound'));
         return;
       }
       P.roomCode = linkCode;
@@ -3465,15 +3673,13 @@ window.forceEndGame = forceEndGame;
       P.joined = true;
       P.room = normalizeRoom(result.room);
       if (P.room) P.room.id = result.roomId;
-      // If we're an existing player who already finished notes, restore that
-      // so we land on the waiting room / current phase instead of the notes screen.
+      // Treat notes as done if player is already registered or game is in progress
       const me = P.room?.players?.find(p => p.deviceId === P.deviceId);
       const total = P.room?.settings?.notesPerPlayer || P.settings.notesPerPlayer;
       P.notesSubmitted = me?.notesSubmitted ? total : 0;
       P.noteInputs = [];
       subscribeToRoom();
-      // Route by the room's current phase — if the game is already past the
-      // lobby (team_setup, playing, etc.) don't force this player back to notes.
+      // Route by the room's current phase
       waitForShell(() => {
         navigateByPhase();
         if (!P.screen || !P.screen.startsWith('ptakim')) goTo('ptakimNotes');

@@ -1,6 +1,6 @@
 import { createClient } from '@base44/sdk'
 
-const CACHE_KEY = 'alias_custom_wordpacks'
+const CACHE_KEY = 'ptakim_custom_wordpacks'
 const CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
 
 /**

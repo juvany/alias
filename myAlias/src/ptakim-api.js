@@ -128,18 +128,20 @@ export async function joinRoom(roomCode, deviceId, playerName) {
     return { success: true, room, roomId: room.id };
   }
 
-  if (room.phase !== 'lobby') return { error: 'Game already started' };
-
   // Check duplicate name
   if (room.players.some(p => p.name === playerName)) {
     return { error: 'Name already taken' };
   }
 
+  // Late joiners (game already started) are added as spectators with notes_submitted:true
+  // so they skip straight to the current game phase instead of the notes screen.
+  const isLobby = room.phase === 'lobby';
+
   const updatedPlayers = [...room.players, {
     device_id: deviceId,
     name: playerName,
-    ready: false,
-    notes_submitted: false,
+    ready: !isLobby,
+    notes_submitted: !isLobby,
     emoji: EMOJIS[room.players.length % EMOJIS.length],
   }];
 
@@ -483,12 +485,24 @@ export async function gameAction(roomCode, deviceId, action, data) {
         updates.phase = 'game_finished';
       } else {
         const noteIndices = Array.from({ length: room.note_count }, (_, i) => i);
+        // Advance every team's explainerIdx before the new round so nobody
+        // repeats as the first explainer back-to-back across rounds.
+        const advancedTeams = room.teams.map(t => ({
+          ...t,
+          explainer_idx: (t.explainer_idx + 1) % Math.max(1, t.player_device_ids.length),
+        }));
+        // The starting team is the one AFTER the team that started the previous round.
+        // room.current_turn still holds the last turn of the round — its team_idx is
+        // close enough: start the next round with the next team in sequence.
+        const prevStartTeam = room.current_turn?.team_idx ?? 0;
+        const nextStartTeam = (prevStartTeam + 1) % advancedTeams.length;
+        updates.teams = advancedTeams;
         updates.current_round = nextRound;
         updates.deck_order = shuffleArray(noteIndices);
         updates.deck_index = 0;
         updates.current_turn = {
-          team_idx: 0,
-          player_idx: room.teams[0]?.explainer_idx || 0,
+          team_idx: nextStartTeam,
+          player_idx: advancedTeams[nextStartTeam].explainer_idx,
           start_time: null,
           end_time: null,
         };
@@ -522,11 +536,12 @@ export async function gameAction(roomCode, deviceId, action, data) {
         ];
       }
       const noteIndices = Array.from({ length: room.note_count }, (_, i) => i);
+      const startTeamIdx = Math.floor(Math.random() * (updates.teams?.length || room.teams?.length || 1));
       updates.current_round = 1;
       updates.deck_order = shuffleArray(noteIndices);
       updates.deck_index = 0;
       updates.current_turn = {
-        team_idx: 0,
+        team_idx: startTeamIdx,
         player_idx: 0,
         start_time: null,
         end_time: null,
@@ -538,6 +553,47 @@ export async function gameAction(roomCode, deviceId, action, data) {
 
     case 'set_phase': {
       updates.phase = data?.phase;
+      break;
+    }
+
+    case 'end_game': {
+      updates.phase = 'game_ended';
+      break;
+    }
+
+    case 'update_player_emoji': {
+      const { emoji: newEmoji } = data || {};
+      if (!newEmoji) break;
+      updates.players = room.players.map(p =>
+        p.device_id === deviceId ? { ...p, emoji: newEmoji } : p
+      );
+      // Also update emoji inside team.players entries
+      if (room.teams) {
+        updates.teams = room.teams.map(team => ({
+          ...team,
+          players: (team.players || []).map(p =>
+            p.device_id === deviceId ? { ...p, emoji: newEmoji } : p
+          ),
+        }));
+      }
+      break;
+    }
+
+    case 'update_team_emoji': {
+      const { teamIdx: teIdx, emoji: teEmoji } = data || {};
+      if (teEmoji === undefined || teIdx === undefined) break;
+      updates.teams = room.teams.map((team, i) =>
+        i === teIdx ? { ...team, emoji: teEmoji } : team
+      );
+      break;
+    }
+
+    case 'update_team_name': {
+      const { teamIdx: tnIdx, name: newTeamName } = data || {};
+      if (!newTeamName || tnIdx === undefined) break;
+      updates.teams = room.teams.map((team, i) =>
+        i === tnIdx ? { ...team, name: newTeamName } : team
+      );
       break;
     }
 

@@ -5,7 +5,7 @@ rem Always run from the script's own directory, regardless of caller's cwd
 cd /d "%~dp0"
 
 set PROD_APP_ID=69bb0f318b7ad64ca3b003e7
-set PROD_URL=https://alias-3b003e7.base44.app
+set PROD_URL=https://yalla.base44.app
 
 echo.
 echo [PROD DEPLOY] Verifying production config...

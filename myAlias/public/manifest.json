@@ -1,7 +1,7 @@
 {
-  "name": "פתקים",
-  "short_name": "פתקים",
-  "description": "משחק הסברים בעברית",
+  "name": "Yalla!",
+  "short_name": "Yalla!",
+  "description": "Yalla! — משחק מסיבה",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>פתקים</title>
+  <title>Yalla!</title>
   <meta name="theme-color" content="#f2f1f6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="פתקים">
+  <meta name="apple-mobile-web-app-title" content="Yalla!">
   <link rel="manifest" href="manifest.json">
   <script>
     // Capture beforeinstallprompt early so the deferred module doesn't miss it.
@@ -1231,7 +1231,7 @@
 /* =====================================================
    APP VERSION — update this on each deploy
    ===================================================== */
-const APP_VERSION = "1.7.3";
+const APP_VERSION = "1.7.4";
 
 /* =====================================================
    WORD LISTS — organized by difficulty 1–4
@@ -1918,7 +1918,7 @@ function TEAM_EMOJI_NAMES_LIST() {
 let G = {
   screen: "modeSelect",
   gameActive: false,
-  uiLang: localStorage.getItem('alias_ui_lang') || 'he',
+  uiLang: localStorage.getItem('ptakim_ui_lang') || 'he',
   adminMode: false,
   teams: [],        // [{name,color,emoji,position,prevPosition,players:[],explainerIdx,diffOffset}]
   currentTeam: 0,
@@ -2083,7 +2083,7 @@ function buildTrailBoard({ highlightTeamIdx = null, pathFrom = null, pathTo = nu
 /* =====================================================
    BANNED WORDS (admin mode)
    ===================================================== */
-const BANNED_KEY = 'alias_banned_words';
+const BANNED_KEY = 'ptakim_banned_words';
 let BANNED_WORDS = new Set(JSON.parse(localStorage.getItem(BANNED_KEY) || '[]'));
 function saveBanned() { try { localStorage.setItem(BANNED_KEY, JSON.stringify([...BANNED_WORDS])); } catch(e) {} }
 
@@ -2354,7 +2354,7 @@ function renderModeSelect(app) {
               <line x1="28" y1="78" x2="66" y2="78" stroke="#CCCCCC" stroke-width="3" stroke-linecap="round"/>
             </svg>
           </div>
-          <div class="logo-text">פתקים</div>
+          <div class="logo-text">Yalla!</div>
           <div class="logo-subtitle">${T('logoSubtitle')}</div>
         </div>
         <div class="gap40"></div>
@@ -2382,7 +2382,7 @@ function renderModeSelect(app) {
         <div class="gap16"></div>
         <div style="display:flex;gap:6px;justify-content:center;">
           ${['he','en','es'].map(l=>`
-            <button onclick="G.uiLang='${l}';localStorage.setItem('alias_ui_lang','${l}');render();"
+            <button onclick="G.uiLang='${l}';localStorage.setItem('ptakim_ui_lang','${l}');render();"
               style="padding:6px 14px;border-radius:10px;border:1.5px solid ${G.uiLang===l?'#6C63FF':'var(--border)'};
                      background:${G.uiLang===l?'rgba(108,99,255,0.15)':'var(--card)'};
                      color:${G.uiLang===l?'#a78bfa':'var(--text-dim)'};
@@ -2776,7 +2776,7 @@ function addTeam() {
 /* =====================================================
    SAVED PLAYER NAMES
    ===================================================== */
-const SAVED_PLAYERS_KEY = 'alias_saved_players';
+const SAVED_PLAYERS_KEY = 'ptakim_saved_players';
 function getSavedPlayers() {
   try { return JSON.parse(localStorage.getItem(SAVED_PLAYERS_KEY) || '[]'); } catch(e) { return []; }
 }
