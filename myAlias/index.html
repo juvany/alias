@@ -164,6 +164,23 @@
     }
     .btn-ghost:active { opacity: 0.6; }
 
+    /* Small, low-emphasis text action for rarely-needed options */
+    .link-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+      align-self: center;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .link-btn:active { opacity: 0.6; }
+
     /* ===== SPACERS ===== */
     .spacer { flex: 1; }
     .gap4 { height: 4px; }
@@ -1288,7 +1305,7 @@
 /* =====================================================
    APP VERSION — update this on each deploy
    ===================================================== */
-const APP_VERSION = "1.7.9";
+const APP_VERSION = "1.7.10";
 
 /* =====================================================
    WORD LISTS — organized by difficulty 1–4
@@ -1748,7 +1765,7 @@ const T_STRINGS = {
     describeHint:"תאר ללא אמירת המילה עצמה", pause:"⏸ עצור", resume:"▶ המשך",
     paused:"מושהה", turnResults:"תוצאות התור", squaresToAdvance:"ריבועים להתקדם",
     guessedWords:"מילים שנוחשו", skippedWords:"דילוגים", nextTurn:"תור הבא ←",
-    bigBoard:"לוח המשחק הגדול 🗺", currentStandings:"מצב נוכחי",
+    currentStandings:"מצב נוכחי",
     returnToGame:"← חזור למשחק", editSettings:"⚙ ערוך הגדרות", endGame:"✕ סיים משחק",
     bonusTitle:"⏱ הזמן נגמר!", bonusPrompt:"מי ניחש את המילה האחרונה?",
     bonusNobody:"אף אחד לא ניחש", bonusMyTeam:"הקבוצה שלנו", bonusOtherTeam:"הקבוצה השנייה", bonusGuessed:"ניחשו את המילה האחרונה!", whoExplains:"מי מסביר?",
@@ -1817,7 +1834,7 @@ const T_STRINGS = {
     describeHint:"Describe without saying the word", pause:"⏸ Pause", resume:"▶ Resume",
     paused:"Paused", turnResults:"Turn Results", squaresToAdvance:"squares to advance",
     guessedWords:"Guessed ✓", skippedWords:"Skipped ↷", nextTurn:"Next Turn →",
-    bigBoard:"Big Board 🗺", currentStandings:"Current Standings",
+    currentStandings:"Current Standings",
     returnToGame:"← Back to Game", editSettings:"⚙ Settings", endGame:"✕ End Game",
     bonusTitle:"⏱ Time's Up!", bonusPrompt:"Who guessed the last word?",
     bonusNobody:"Nobody guessed", bonusMyTeam:"Our team", bonusOtherTeam:"The other team", bonusGuessed:"Guessed the last word!", whoExplains:"Who explains?",
@@ -1886,7 +1903,7 @@ const T_STRINGS = {
     describeHint:"Describe sin decir la palabra", pause:"⏸ Pausar", resume:"▶ Continuar",
     paused:"Pausado", turnResults:"Resultados del Turno", squaresToAdvance:"casillas para avanzar",
     guessedWords:"Adivinadas ✓", skippedWords:"Pasadas ↷", nextTurn:"Siguiente Turno →",
-    bigBoard:"Tablero Grande 🗺", currentStandings:"Clasificación",
+    currentStandings:"Clasificación",
     returnToGame:"← Volver al Juego", editSettings:"⚙ Ajustes", endGame:"✕ Terminar",
     bonusTitle:"⏱ ¡Tiempo!", bonusPrompt:"¿Quién adivinó la última palabra?",
     bonusNobody:"Nadie adivinó", bonusMyTeam:"Nuestro equipo", bonusOtherTeam:"El otro equipo", bonusGuessed:"¡Adivinaron la última palabra!", whoExplains:"¿Quién explica?",
@@ -3598,21 +3615,14 @@ function renderTurnResults(app) {
 
         </div><!-- /scroll area -->
 
-        <!-- Buttons — pinned below the scroll area -->
+        <!-- Buttons — pinned below the scroll area. Fixing results is the rare
+             case, so it sits under the main action as a small text link. -->
         <button class="btn btn-primary" onclick="goDirectToNextTurn()" style="margin-top:8px;max-width:100%;flex-shrink:0;">
           ${TT(tl,'nextTurn')}
         </button>
-        <div style="height:6px;flex-shrink:0;"></div>
-        <div style="width:100%;display:flex;gap:6px;flex-shrink:0;">
-          <button class="btn btn-secondary" onclick="nextTeamTurn()"
-            style="flex:1;min-width:0;max-width:100%;font-size:0.95rem;padding:11px 10px;">
-            ${TT(tl,'bigBoard')}
-          </button>
-          <button class="btn btn-secondary" onclick="showFixResults()"
-            style="flex:0 1 auto;min-width:0;max-width:100%;font-size:0.95rem;padding:11px 12px;white-space:nowrap;">
-            ${TT(tl,'fixResults')}
-          </button>
-        </div>
+        <button class="link-btn" onclick="showFixResults()" style="margin-top:6px;flex-shrink:0;">
+          ${TT(tl,'fixResults')}
+        </button>
 
       </div>
     </div>
@@ -3811,12 +3821,6 @@ function saveFixResults() {
   saveGame();
 }
 
-function nextTeamTurn() {
-  G.currentTeam = (G.currentTeam + 1) % G.teams.length;
-  G.turnNumber++;
-  goto("board");
-}
-
 function goDirectToNextTurn() {
   G.currentTeam = (G.currentTeam + 1) % G.teams.length;
   G.turnNumber++;
@@ -3883,9 +3887,8 @@ function renderWin(app) {
           ${T('mainMenu')}
         </button>
         ${G.playing && G.turnSettled ? `
-          <div class="gap8"></div>
-          <button class="btn btn-secondary" onclick="showFixResults()"
-            style="animation:winFadeUp 0.6s ease both;animation-delay:1.7s;opacity:0.85;">
+          <button class="link-btn" onclick="showFixResults()"
+            style="margin-top:10px;animation:winFadeUp 0.6s ease both;animation-delay:1.7s;">
             ${T('fixResults')}
           </button>
         ` : ''}
