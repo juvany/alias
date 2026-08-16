@@ -1288,7 +1288,7 @@
 /* =====================================================
    APP VERSION — update this on each deploy
    ===================================================== */
-const APP_VERSION = "1.7.8";
+const APP_VERSION = "1.7.9";
 
 /* =====================================================
    WORD LISTS — organized by difficulty 1–4
@@ -3535,6 +3535,11 @@ function renderTurnResults(app) {
     <div class="screen">
       <div class="screen-inner" style="overflow:hidden;padding:10px 14px;">
 
+        <!-- Everything above the buttons scrolls as one block, so the actions at
+             the bottom stay reachable no matter how many words or teams the turn
+             produced. Without this the fixed-height content pushes them off. -->
+        <div style="flex:1;min-height:0;width:100%;overflow-y:auto;display:flex;flex-direction:column;">
+
         <!-- Results banner -->
         <div style="width:100%;flex-shrink:0;background:linear-gradient(135deg,${team.color}18,${team.color}08);border:1.5px solid ${team.color}40;border-radius:16px;padding:10px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
           <div style="font-size:2rem;">${team.emoji}</div>
@@ -3586,22 +3591,25 @@ function renderTurnResults(app) {
         <!-- Standings label -->
         <div class="section-label" style="width:100%;flex-shrink:0;margin-bottom:4px;">${TT(tl,'currentStandings')}</div>
 
-        <!-- Standings — scrollable if needed -->
-        <div style="flex:1;overflow-y:auto;width:100%;min-height:0;">
+        <!-- Standings -->
+        <div style="width:100%;flex-shrink:0;">
           <div class="scores-wrap">${scoreItems}</div>
         </div>
 
-        <!-- Buttons -->
+        </div><!-- /scroll area -->
+
+        <!-- Buttons — pinned below the scroll area -->
         <button class="btn btn-primary" onclick="goDirectToNextTurn()" style="margin-top:8px;max-width:100%;flex-shrink:0;">
           ${TT(tl,'nextTurn')}
         </button>
         <div style="height:6px;flex-shrink:0;"></div>
         <div style="width:100%;display:flex;gap:6px;flex-shrink:0;">
-          <button class="btn btn-secondary" onclick="nextTeamTurn()" style="flex:1;max-width:100%;">
+          <button class="btn btn-secondary" onclick="nextTeamTurn()"
+            style="flex:1;min-width:0;max-width:100%;font-size:0.95rem;padding:11px 10px;">
             ${TT(tl,'bigBoard')}
           </button>
           <button class="btn btn-secondary" onclick="showFixResults()"
-            style="flex:0 0 auto;max-width:100%;padding-left:16px;padding-right:16px;white-space:nowrap;">
+            style="flex:0 1 auto;min-width:0;max-width:100%;font-size:0.95rem;padding:11px 12px;white-space:nowrap;">
             ${TT(tl,'fixResults')}
           </button>
         </div>
@@ -3642,8 +3650,12 @@ function showFixResults() {
   overlay.id = 'fix-results-overlay';
   overlay.className = 'game-menu-overlay';
   overlay.onclick = (e) => { if (e.target === overlay) closeFixResults(); };
-  overlay.innerHTML = `<div class="game-menu-sheet" style="max-height:88vh;display:flex;flex-direction:column;">
-    <div id="fix-results-body"></div>
+  // The body must itself be a bounded flex column: its inner word list uses
+  // flex:1 + overflow-y:auto, which only scrolls if every ancestor up to the
+  // capped sheet passes a constrained height down. Without min-height:0 here the
+  // list grows to fit its content and pushes Save/Cancel off screen.
+  overlay.innerHTML = `<div class="game-menu-sheet" style="max-height:85vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div id="fix-results-body" style="display:flex;flex-direction:column;min-height:0;flex:1;overflow:hidden;"></div>
   </div>`;
   document.body.appendChild(overlay);
   renderFixResultsBody();
