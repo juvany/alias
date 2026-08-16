@@ -1,2 +1,4 @@
 [2026-08-16T16:23:49+03:00] i logged in continue to publish
 
+[2026-08-16T20:09:45+03:00] now in team seelct the continue button is hidden
+
