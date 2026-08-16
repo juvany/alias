@@ -644,6 +644,60 @@
       font-weight: 600;
     }
 
+    /* ===== TEAM POSITION STRIP ===== */
+    .team-pos-strip {
+      width: 100%;
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+      overflow-x: auto;
+      padding: 2px 0;
+      scrollbar-width: none;
+      flex-shrink: 0;
+    }
+    .team-pos-strip::-webkit-scrollbar { display: none; }
+
+    .team-pos-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      padding: 5px 9px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      line-height: 1;
+    }
+
+    .team-pos-chip.active {
+      border-color: var(--tp-color);
+      background: var(--tp-bg);
+      box-shadow: 0 2px 10px var(--tp-glow);
+    }
+
+    .tp-emoji { font-size: 1.05rem; }
+    .tp-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      max-width: 78px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .team-pos-chip.active .tp-name { color: var(--tp-color); }
+    .tp-pos { font-size: 1rem; font-weight: 900; color: var(--tp-color); }
+    .tp-total { font-size: 0.62rem; font-weight: 700; color: var(--text-muted); }
+    .tp-bar {
+      width: 34px;
+      height: 4px;
+      border-radius: 3px;
+      background: var(--border);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .tp-bar-fill { height: 100%; border-radius: 3px; background: var(--tp-color); }
+
     /* Circular Timer */
     .timer-wrap {
       display: flex;
@@ -1234,7 +1288,7 @@
 /* =====================================================
    APP VERSION — update this on each deploy
    ===================================================== */
-const APP_VERSION = "1.7.7";
+const APP_VERSION = "1.7.8";
 
 /* =====================================================
    WORD LISTS — organized by difficulty 1–4
@@ -1698,6 +1752,12 @@ const T_STRINGS = {
     returnToGame:"← חזור למשחק", editSettings:"⚙ ערוך הגדרות", endGame:"✕ סיים משחק",
     bonusTitle:"⏱ הזמן נגמר!", bonusPrompt:"מי ניחש את המילה האחרונה?",
     bonusNobody:"אף אחד לא ניחש", bonusMyTeam:"הקבוצה שלנו", bonusOtherTeam:"הקבוצה השנייה", bonusGuessed:"ניחשו את המילה האחרונה!", whoExplains:"מי מסביר?",
+    fixResults:"✏ תקן תוצאות", fixResultsTitle:"תיקון תוצאות התור",
+    fixResultsHint:"סמנו מחדש כל מילה. השינויים מתעדכנים בלוח מיד.",
+    fixCorrect:"✓ נכון", fixSkipped:"↷ דולג", fixRemove:"הסר מילה",
+    fixNoWords:"לא היו מילים בתור הזה.",
+    fixBonusLabel:"מי ניחש את המילה האחרונה?", fixBonusNobody:"אף אחד",
+    fixSave:"שמור שינויים", fixCancel:"ביטול", fixNewTotal:"סה\"כ חדש",
     continueGame:"המשך משחק",
     pressPlay:"לחץ שחק! כשמוכנים", wordPerSquare:"כל מילה שנוחשה = ✓ ריבוע אחד קדימה",
     square:"ריבוע", of:"מתוך", nowExplaining:"מסביר/ה עכשיו",
@@ -1761,6 +1821,12 @@ const T_STRINGS = {
     returnToGame:"← Back to Game", editSettings:"⚙ Settings", endGame:"✕ End Game",
     bonusTitle:"⏱ Time's Up!", bonusPrompt:"Who guessed the last word?",
     bonusNobody:"Nobody guessed", bonusMyTeam:"Our team", bonusOtherTeam:"The other team", bonusGuessed:"Guessed the last word!", whoExplains:"Who explains?",
+    fixResults:"✏ Fix results", fixResultsTitle:"Fix turn results",
+    fixResultsHint:"Re-mark any word. The board updates as soon as you save.",
+    fixCorrect:"✓ Correct", fixSkipped:"↷ Skipped", fixRemove:"Remove word",
+    fixNoWords:"No words in this turn.",
+    fixBonusLabel:"Who guessed the last word?", fixBonusNobody:"Nobody",
+    fixSave:"Save changes", fixCancel:"Cancel", fixNewTotal:"New total",
     continueGame:"Continue Game",
     pressPlay:"Press Play! when ready", wordPerSquare:"Each correct word = ✓ 1 square forward",
     square:"Square", of:"of", nowExplaining:"Now explaining",
@@ -1824,6 +1890,12 @@ const T_STRINGS = {
     returnToGame:"← Volver al Juego", editSettings:"⚙ Ajustes", endGame:"✕ Terminar",
     bonusTitle:"⏱ ¡Tiempo!", bonusPrompt:"¿Quién adivinó la última palabra?",
     bonusNobody:"Nadie adivinó", bonusMyTeam:"Nuestro equipo", bonusOtherTeam:"El otro equipo", bonusGuessed:"¡Adivinaron la última palabra!", whoExplains:"¿Quién explica?",
+    fixResults:"✏ Corregir resultados", fixResultsTitle:"Corregir resultados del turno",
+    fixResultsHint:"Vuelve a marcar cualquier palabra. El tablero se actualiza al guardar.",
+    fixCorrect:"✓ Correcto", fixSkipped:"↷ Saltada", fixRemove:"Quitar palabra",
+    fixNoWords:"No hubo palabras en este turno.",
+    fixBonusLabel:"¿Quién adivinó la última palabra?", fixBonusNobody:"Nadie",
+    fixSave:"Guardar cambios", fixCancel:"Cancelar", fixNewTotal:"Nuevo total",
     continueGame:"Continuar Juego",
     pressPlay:"¡Pulsa Jugar! cuando estén listos", wordPerSquare:"Cada palabra = ✓ 1 casilla",
     square:"Casilla", of:"de", nowExplaining:"Explicando ahora",
@@ -1928,6 +2000,12 @@ let G = {
   turnNumber: 0,
   lastMove: null,   // {teamIdx, from, to} — for board animation
   tileLayout: null, // random difficulty array generated at game start
+  bonusWord: null,  // word on screen when the timer ran out
+  bonusTeamIdx: null, // team that stole the last word (null = nobody / own team)
+  bonusFrom: null,  // bonus team's position before the +1, for the animation
+  turnSettled: false, // true once the turn's move has been applied to the board
+  turnAdvance: 0,   // squares the explaining team gained on the settled turn
+  winnerIdx: null,  // team that reached the finish line
   settings: {
     timerSeconds: 60,
     skipPenalty: false,
@@ -1974,6 +2052,31 @@ function getExplainerName(teamIdx) {
   const team = G.teams[teamIdx];
   if (!team || !team.players || team.players.length === 0) return null;
   return team.players[team.explainerIdx % team.players.length] || null;
+}
+
+// Compact "where is every team" strip — shown on every in-turn screen so
+// players always know the standings without opening the big board.
+function buildTeamPositionStrip(activeIdx = G.currentTeam) {
+  if (!G.teams || G.teams.length === 0) return '';
+  const target = G.settings.targetSteps;
+  const chips = G.teams.map((t, i) => {
+    const pos = t.position || 0;
+    const pct = Math.min(100, Math.round((pos / target) * 100));
+    const isActive = i === activeIdx;
+    return `
+      <div class="team-pos-chip${isActive ? ' active' : ''}"
+        style="--tp-color:${t.color};--tp-bg:${t.color}24;--tp-glow:${t.color}40;">
+        <span class="tp-emoji">${t.emoji}</span>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <span class="tp-name">${t.name}</span>
+          <div class="tp-bar"><div class="tp-bar-fill" style="width:${pct}%;"></div></div>
+        </div>
+        <span class="tp-pos">${pos}</span>
+        <span class="tp-total">/${target}</span>
+      </div>
+    `;
+  }).join('');
+  return `<div class="team-pos-strip">${chips}</div>`;
 }
 
 // Build a TRAIL board: red background, circular tiles, emoji pawns
@@ -2296,6 +2399,13 @@ function resumeSavedGame() {
       saved.usedWords = new Set(Array.isArray(saved.usedWords) ? saved.usedWords : []);
     }
     Object.assign(G, saved);
+    // A game saved by an older build has no turn-settlement fields. Treat it as
+    // already settled so the result-fix editor works on a resumed turn too.
+    if (G.turnSettled === undefined) G.turnSettled = G.screen === 'turnResults';
+    if (G.turnAdvance === undefined) {
+      G.turnAdvance = G.lastMove ? Math.max(0, G.lastMove.to - G.lastMove.from) : 0;
+    }
+    if (G.winnerIdx === undefined) G.winnerIdx = null;
     // Restore non-serializable defaults
     if (G.playing) {
       G.playing.timerInterval = null;
@@ -2879,6 +2989,12 @@ function startGame() {
   G.usedWords = new Set();
   G.tileLayout = generateRandomBoard(G.settings.targetSteps);
   G.gameActive = true;
+  G.bonusTeamIdx = null;
+  G.bonusFrom = null;
+  G.bonusWord = null;
+  G.turnSettled = false;
+  G.turnAdvance = 0;
+  G.winnerIdx = null;
   goto("board");
 }
 
@@ -3029,6 +3145,8 @@ function renderTurnIntro(app) {
           <button class="btn-ghost" onclick="showGameMenu()" style="font-size:1.2rem;">⚙</button>
         </div>
 
+        ${buildTeamPositionStrip(ct)}
+
         <div class="turn-intro-wrap">
           <div class="turn-team-display" style="background:linear-gradient(135deg,${team.color},${team.color}99);">
             ${team.emoji}
@@ -3153,6 +3271,8 @@ function renderPlaying(app) {
         </div>
       </div>
 
+      <div style="padding:0 20px 4px;">${buildTeamPositionStrip(ct)}</div>
+
       <div class="timer-wrap">
         <div class="timer-circle-wrap">
           <svg class="timer-svg" viewBox="0 0 90 90">
@@ -3252,47 +3372,76 @@ function endTurn() {
   }
   G.playing.paused = false;
 
-  const ct = G.currentTeam;
-  const correct = G.playing.correct.length;
-  const skipped = G.playing.skipped.length;
-  const penalty = G.settings.skipPenalty ? skipped : 0;
-  const advance = Math.max(0, correct - penalty);
-
-  const from = G.teams[ct].position;
-  G.teams[ct].score = (G.teams[ct].score || 0) + advance;
-  G.teams[ct].position = Math.min(from + advance, G.settings.targetSteps);
-  const to = G.teams[ct].position;
-
-  if (G.teams[ct].players && G.teams[ct].players.length > 1) {
-    G.teams[ct].explainerIdx = (G.teams[ct].explainerIdx + 1) % G.teams[ct].players.length;
-  }
-
-  G.lastMove = { teamIdx: ct, from, to };
-
-  // Show bonus guess screen before results
+  // Scoring is deferred to applyBonusAndFinish(): the word on screen when the
+  // timer ran out may still be credited to the explaining team itself, so we
+  // cannot settle the move before that question is answered.
   G.bonusWord = G.playing.word;
   G.bonusTeamIdx = null;
+  G.bonusFrom = null;
+  G.turnSettled = false;
   G.screen = 'bonusGuess';
   render();
 }
 
+// Squares the explaining team earns for a turn. The last word counts as a
+// normal correct word whenever the explaining team is the one that got it.
+function computeTurnAdvance(bonusTeamIdx) {
+  const bonusForOwnTeam = bonusTeamIdx === G.currentTeam ? 1 : 0;
+  const penalty = G.settings.skipPenalty ? G.playing.skipped.length : 0;
+  return Math.max(0, G.playing.correct.length + bonusForOwnTeam - penalty);
+}
+
 function applyBonusAndFinish(bonusTeamIdx) {
-  if (bonusTeamIdx !== null && bonusTeamIdx !== G.currentTeam) {
+  if (G.turnSettled) return; // guard against a double tap on the bonus buttons
+  G.turnSettled = true;
+  G.bonusTeamIdx = bonusTeamIdx;
+
+  // Rotate the explainer once per turn — never on a later correction
+  const ct = G.currentTeam;
+  if (G.teams[ct].players && G.teams[ct].players.length > 1) {
+    G.teams[ct].explainerIdx = (G.teams[ct].explainerIdx + 1) % G.teams[ct].players.length;
+  }
+
+  settleTurn(G.teams[ct].position);
+}
+
+// Applies the current turn's outcome to the board, starting from teamStart as
+// the explaining team's pre-turn square. Used both when the turn ends and when
+// a result is corrected afterwards.
+function settleTurn(teamStart) {
+  const ct = G.currentTeam;
+  const target = G.settings.targetSteps;
+  const bonusTeamIdx = G.bonusTeamIdx;
+
+  const advance = computeTurnAdvance(bonusTeamIdx);
+  G.teams[ct].score = (G.teams[ct].score || 0) + advance;
+  G.teams[ct].position = Math.min(teamStart + advance, target);
+  G.turnAdvance = advance; // remembered so a later correction can rewind it
+  G.lastMove = { teamIdx: ct, from: teamStart, to: G.teams[ct].position };
+
+  // A different team stole the last word → one bonus square for them
+  if (bonusTeamIdx != null && bonusTeamIdx !== ct) {
     const bt = G.teams[bonusTeamIdx];
     G.bonusFrom = bt.position;
     bt.score = (bt.score || 0) + 1;
-    bt.position = Math.min(bt.position + 1, G.settings.targetSteps);
-    G.bonusTeamIdx = bonusTeamIdx;
-    if (bt.position >= G.settings.targetSteps) {
-      goto('win');
-      return;
-    }
+    bt.position = Math.min(bt.position + 1, target);
+  } else {
+    G.bonusFrom = null;
   }
-  if (G.teams[G.currentTeam].position >= G.settings.targetSteps) {
-    goto('win');
+
+  // The explaining team gets priority if both reach the finish on the same turn
+  if (G.teams[ct].position >= target) { declareWinner(ct); return; }
+  if (bonusTeamIdx != null && G.teams[bonusTeamIdx].position >= target) {
+    declareWinner(bonusTeamIdx);
     return;
   }
+  G.winnerIdx = null;
   goto('turnResults');
+}
+
+function declareWinner(teamIdx) {
+  G.winnerIdx = teamIdx;
+  goto('win');
 }
 
 function renderBonusGuess(app) {
@@ -3349,7 +3498,10 @@ function renderTurnResults(app) {
   const ct = G.currentTeam;
   const team = G.teams[ct];
   const tl = team.lang || 'he';
-  const correct = G.playing.correct;
+  // The last word is credited to this team when it won the bonus, so show it
+  // alongside the words guessed during the timer.
+  const ownBonusWord = (G.bonusTeamIdx === ct && G.bonusWord) ? G.bonusWord : null;
+  const correct = ownBonusWord ? [...G.playing.correct, ownBonusWord] : G.playing.correct;
   const skipped = G.playing.skipped;
   const penalty = G.settings.skipPenalty ? skipped.length : 0;
   const advance = Math.max(0, correct.length - penalty);
@@ -3402,8 +3554,9 @@ function renderTurnResults(app) {
           </div>
         ` : ''}
 
-        <!-- Bonus team banner -->
-        ${G.bonusTeamIdx !== null && G.bonusTeamIdx !== undefined ? (() => {
+        <!-- Bonus team banner — only for a steal by another team; the own-team
+             case is already folded into the +N above -->
+        ${G.bonusTeamIdx != null && G.bonusTeamIdx !== ct ? (() => {
           const bt = G.teams[G.bonusTeamIdx];
           return `
           <div style="width:100%;flex-shrink:0;background:linear-gradient(135deg,${bt.color}18,${bt.color}08);border:1.5px solid ${bt.color}40;border-radius:16px;padding:10px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;animation:winFadeUp 0.5s ease both;animation-delay:0.3s;">
@@ -3443,9 +3596,15 @@ function renderTurnResults(app) {
           ${TT(tl,'nextTurn')}
         </button>
         <div style="height:6px;flex-shrink:0;"></div>
-        <button class="btn btn-secondary" onclick="nextTeamTurn()" style="max-width:100%;flex-shrink:0;">
-          ${TT(tl,'bigBoard')}
-        </button>
+        <div style="width:100%;display:flex;gap:6px;flex-shrink:0;">
+          <button class="btn btn-secondary" onclick="nextTeamTurn()" style="flex:1;max-width:100%;">
+            ${TT(tl,'bigBoard')}
+          </button>
+          <button class="btn btn-secondary" onclick="showFixResults()"
+            style="flex:0 0 auto;max-width:100%;padding-left:16px;padding-right:16px;white-space:nowrap;">
+            ${TT(tl,'fixResults')}
+          </button>
+        </div>
 
       </div>
     </div>
@@ -3453,6 +3612,191 @@ function renderTurnResults(app) {
 
   // Animate avatar movement on the mini board after render
   if (G.lastMove && G.lastMove.to > G.lastMove.from) setTimeout(animateAvatarOnBoard, 400);
+}
+
+/* =====================================================
+   MANUAL RESULT FIX (post-turn correction)
+   Lets whoever runs the game re-mark words that were
+   tapped wrong, and reassign the last-word bonus.
+   ===================================================== */
+let fixDraft = null; // {words:[{word,state}], bonusTeamIdx}
+
+function showFixResults() {
+  if (!G.teams || !G.playing) return;
+  const ct = G.currentTeam;
+
+  // Build an editable draft from the turn as it was recorded. The last word is
+  // not in these lists — it is represented by the bonus selection below.
+  fixDraft = {
+    words: [
+      ...G.playing.correct.map(w => ({ word: w, state: 'correct' })),
+      ...G.playing.skipped.map(w => ({ word: w, state: 'skipped' })),
+    ],
+    bonusTeamIdx: G.bonusTeamIdx != null ? G.bonusTeamIdx : null,
+  };
+
+  const existing = document.getElementById('fix-results-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'fix-results-overlay';
+  overlay.className = 'game-menu-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) closeFixResults(); };
+  overlay.innerHTML = `<div class="game-menu-sheet" style="max-height:88vh;display:flex;flex-direction:column;">
+    <div id="fix-results-body"></div>
+  </div>`;
+  document.body.appendChild(overlay);
+  renderFixResultsBody();
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+
+function renderFixResultsBody() {
+  const body = document.getElementById('fix-results-body');
+  if (!body || !fixDraft) return;
+  const ct = G.currentTeam;
+  const team = G.teams[ct];
+  const tl = team.lang || 'he';
+
+  const skippedCount = fixDraft.words.filter(w => w.state === 'skipped').length;
+  // The last word counts toward this team only when the bonus is assigned to it
+  const ownBonus = fixDraft.bonusTeamIdx === ct ? 1 : 0;
+  const correctCount = fixDraft.words.filter(w => w.state === 'correct').length + ownBonus;
+  const penalty = G.settings.skipPenalty ? skippedCount : 0;
+  const advance = Math.max(0, correctCount - penalty);
+
+  const rows = fixDraft.words.length ? fixDraft.words.map((w, i) => {
+    const isCorrect = w.state === 'correct';
+    return `
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--card);
+                  border:1px solid var(--border);border-radius:12px;margin-bottom:6px;">
+        <span style="flex:1;font-size:0.92rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;">${w.word}</span>
+        <button onclick="setFixWordState(${i},'correct')"
+          style="padding:5px 10px;border-radius:9px;font-size:0.75rem;font-weight:800;cursor:pointer;font-family:inherit;
+                 border:1.5px solid ${isCorrect ? '#16a34a' : 'var(--border)'};
+                 background:${isCorrect ? 'rgba(22,163,74,0.16)' : 'transparent'};
+                 color:${isCorrect ? '#16a34a' : 'var(--text-muted)'};">
+          ${TT(tl,'fixCorrect')}
+        </button>
+        <button onclick="setFixWordState(${i},'skipped')"
+          style="padding:5px 10px;border-radius:9px;font-size:0.75rem;font-weight:800;cursor:pointer;font-family:inherit;
+                 border:1.5px solid ${!isCorrect ? 'var(--skip-color)' : 'var(--border)'};
+                 background:${!isCorrect ? 'rgba(220,38,38,0.12)' : 'transparent'};
+                 color:${!isCorrect ? 'var(--skip-color)' : 'var(--text-muted)'};">
+          ${TT(tl,'fixSkipped')}
+        </button>
+        <button onclick="removeFixWord(${i})" title="${TT(tl,'fixRemove')}"
+          style="padding:5px 8px;border-radius:9px;border:1.5px solid var(--border);background:transparent;
+                 color:var(--text-muted);font-size:0.85rem;cursor:pointer;font-family:inherit;">✕</button>
+      </div>
+    `;
+  }).join('') : `<div style="color:var(--text-muted);text-align:center;padding:16px;font-size:0.88rem;">${TT(tl,'fixNoWords')}</div>`;
+
+  const bonusBtns = [
+    ...G.teams.map((t, i) => ({ idx: i, label: `${t.emoji} ${t.name}`, color: t.color })),
+    { idx: null, label: TT(tl,'fixBonusNobody'), color: null },
+  ].map(o => {
+    const on = fixDraft.bonusTeamIdx === o.idx;
+    const col = o.color || 'var(--text-dim)';
+    return `<button onclick="setFixBonus(${o.idx === null ? 'null' : o.idx})"
+      style="padding:6px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:inherit;
+             border:1.5px solid ${on ? col : 'var(--border)'};
+             background:${on && o.color ? o.color + '22' : 'transparent'};
+             color:${on ? col : 'var(--text-muted)'};white-space:nowrap;">${o.label}</button>`;
+  }).join('');
+
+  body.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-shrink:0;">
+      <h3 style="margin:0;font-size:1.1rem;">${TT(tl,'fixResultsTitle')}</h3>
+      <button class="btn-ghost" onclick="closeFixResults()" style="font-size:1.3rem;padding:2px 8px;">✕</button>
+    </div>
+    <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;flex-shrink:0;">${TT(tl,'fixResultsHint')}</div>
+
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;flex-shrink:0;
+                background:${team.color}14;border:1.5px solid ${team.color}40;margin-bottom:10px;">
+      <span style="font-size:1.4rem;">${team.emoji}</span>
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:0.9rem;">${team.name}</div>
+        <div style="font-size:0.74rem;color:var(--text-dim);">
+          ${correctCount} ${TT(tl,'correct_n')}${penalty > 0 ? ` − ${penalty} ${TT(tl,'penaltyLabel')}` : ''}
+        </div>
+      </div>
+      <div style="text-align:${tl==='he'?'left':'right'};">
+        <div style="font-size:0.62rem;color:var(--text-muted);">${TT(tl,'fixNewTotal')}</div>
+        <div style="font-size:1.5rem;font-weight:900;color:${team.color};">+${advance}</div>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;min-height:0;margin-bottom:10px;">
+      ${rows}
+      <div style="font-size:0.74rem;font-weight:700;color:var(--text-dim);margin:12px 0 6px;">
+        ${TT(tl,'fixBonusLabel')}
+        ${G.bonusWord ? `<span style="color:var(--text);font-weight:900;">— ${G.bonusWord}</span>` : ''}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">${bonusBtns}</div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button class="btn btn-secondary" onclick="closeFixResults()" style="flex:1;max-width:100%;">${TT(tl,'fixCancel')}</button>
+      <button class="btn btn-primary" onclick="saveFixResults()" style="flex:1.4;max-width:100%;">${TT(tl,'fixSave')}</button>
+    </div>
+  `;
+}
+
+function setFixWordState(i, state) {
+  if (!fixDraft || !fixDraft.words[i]) return;
+  fixDraft.words[i].state = state;
+  renderFixResultsBody();
+}
+
+function removeFixWord(i) {
+  if (!fixDraft) return;
+  fixDraft.words.splice(i, 1);
+  renderFixResultsBody();
+}
+
+function setFixBonus(idx) {
+  if (!fixDraft) return;
+  fixDraft.bonusTeamIdx = idx;
+  renderFixResultsBody();
+}
+
+function closeFixResults() {
+  const overlay = document.getElementById('fix-results-overlay');
+  fixDraft = null;
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  setTimeout(() => overlay.remove(), 250);
+}
+
+// Rewind the settled turn, then re-settle it from the edited draft. Working in
+// deltas keeps every other team's position untouched.
+function saveFixResults() {
+  if (!fixDraft) return;
+  const ct = G.currentTeam;
+  const oldBonusIdx = G.bonusTeamIdx;
+
+  // 1. Undo the explaining team's settled move
+  const teamStart = G.lastMove ? G.lastMove.from : G.teams[ct].position;
+  G.teams[ct].score = Math.max(0, (G.teams[ct].score || 0) - (G.turnAdvance || 0));
+  G.teams[ct].position = teamStart;
+
+  // 2. Undo the old bonus square, if one was awarded to another team
+  if (oldBonusIdx != null && oldBonusIdx !== ct) {
+    const ob = G.teams[oldBonusIdx];
+    ob.score = Math.max(0, (ob.score || 0) - 1);
+    if (G.bonusFrom != null) ob.position = G.bonusFrom;
+  }
+
+  // 3. Rebuild the word lists and bonus owner from the draft
+  G.playing.correct = fixDraft.words.filter(w => w.state === 'correct').map(w => w.word);
+  G.playing.skipped = fixDraft.words.filter(w => w.state === 'skipped').map(w => w.word);
+  G.bonusTeamIdx = fixDraft.bonusTeamIdx;
+
+  closeFixResults();
+
+  // 4. Re-settle from the same starting square (also re-checks for a win)
+  settleTurn(teamStart);
+  saveGame();
 }
 
 function nextTeamTurn() {
@@ -3472,7 +3816,7 @@ function goDirectToNextTurn() {
    WIN SCREEN
    ===================================================== */
 function renderWin(app) {
-  const ct = G.currentTeam;
+  const ct = G.winnerIdx != null ? G.winnerIdx : G.currentTeam;
   const team = G.teams[ct];
 
   // Sort final standings by real score (uncapped)
@@ -3526,6 +3870,13 @@ function renderWin(app) {
         <button class="btn btn-secondary" onclick="goto('home')" style="animation:winFadeUp 0.6s ease both;animation-delay:1.6s;">
           ${T('mainMenu')}
         </button>
+        ${G.playing && G.turnSettled ? `
+          <div class="gap8"></div>
+          <button class="btn btn-secondary" onclick="showFixResults()"
+            style="animation:winFadeUp 0.6s ease both;animation-delay:1.7s;opacity:0.85;">
+            ${T('fixResults')}
+          </button>
+        ` : ''}
       </div>
     </div>
   `;
