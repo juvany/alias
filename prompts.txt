@@ -1,0 +1,9 @@
+[2026-08-14T13:47:43+03:00] for charade game:
+need to have a clear indication where each group is currently at
+when last term is guessed, if i select my team, it does not count it in the turn result. fix it
+
+have an option for the admin to change results manually, sometimes users click on correct by mistake and that needs to be fixed after the turn finished
+once done, commit, push and update the server 
+
+[2026-08-14T22:00:26+03:00] continue
+
