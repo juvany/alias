@@ -56,24 +56,24 @@ function showBanner({ type, prompt } = {}) {
 
   const copy = {
     he: {
-      title: 'הוסף לדף הבית',
-      native:  'התקן כאפליקציה לגישה מהירה',
-      menu:    'לחץ ⋮ ← "הוסף למסך הבית"',
-      ios:     'לחץ שיתוף ← "הוסף למסך הבית"',
-      install: 'התקן',
+      title:   'רוצים את המשחק על המסך?',
+      native:  'התקינו וזה יהיה תמיד במרחק לחיצה',
+      menu:    'הקישו ⋮ ואז "הוספה למסך הבית"',
+      ios:     'הקישו שיתוף ואז "הוספה למסך הבית"',
+      install: 'התקנה',
     },
     en: {
-      title:   'Add to Home Screen',
-      native:  'Install the app for quick access',
-      menu:    'Tap ⋮ → "Add to Home Screen"',
-      ios:     'Tap Share → "Add to Home Screen"',
+      title:   'Want this on your home screen?',
+      native:  'Install it and it\'s always one tap away',
+      menu:    'Tap ⋮ then "Add to Home Screen"',
+      ios:     'Tap Share then "Add to Home Screen"',
       install: 'Install',
     },
     es: {
-      title:   'Añadir al inicio',
-      native:  'Instala la app para acceso rápido',
-      menu:    'Toca ⋮ → "Añadir a pantalla de inicio"',
-      ios:     'Toca Compartir → "Agregar a inicio"',
+      title:   '¿Lo quieres en tu pantalla?',
+      native:  'Instálalo y lo tendrás a un toque',
+      menu:    'Toca ⋮ y luego "Añadir a pantalla de inicio"',
+      ios:     'Toca Compartir y luego "Añadir a inicio"',
       install: 'Instalar',
     },
   }

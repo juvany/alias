@@ -1305,7 +1305,7 @@
 /* =====================================================
    APP VERSION — update this on each deploy
    ===================================================== */
-const APP_VERSION = "1.7.10";
+const APP_VERSION = "1.7.11";
 
 /* =====================================================
    WORD LISTS — organized by difficulty 1–4
@@ -1754,211 +1754,226 @@ const LANG_NAMES = { he: "עברית", en: "English", es: "Español" };
    ===================================================== */
 const T_STRINGS = {
   he: {
-    newGame:"משחק חדש", howToPlay:"איך משחקים?", mainMenu:"תפריט ראשי",
-    gameSettings:"הגדרות משחק", back:"← חזור", backToGame:"← חזור למשחק",
-    teams:"קבוצות", addTeam:"+ הוסף קבוצה", timePerTurn:"זמן לתור", seconds:"שניות",
+    newGame:"משחק חדש", howToPlay:"איך משחקים?", mainMenu:"תפריט",
+    gameSettings:"הגדרות", back:"← חזרה", backToGame:"← חזרה למשחק",
+    teams:"קבוצות", addTeam:"+ קבוצה חדשה", timePerTurn:"זמן לתור", seconds:"שניות",
     gameLength:"אורך המשחק", winSquares:"ריבועים לניצחון", extraRules:"כללים נוספים",
-    skipPenalty:"קנס על דילוג", skipPenaltySub:"דילוג על מילה = −1 נקודה",
+    skipPenalty:"קנס על דילוג", skipPenaltySub:"כל דילוג מוריד ריבוע אחד",
     next:"הבא →",
-    startGame:"התחל משחק!", boardTitle:"לוח המשחק", round:"תור",
-    startTurn:"התחל תור", correct:"✓ נכון!", skip:"↷ דלג",
-    describeHint:"תאר ללא אמירת המילה עצמה", pause:"⏸ עצור", resume:"▶ המשך",
-    paused:"מושהה", turnResults:"תוצאות התור", squaresToAdvance:"ריבועים להתקדם",
-    guessedWords:"מילים שנוחשו", skippedWords:"דילוגים", nextTurn:"תור הבא ←",
+    startGame:"מתחילים!", boardTitle:"לוח המשחק", round:"תור",
+    startTurn:"מתחילים תור", correct:"✓ נכון!", skip:"↷ דילוג",
+    describeHint:"תארו את המילה בלי להגיד אותה", pause:"⏸ הפסקה", resume:"▶ ממשיכים",
+    paused:"בהפסקה", turnResults:"תוצאות התור", squaresToAdvance:"ריבועים להתקדם",
+    guessedWords:"מילים שניחשתם", skippedWords:"דילוגים", nextTurn:"תור הבא ←",
     currentStandings:"מצב נוכחי",
-    returnToGame:"← חזור למשחק", editSettings:"⚙ ערוך הגדרות", endGame:"✕ סיים משחק",
+    returnToGame:"← חזרה למשחק", editSettings:"⚙ הגדרות", endGame:"✕ סיום משחק",
     bonusTitle:"⏱ הזמן נגמר!", bonusPrompt:"מי ניחש את המילה האחרונה?",
     bonusNobody:"אף אחד לא ניחש", bonusMyTeam:"הקבוצה שלנו", bonusOtherTeam:"הקבוצה השנייה", bonusGuessed:"ניחשו את המילה האחרונה!", whoExplains:"מי מסביר?",
-    fixResults:"✏ תקן תוצאות", fixResultsTitle:"תיקון תוצאות התור",
-    fixResultsHint:"סמנו מחדש כל מילה. השינויים מתעדכנים בלוח מיד.",
-    fixCorrect:"✓ נכון", fixSkipped:"↷ דולג", fixRemove:"הסר מילה",
+    fixResults:"✏ תיקון תוצאות", fixResultsTitle:"תיקון התוצאות",
+    fixResultsHint:"סמנו מחדש כל מילה — הלוח יתעדכן כשתשמרו.",
+    fixCorrect:"✓ נכון", fixSkipped:"↷ דילוג", fixRemove:"הסרת מילה",
     fixNoWords:"לא היו מילים בתור הזה.",
     fixBonusLabel:"מי ניחש את המילה האחרונה?", fixBonusNobody:"אף אחד",
-    fixSave:"שמור שינויים", fixCancel:"ביטול", fixNewTotal:"סה\"כ חדש",
-    continueGame:"המשך משחק",
-    pressPlay:"לחץ שחק! כשמוכנים", wordPerSquare:"כל מילה שנוחשה = ✓ ריבוע אחד קדימה",
-    square:"ריבוע", of:"מתוך", nowExplaining:"מסביר/ה עכשיו",
-    player:"שחקן", playerOf:"מתוך", playBtn:"▶ שחק!",
-    difficulty:"רמת קושי", wordLevel:"רמת מילים לקבוצה זו", wordLang:"שפת המילים",
-    appLang:"שפת הממשק", winners:"המנצחים הם...", reachedEnd:"הגיעו לסוף הלוח!",
-    finalStandings:"דירוג סופי", confirmEndGame:"לסיים את המשחק? ההתקדמות תאבד.",
-    logoSubtitle:"משחקי מילים וחברים",
+    fixSave:"שמירה", fixCancel:"ביטול", fixNewTotal:"סה\"כ חדש",
+    continueGame:"ממשיכים לשחק",
+    pressPlay:"לחצו כשאתם מוכנים", wordPerSquare:"כל מילה נכונה = ריבוע אחד קדימה",
+    square:"ריבוע", of:"מתוך", nowExplaining:"עכשיו מסבירים",
+    player:"שחקן", playerOf:"מתוך", playBtn:"▶ שחקו!",
+    difficulty:"רמת קושי", wordLevel:"רמת המילים לקבוצה", wordLang:"שפת המילים",
+    appLang:"שפת האפליקציה", winners:"המנצחים הם...", reachedEnd:"הגיעו לסוף הלוח!",
+    finalStandings:"דירוג סופי", confirmEndGame:"לסיים את המשחק? כל ההתקדמות תימחק.",
+    logoSubtitle:"משחקי מילים עם חברים",
     chooseMode:"בחרו משחק",
     charadeTitle:"שרייד",
-    charadeDesc:"תארו מילים מבלי להגיד את המילה, התקדמו על הלוח!",
+    charadeDesc:"תארו מילים בלי להגיד אותן, והתקדמו על הלוח",
     ptakimTitle:"פתקים",
-    ptakimDesc:"כתבו שמות על פתקים, נחשו ב-3 סיבובים — חופשי, מילה אחת, פנטומימה",
-    instrBack:"← חזור", instrTitle:"איך משחקים?",
-    instrGoal:"🎯 מטרת המשחק", instrGoalText:"כל קבוצה מנסה להגיע ראשונה לסוף לוח המשחק. מתקדמים על ידי ניחוש נכון של מילים שמסביר שחקן מהקבוצה.",
-    instrTurn:"🎲 מהלך התור",
-    instrTurn1:"בתחילת התור, שחקן מסביר אחד לוקח את הטלפון",
-    instrTurn2:"מספר הריבוע שהקבוצה נמצאת עליו קובע את רמת הקושי",
-    instrTurn3:"השחקן המסביר רואה מילה ומסביר אותה לצוות — ללא לחץ על \"שחק\"",
-    instrTurn4:"לחץ \"שחק!\" כשכולם מוכנים — שעון הדקות מתחיל",
-    instrTurn5:"על כל מילה שנוחשה נכון — הקבוצה מתקדמת ריבוע אחד קדימה",
-    instrRules:"🚫 כללים חשובים",
-    instrRule1:"אסור לומר את המילה עצמה או שורשה",
-    instrRule2:"אסור לתרגם לשפות אחרות",
-    instrRule3:"אסור לרמוז עם הידיים או לחקות",
-    instrRule4:"מותר לתאר, לספר, לשאול שאלות, לדמות",
-    instrRule5:"אפשר לדלג על מילה קשה — אך לא מתקדמים עליה",
+    ptakimDesc:"כתבו שמות על פתקים ונחשו ב-3 סיבובים — חופשי, מילה אחת, פנטומימה",
+    instrBack:"← חזרה", instrTitle:"איך משחקים?",
+    instrGoal:"🎯 המטרה", instrGoalText:"הקבוצה הראשונה שמגיעה לסוף הלוח מנצחת. מתקדמים על כל מילה שהקבוצה מנחשת נכון.",
+    instrTurn:"🎲 איך עובד תור",
+    instrTurn1:"שחקן אחד מהקבוצה לוקח את הטלפון ומסביר",
+    instrTurn2:"הריבוע שאתם עליו קובע את רמת הקושי",
+    instrTurn3:"המסביר רואה את המילה עוד לפני שהשעון מתחיל",
+    instrTurn4:"לוחצים שחקו כשכולם מוכנים — והשעון מתחיל",
+    instrTurn5:"כל מילה נכונה = ריבוע אחד קדימה",
+    instrRules:"🚫 מה אסור ומה מותר",
+    instrRule1:"אסור להגיד את המילה עצמה או את השורש שלה",
+    instrRule2:"אסור לתרגם לשפה אחרת",
+    instrRule3:"אסור לרמוז בידיים או לחקות",
+    instrRule4:"מותר לתאר, לספר, לשאול ולהשוות",
+    instrRule5:"אפשר לדלג על מילה קשה — פשוט לא מתקדמים עליה",
     instrDiff:"⭐ רמות קושי",
-    instrDiffText:"ככל שמתקדמים על הלוח, הריבועים הופכים לקשים יותר:",
+    instrDiffText:"כמה שמתקדמים יותר על הלוח, המילים נעשות קשות יותר:",
     instrWin:"🏆 ניצחון",
-    instrWinText:"הקבוצה הראשונה שמגיעה לסוף הלוח — מנצחת!",
+    instrWinText:"הקבוצה הראשונה שמגיעה לסוף הלוח מנצחת!",
     letsPlay:"בואו נשחק!",
-    backToSetup:"← חזור למשחק",
-    addTeamBtn:"+ הוסף קבוצה",
-    addPlayerBtn:"+ הוסף שחקן",
+    backToSetup:"← חזרה למשחק",
+    addTeamBtn:"+ קבוצה חדשה",
+    addPlayerBtn:"+ שחקן חדש",
     gameLengthSub:"קצר (40) עד ארוך (65)",
     playerPlaceholder:"שם שחקן",
     teamPlaceholder:"שם קבוצה",
     advanced:"התקדמה",
     squares:"ריבועים →",
     squareLbl:"ריבוע",
-    explainerLbl:"🎙 מסביר/ה:",
+    explainerLbl:"🎙 מסבירים:",
+    wordCategories:"📂 קטגוריות מילים",
+    bannedWordsTitle:"מילים חסומות",
+    bannedWordsNone:"עוד לא חסמתם מילים.",
+    bannedWordsLink:"מילים חסומות", bannedWordsLinkOne:"מילה חסומה",
+    savedPlayersHint:"שחקנים קודמים:",
     offsetVeryEasy:"קל מאוד",offsetEasy:"קל",offsetNormal:"רגיל",offsetHard:"קשה",offsetVeryHard:"קשה מאוד",
     diff1:"קל מאוד",diff2:"קל",diff3:"בינוני",diff4:"בינוני-קשה",
     legendEasy:"קל",legendMed:"בינוני",legendHard:"קשה",legendVHard:"קשה מאוד",
-    theWordWas:"המילה הייתה",boardPosition:"מיקום על הלוח",explainerTag:"מסביר",penaltyLabel:"קנס",correct_n:"נכון"
+    theWordWas:"המילה הייתה",boardPosition:"מיקום על הלוח",explainerTag:"מסביר",penaltyLabel:"על דילוגים",correct_n:"נכונות",correct_n1:"נכונה"
   },
   en: {
-    newGame:"New Game", howToPlay:"How to Play?", mainMenu:"Main Menu",
-    gameSettings:"Game Settings", back:"← Back", backToGame:"← Back to Game",
+    newGame:"New Game", howToPlay:"How to Play", mainMenu:"Menu",
+    gameSettings:"Settings", back:"← Back", backToGame:"← Back to Game",
     teams:"Teams", addTeam:"+ Add Team", timePerTurn:"Time per Turn", seconds:"sec",
     gameLength:"Game Length", winSquares:"Squares to Win", extraRules:"Extra Rules",
-    skipPenalty:"Skip Penalty", skipPenaltySub:"Skip = −1 point",
+    skipPenalty:"Skip Penalty", skipPenaltySub:"Every skip costs you one square",
     next:"Next →",
-    startGame:"Start Game!", boardTitle:"Game Board", round:"Turn",
-    startTurn:"Start Turn", correct:"✓ Correct!", skip:"↷ Skip",
-    describeHint:"Describe without saying the word", pause:"⏸ Pause", resume:"▶ Resume",
+    startGame:"Let's Play!", boardTitle:"Game Board", round:"Turn",
+    startTurn:"Start Turn", correct:"✓ Got it!", skip:"↷ Skip",
+    describeHint:"Describe it without saying the word", pause:"⏸ Pause", resume:"▶ Resume",
     paused:"Paused", turnResults:"Turn Results", squaresToAdvance:"squares to advance",
-    guessedWords:"Guessed ✓", skippedWords:"Skipped ↷", nextTurn:"Next Turn →",
-    currentStandings:"Current Standings",
+    guessedWords:"Got it ✓", skippedWords:"Skipped ↷", nextTurn:"Next Turn →",
+    currentStandings:"Where Everyone Stands",
     returnToGame:"← Back to Game", editSettings:"⚙ Settings", endGame:"✕ End Game",
     bonusTitle:"⏱ Time's Up!", bonusPrompt:"Who guessed the last word?",
-    bonusNobody:"Nobody guessed", bonusMyTeam:"Our team", bonusOtherTeam:"The other team", bonusGuessed:"Guessed the last word!", whoExplains:"Who explains?",
-    fixResults:"✏ Fix results", fixResultsTitle:"Fix turn results",
-    fixResultsHint:"Re-mark any word. The board updates as soon as you save.",
-    fixCorrect:"✓ Correct", fixSkipped:"↷ Skipped", fixRemove:"Remove word",
-    fixNoWords:"No words in this turn.",
+    bonusNobody:"Nobody got it", bonusMyTeam:"Our team", bonusOtherTeam:"The other team", bonusGuessed:"got the last word!", whoExplains:"Who's explaining?",
+    fixResults:"✏ Fix results", fixResultsTitle:"Fix the results",
+    fixResultsHint:"Re-mark any word — the board updates when you save.",
+    fixCorrect:"✓ Got it", fixSkipped:"↷ Skipped", fixRemove:"Remove word",
+    fixNoWords:"No words this turn.",
     fixBonusLabel:"Who guessed the last word?", fixBonusNobody:"Nobody",
-    fixSave:"Save changes", fixCancel:"Cancel", fixNewTotal:"New total",
-    continueGame:"Continue Game",
-    pressPlay:"Press Play! when ready", wordPerSquare:"Each correct word = ✓ 1 square forward",
+    fixSave:"Save", fixCancel:"Cancel", fixNewTotal:"New total",
+    continueGame:"Keep Playing",
+    pressPlay:"Hit Play when you're ready", wordPerSquare:"Each word you get = 1 square forward",
     square:"Square", of:"of", nowExplaining:"Now explaining",
     player:"Player", playerOf:"of", playBtn:"▶ Play!",
     difficulty:"Difficulty", wordLevel:"Word level for this team", wordLang:"Word language",
-    appLang:"Interface language", winners:"The winners are...", reachedEnd:"Reached the end!",
-    finalStandings:"Final Standings", confirmEndGame:"End game? All progress will be lost.",
-    logoSubtitle:"Word & party games",
-    chooseMode:"Choose a game",
+    appLang:"App language", winners:"The winners are...", reachedEnd:"made it to the end!",
+    finalStandings:"Final Standings", confirmEndGame:"End the game? You'll lose all progress.",
+    logoSubtitle:"Word games with friends",
+    chooseMode:"Pick a game",
     charadeTitle:"Charade",
-    charadeDesc:"Describe words without saying them, race across the board!",
+    charadeDesc:"Describe words without saying them and race across the board",
     ptakimTitle:"Ptakim",
-    ptakimDesc:"Write names on notes, guess in 3 rounds — free clue, one word, pantomime",
-    instrBack:"← Back", instrTitle:"How to Play?",
-    instrGoal:"🎯 Game Goal", instrGoalText:"Each team tries to reach the end of the board first. Advance by correctly guessing words that a player from the team describes.",
-    instrTurn:"🎲 Turn Flow",
-    instrTurn1:"At the start of a turn, one explainer takes the phone",
-    instrTurn2:"The team's current square determines the difficulty level",
-    instrTurn3:"The explainer sees a word and describes it — without pressing Play",
-    instrTurn4:"Press Play! when everyone is ready — the timer starts",
-    instrTurn5:"Each correctly guessed word = 1 square forward",
-    instrRules:"🚫 Important Rules",
-    instrRule1:"Cannot say the word itself or its root",
-    instrRule2:"Cannot translate to other languages",
-    instrRule3:"Cannot gesture or mime",
-    instrRule4:"May describe, tell, ask questions, or compare",
-    instrRule5:"May skip a hard word — but no advancement",
+    ptakimDesc:"Write names on notes and guess them in 3 rounds — free clue, one word, mime",
+    instrBack:"← Back", instrTitle:"How to Play",
+    instrGoal:"🎯 The Goal", instrGoalText:"First team to the end of the board wins. You move forward for every word your team guesses right.",
+    instrTurn:"🎲 How a Turn Works",
+    instrTurn1:"One player on the team takes the phone and explains",
+    instrTurn2:"The square you're on sets how hard the words are",
+    instrTurn3:"The explainer sees the word before the clock starts",
+    instrTurn4:"Hit Play when everyone's ready — the clock starts",
+    instrTurn5:"Every word you get = 1 square forward",
+    instrRules:"🚫 Do's and Don'ts",
+    instrRule1:"Don't say the word itself or its root",
+    instrRule2:"Don't translate it into another language",
+    instrRule3:"Don't point, gesture, or mime",
+    instrRule4:"Do describe, tell stories, ask, and compare",
+    instrRule5:"You can skip a hard word — you just don't move forward",
     instrDiff:"⭐ Difficulty Levels",
-    instrDiffText:"As you advance on the board, squares become harder:",
+    instrDiffText:"The further you get on the board, the harder the words:",
     instrWin:"🏆 Winning",
-    instrWinText:"The first team to reach the end of the board wins!",
+    instrWinText:"First team to reach the end of the board wins!",
     letsPlay:"Let's Play!",
     backToSetup:"← Back to Game",
     addTeamBtn:"+ Add Team",
     addPlayerBtn:"+ Add Player",
-    gameLengthSub:"Short (40) to Long (65)",
+    gameLengthSub:"Short (40) to long (65)",
     playerPlaceholder:"Player name",
     teamPlaceholder:"Team name",
-    advanced:"advanced",
+    advanced:"moved",
     squares:"squares →",
     squareLbl:"Square",
     explainerLbl:"🎙 Explaining:",
+    wordCategories:"📂 Word Categories",
+    bannedWordsTitle:"Blocked Words",
+    bannedWordsNone:"You haven't blocked any words yet.",
+    bannedWordsLink:"blocked words", bannedWordsLinkOne:"blocked word",
+    savedPlayersHint:"Played before:",
     offsetVeryEasy:"Very Easy",offsetEasy:"Easy",offsetNormal:"Normal",offsetHard:"Hard",offsetVeryHard:"Very Hard",
     diff1:"Very Easy",diff2:"Easy",diff3:"Medium",diff4:"Med-Hard",
     legendEasy:"Easy",legendMed:"Medium",legendHard:"Hard",legendVHard:"Very Hard",
-    theWordWas:"The word was",boardPosition:"Board Position",explainerTag:"Explaining",penaltyLabel:"penalty",correct_n:"correct"
+    theWordWas:"The word was",boardPosition:"Board Position",explainerTag:"Explaining",penaltyLabel:"for skips",correct_n:"right",correct_n1:"right"
   },
   es: {
-    newGame:"Nuevo Juego", howToPlay:"¿Cómo Jugar?", mainMenu:"Menú Principal",
-    gameSettings:"Configuración", back:"← Volver", backToGame:"← Volver al Juego",
+    newGame:"Nuevo Juego", howToPlay:"Cómo Jugar", mainMenu:"Menú",
+    gameSettings:"Ajustes", back:"← Volver", backToGame:"← Volver al Juego",
     teams:"Equipos", addTeam:"+ Añadir Equipo", timePerTurn:"Tiempo por Turno", seconds:"seg",
     gameLength:"Duración del Juego", winSquares:"Casillas para Ganar", extraRules:"Reglas Extra",
-    skipPenalty:"Penalización por Pasar", skipPenaltySub:"Pasar = −1 punto",
+    skipPenalty:"Penalización por Pasar", skipPenaltySub:"Cada palabra que pasas cuesta una casilla",
     next:"Siguiente →",
-    startGame:"¡Empezar!", boardTitle:"Tablero", round:"Turno",
-    startTurn:"Empezar Turno", correct:"✓ ¡Correcto!", skip:"↷ Pasar",
-    describeHint:"Describe sin decir la palabra", pause:"⏸ Pausar", resume:"▶ Continuar",
-    paused:"Pausado", turnResults:"Resultados del Turno", squaresToAdvance:"casillas para avanzar",
-    guessedWords:"Adivinadas ✓", skippedWords:"Pasadas ↷", nextTurn:"Siguiente Turno →",
-    currentStandings:"Clasificación",
+    startGame:"¡A jugar!", boardTitle:"Tablero", round:"Turno",
+    startTurn:"Empezar Turno", correct:"✓ ¡Sí!", skip:"↷ Pasar",
+    describeHint:"Descríbela sin decir la palabra", pause:"⏸ Pausa", resume:"▶ Seguir",
+    paused:"En pausa", turnResults:"Resultados del Turno", squaresToAdvance:"casillas para avanzar",
+    guessedWords:"Acertadas ✓", skippedWords:"Pasadas ↷", nextTurn:"Siguiente Turno →",
+    currentStandings:"Cómo va todo",
     returnToGame:"← Volver al Juego", editSettings:"⚙ Ajustes", endGame:"✕ Terminar",
-    bonusTitle:"⏱ ¡Tiempo!", bonusPrompt:"¿Quién adivinó la última palabra?",
-    bonusNobody:"Nadie adivinó", bonusMyTeam:"Nuestro equipo", bonusOtherTeam:"El otro equipo", bonusGuessed:"¡Adivinaron la última palabra!", whoExplains:"¿Quién explica?",
-    fixResults:"✏ Corregir resultados", fixResultsTitle:"Corregir resultados del turno",
-    fixResultsHint:"Vuelve a marcar cualquier palabra. El tablero se actualiza al guardar.",
-    fixCorrect:"✓ Correcto", fixSkipped:"↷ Saltada", fixRemove:"Quitar palabra",
+    bonusTitle:"⏱ ¡Se acabó el tiempo!", bonusPrompt:"¿Quién adivinó la última palabra?",
+    bonusNobody:"Nadie la adivinó", bonusMyTeam:"Nuestro equipo", bonusOtherTeam:"El otro equipo", bonusGuessed:"¡adivinaron la última palabra!", whoExplains:"¿Quién explica?",
+    fixResults:"✏ Corregir resultados", fixResultsTitle:"Corregir los resultados",
+    fixResultsHint:"Vuelve a marcar cualquier palabra — el tablero se actualiza al guardar.",
+    fixCorrect:"✓ Acertada", fixSkipped:"↷ Pasada", fixRemove:"Quitar palabra",
     fixNoWords:"No hubo palabras en este turno.",
     fixBonusLabel:"¿Quién adivinó la última palabra?", fixBonusNobody:"Nadie",
-    fixSave:"Guardar cambios", fixCancel:"Cancelar", fixNewTotal:"Nuevo total",
-    continueGame:"Continuar Juego",
-    pressPlay:"¡Pulsa Jugar! cuando estén listos", wordPerSquare:"Cada palabra = ✓ 1 casilla",
+    fixSave:"Guardar", fixCancel:"Cancelar", fixNewTotal:"Nuevo total",
+    continueGame:"Seguir Jugando",
+    pressPlay:"Pulsa Jugar cuando estéis listos", wordPerSquare:"Cada palabra que acertáis = 1 casilla",
     square:"Casilla", of:"de", nowExplaining:"Explicando ahora",
     player:"Jugador", playerOf:"de", playBtn:"▶ ¡Jugar!",
-    difficulty:"Dificultad", wordLevel:"Nivel de palabras", wordLang:"Idioma de palabras",
-    appLang:"Idioma de la interfaz", winners:"¡Los ganadores son...", reachedEnd:"¡Llegaron al final!",
-    finalStandings:"Clasificación Final", confirmEndGame:"¿Terminar el juego? Se perderá el progreso.",
-    logoSubtitle:"Juegos de palabras y amigos",
+    difficulty:"Dificultad", wordLevel:"Nivel de palabras del equipo", wordLang:"Idioma de las palabras",
+    appLang:"Idioma de la app", winners:"¡Los ganadores son...", reachedEnd:"¡llegaron al final!",
+    finalStandings:"Clasificación Final", confirmEndGame:"¿Terminar el juego? Perderéis todo el progreso.",
+    logoSubtitle:"Juegos de palabras con amigos",
     chooseMode:"Elige un juego",
     charadeTitle:"Charada",
-    charadeDesc:"Describe palabras sin decirlas, avanza por el tablero!",
+    charadeDesc:"Describe palabras sin decirlas y avanza por el tablero",
     ptakimTitle:"Ptakim",
-    ptakimDesc:"Escribe nombres en notas, adivina en 3 rondas — libre, una palabra, pantomima",
-    instrBack:"← Volver", instrTitle:"¿Cómo Jugar?",
-    instrGoal:"🎯 Objetivo del Juego", instrGoalText:"Cada equipo intenta llegar primero al final del tablero. Se avanza adivinando correctamente palabras que describe un jugador del equipo.",
-    instrTurn:"🎲 Desarrollo del Turno",
-    instrTurn1:"Al inicio del turno, un explicador toma el teléfono",
-    instrTurn2:"La casilla actual del equipo determina el nivel de dificultad",
-    instrTurn3:"El explicador ve una palabra y la describe — sin pulsar Jugar",
-    instrTurn4:"Pulsa ¡Jugar! cuando todos estén listos — empieza el temporizador",
-    instrTurn5:"Cada palabra adivinada correctamente = 1 casilla hacia adelante",
-    instrRules:"🚫 Reglas Importantes",
-    instrRule1:"No se puede decir la palabra ni su raíz",
-    instrRule2:"No se puede traducir a otros idiomas",
-    instrRule3:"No se puede gesticular ni imitar",
-    instrRule4:"Se puede describir, contar, preguntar o comparar",
-    instrRule5:"Se puede pasar una palabra difícil — pero sin avanzar",
+    ptakimDesc:"Escribe nombres en notas y adivínalos en 3 rondas — libre, una palabra, mímica",
+    instrBack:"← Volver", instrTitle:"Cómo Jugar",
+    instrGoal:"🎯 El objetivo", instrGoalText:"El primer equipo que llega al final del tablero gana. Avanzáis con cada palabra que vuestro equipo acierta.",
+    instrTurn:"🎲 Cómo funciona un turno",
+    instrTurn1:"Un jugador del equipo coge el teléfono y explica",
+    instrTurn2:"La casilla en la que estáis marca lo difíciles que son las palabras",
+    instrTurn3:"Quien explica ve la palabra antes de que arranque el reloj",
+    instrTurn4:"Pulsad Jugar cuando todos estén listos — y arranca el reloj",
+    instrTurn5:"Cada palabra que acertáis = 1 casilla",
+    instrRules:"🚫 Lo que vale y lo que no",
+    instrRule1:"No digas la palabra ni su raíz",
+    instrRule2:"No la traduzcas a otro idioma",
+    instrRule3:"No señales, gesticules ni imites",
+    instrRule4:"Sí puedes describir, contar, preguntar y comparar",
+    instrRule5:"Puedes pasar una palabra difícil — solo que no avanzas",
     instrDiff:"⭐ Niveles de Dificultad",
-    instrDiffText:"A medida que avanzas en el tablero, las casillas se vuelven más difíciles:",
+    instrDiffText:"Cuanto más avanzáis en el tablero, más difíciles son las palabras:",
     instrWin:"🏆 Victoria",
-    instrWinText:"¡El primer equipo en llegar al final del tablero gana!",
+    instrWinText:"¡Gana el primer equipo que llega al final del tablero!",
     letsPlay:"¡A Jugar!",
     backToSetup:"← Volver al Juego",
     addTeamBtn:"+ Añadir Equipo",
     addPlayerBtn:"+ Añadir Jugador",
-    gameLengthSub:"Corto (40) a Largo (65)",
+    gameLengthSub:"Corto (40) a largo (65)",
     playerPlaceholder:"Nombre del jugador",
     teamPlaceholder:"Nombre del equipo",
     advanced:"avanzó",
     squares:"casillas →",
     squareLbl:"Casilla",
     explainerLbl:"🎙 Explicando:",
+    wordCategories:"📂 Categorías de Palabras",
+    bannedWordsTitle:"Palabras Bloqueadas",
+    bannedWordsNone:"Aún no has bloqueado ninguna palabra.",
+    bannedWordsLink:"palabras bloqueadas", bannedWordsLinkOne:"palabra bloqueada",
+    savedPlayersHint:"Ya han jugado:",
     offsetVeryEasy:"Muy Fácil",offsetEasy:"Fácil",offsetNormal:"Normal",offsetHard:"Difícil",offsetVeryHard:"Muy Difícil",
     diff1:"Muy Fácil",diff2:"Fácil",diff3:"Medio",diff4:"Medio-Difícil",
     legendEasy:"Fácil",legendMed:"Medio",legendHard:"Difícil",legendVHard:"Muy Difícil",
-    theWordWas:"La palabra era",boardPosition:"Posición en tablero",explainerTag:"Explicando",penaltyLabel:"penaliz.",correct_n:"correcto"
+    theWordWas:"La palabra era",boardPosition:"Posición en tablero",explainerTag:"Explicando",penaltyLabel:"por pasar",correct_n:"acertadas",correct_n1:"acertada"
   }
 };
 function T(key) { return (T_STRINGS[G.uiLang] || T_STRINGS.he)[key] || T_STRINGS.he[key] || key; }
@@ -2244,14 +2259,14 @@ function renderBannedWordsScreen() {
         `).join('')}
       </div>
     </div>
-  `).join('') || '<div style="color:var(--text-muted);text-align:center;padding:24px;">No banned words yet.</div>';
+  `).join('') || `<div style="color:var(--text-muted);text-align:center;padding:24px;">${T('bannedWordsNone')}</div>`;
 
   app.innerHTML = `
     <div class="screen">
       <div class="screen-inner">
         <div style="width:100%;display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;">
           <button class="btn-ghost" onclick="goto(G.gameActive ? 'board' : 'home')">${T('back')}</button>
-          <div style="font-weight:800;">🚫 Banned Words</div>
+          <div style="font-weight:800;">🚫 ${T('bannedWordsTitle')}</div>
           <div style="width:60px;"></div>
         </div>
         <div style="width:100%;padding:4px 0;">${sections}</div>
@@ -2566,7 +2581,7 @@ function renderHome(app) {
         ${BANNED_WORDS.size > 0 ? `
         <div class="gap8"></div>
         <button onclick="goto('bannedWords')" style="background:none;border:none;color:var(--text-muted);font-size:0.78rem;cursor:pointer;text-decoration:underline;">
-          🚫 ${BANNED_WORDS.size} banned word${BANNED_WORDS.size===1?'':'s'}
+          🚫 ${BANNED_WORDS.size} ${T(BANNED_WORDS.size===1 ? 'bannedWordsLinkOne' : 'bannedWordsLink')}
         </button>
         ` : ''}
       </div>
@@ -2779,7 +2794,7 @@ function renderGameOptions(app) {
         </div>
 
         <!-- Word Categories -->
-        <div class="section-label" style="width:100%;flex-shrink:0;margin-bottom:6px;">📂 Word Categories</div>
+        <div class="section-label" style="width:100%;flex-shrink:0;margin-bottom:6px;">${T('wordCategories')}</div>
         <div style="width:100%;display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;flex-shrink:0;">
           ${Object.entries(CATEGORIES).map(([key, cat]) => {
             const on = G.settings.enabledCategories.includes(key);
@@ -2879,7 +2894,8 @@ function renderTeamsList() {
           ${(() => {
             const saved = getSavedPlayers().filter(n => !t.players.includes(n));
             if (!saved.length) return '';
-            return `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;">
+            return `<div style="font-size:0.62rem;color:var(--text-muted);margin-top:5px;">${T('savedPlayersHint')}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;">
               ${saved.map(name => `
                 <button onclick="addSavedPlayerToTeam(${i},'${name.replace(/'/g,"\\'")}')"
                   style="padding:2px 8px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);
@@ -2907,12 +2923,18 @@ function addTeam() {
    SAVED PLAYER NAMES
    ===================================================== */
 const SAVED_PLAYERS_KEY = 'ptakim_saved_players';
+const MAX_SAVED_PLAYERS = 10; // quick-pick list stays short enough to scan
 function getSavedPlayers() {
-  try { return JSON.parse(localStorage.getItem(SAVED_PLAYERS_KEY) || '[]'); } catch(e) { return []; }
+  try {
+    const list = JSON.parse(localStorage.getItem(SAVED_PLAYERS_KEY) || '[]');
+    // Older builds may have stored more than the cap — trim on read too
+    return Array.isArray(list) ? list.slice(0, MAX_SAVED_PLAYERS) : [];
+  } catch(e) { return []; }
 }
 function savePlayers(names) {
-  const existing = getSavedPlayers();
-  const merged = [...new Set([...existing, ...names.map(n=>n.trim()).filter(Boolean)])];
+  const fresh = names.map(n => n.trim()).filter(Boolean);
+  // Most recently used first, so the names in play survive the cap
+  const merged = [...new Set([...fresh, ...getSavedPlayers()])].slice(0, MAX_SAVED_PLAYERS);
   try { localStorage.setItem(SAVED_PLAYERS_KEY, JSON.stringify(merged)); } catch(e) {}
 }
 function deleteSavedPlayer(name) {
@@ -3563,7 +3585,7 @@ function renderTurnResults(app) {
           <div style="flex:1;">
             <div style="font-weight:800;font-size:1rem;">${team.name}</div>
             <div style="font-size:0.82rem;color:var(--text-dim);">
-              ${correct.length} ${TT(tl,'correct_n')}${penalty > 0 ? ` − ${penalty} ${TT(tl,'penaltyLabel')}` : ''} → ${TT(tl,'squareLbl')} ${team.position} ${TT(tl,'of')} ${G.settings.targetSteps}
+              ${correct.length} ${TT(tl, correct.length === 1 ? 'correct_n1' : 'correct_n')}${penalty > 0 ? ` − ${penalty} ${TT(tl,'penaltyLabel')}` : ''} → ${TT(tl,'squareLbl')} ${team.position} ${TT(tl,'of')} ${G.settings.targetSteps}
             </div>
           </div>
           <div style="font-size:2.2rem;font-weight:900;color:${team.color};">+${advance}</div>
@@ -3739,7 +3761,7 @@ function renderFixResultsBody() {
       <div style="flex:1;">
         <div style="font-weight:800;font-size:0.9rem;">${team.name}</div>
         <div style="font-size:0.74rem;color:var(--text-dim);">
-          ${correctCount} ${TT(tl,'correct_n')}${penalty > 0 ? ` − ${penalty} ${TT(tl,'penaltyLabel')}` : ''}
+          ${correctCount} ${TT(tl, correctCount === 1 ? 'correct_n1' : 'correct_n')}${penalty > 0 ? ` − ${penalty} ${TT(tl,'penaltyLabel')}` : ''}
         </div>
       </div>
       <div style="text-align:${tl==='he'?'left':'right'};">
