@@ -122,6 +122,8 @@
       gap: 8px;
     }
     .btn:active { transform: scale(0.95); filter: brightness(0.9); }
+    .btn:disabled { box-shadow: none; }
+    .btn:disabled:active { transform: none; filter: none; }
     .btn-primary {
       background: #5e5ce6;
       color: #fff;
@@ -276,6 +278,18 @@
       gap: 10px;
       margin-bottom: 10px;
     }
+
+    /* Color / emoji pickers: always a single row, scroll sideways if needed */
+    .picker-row {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 1px;
+    }
+    .picker-row::-webkit-scrollbar { display: none; }
 
     .team-dot {
       width: 14px;
@@ -653,12 +667,6 @@
       font-size: 0.9rem;
       font-weight: 700;
       color: white;
-    }
-
-    .playing-score {
-      font-size: 0.9rem;
-      color: var(--text-dim);
-      font-weight: 600;
     }
 
     /* ===== TEAM POSITION STRIP ===== */
@@ -1101,9 +1109,11 @@
       font-size: 0.85rem; font-weight: 900; color: #fff;
       transition: transform 0.15s;
     }
+    /* Black on the bright tile gradients reads far better than white;
+       the light halo keeps it legible on the darker red/purple tiles. */
     .trail-tile .tile-num {
-      font-size: 0.85rem; font-weight: 900; color: #fff;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.6); line-height: 1; z-index: 1;
+      font-size: 0.85rem; font-weight: 900; color: #0b0b0b;
+      text-shadow: 0 0 2px rgba(255,255,255,0.55); line-height: 1; z-index: 1;
     }
     .trail-start-tile {
       border-radius: 50%;
@@ -1305,7 +1315,7 @@
 /* =====================================================
    APP VERSION — update this on each deploy
    ===================================================== */
-const APP_VERSION = "1.7.12";
+const APP_VERSION = "1.7.14";
 
 /* =====================================================
    WORD LISTS — organized by difficulty 1–4
@@ -1822,6 +1832,7 @@ const T_STRINGS = {
     bannedWordsNone:"עוד לא חסמתם מילים.",
     bannedWordsLink:"מילים חסומות", bannedWordsLinkOne:"מילה חסומה",
     savedPlayersHint:"שחקנים קודמים:",
+    needTwoPlayers:"כל קבוצה צריכה לפחות 2 שחקנים",
     offsetVeryEasy:"קל מאוד",offsetEasy:"קל",offsetNormal:"רגיל",offsetHard:"קשה",offsetVeryHard:"קשה מאוד",
     diff1:"קל מאוד",diff2:"קל",diff3:"בינוני",diff4:"בינוני-קשה",
     legendEasy:"קל",legendMed:"בינוני",legendHard:"קשה",legendVHard:"קשה מאוד",
@@ -1896,6 +1907,7 @@ const T_STRINGS = {
     bannedWordsNone:"You haven't blocked any words yet.",
     bannedWordsLink:"blocked words", bannedWordsLinkOne:"blocked word",
     savedPlayersHint:"Played before:",
+    needTwoPlayers:"Every team needs at least 2 players",
     offsetVeryEasy:"Very Easy",offsetEasy:"Easy",offsetNormal:"Normal",offsetHard:"Hard",offsetVeryHard:"Very Hard",
     diff1:"Very Easy",diff2:"Easy",diff3:"Medium",diff4:"Med-Hard",
     legendEasy:"Easy",legendMed:"Medium",legendHard:"Hard",legendVHard:"Very Hard",
@@ -1970,6 +1982,7 @@ const T_STRINGS = {
     bannedWordsNone:"Aún no has bloqueado ninguna palabra.",
     bannedWordsLink:"palabras bloqueadas", bannedWordsLinkOne:"palabra bloqueada",
     savedPlayersHint:"Ya han jugado:",
+    needTwoPlayers:"Cada equipo necesita al menos 2 jugadores",
     offsetVeryEasy:"Muy Fácil",offsetEasy:"Fácil",offsetNormal:"Normal",offsetHard:"Difícil",offsetVeryHard:"Muy Difícil",
     diff1:"Muy Fácil",diff2:"Fácil",diff3:"Medio",diff4:"Medio-Difícil",
     legendEasy:"Fácil",legendMed:"Medio",legendHard:"Difícil",legendVHard:"Muy Difícil",
@@ -2170,7 +2183,7 @@ function buildTrailBoard({ highlightTeamIdx = null, pathFrom = null, pathTo = nu
       const hasPawns  = teamsHere.length > 0;
       const avSize    = teamsHere.length > 1 ? ' small' : '';
       const avs       = teamsHere.map(t => `<div class="tile-avatar${avSize}">${t.emoji}</div>`).join('');
-      const numFS     = Math.max(0.55, tileSize / 52).toFixed(2) + 'rem';
+      const numFS     = Math.max(0.64, tileSize / 42).toFixed(2) + 'rem';
       const avFS      = Math.max(0.85, tileSize / 36).toFixed(2) + 'rem';
       const avFSsmall = Math.max(0.65, tileSize / 48).toFixed(2) + 'rem';
 
@@ -2715,7 +2728,10 @@ function renderSetup(app) {
           <span>▶</span> ${T('continueGame')}
         </button>
         ` : `
-        <button class="btn btn-primary" onclick="goto('gameOptions')" style="margin-top:8px;max-width:100%;flex-shrink:0;">
+        <div id="setup-next-hint" style="font-size:0.72rem;font-weight:700;color:#f87171;text-align:center;margin-top:6px;flex-shrink:0;display:none;">
+          ${T('needTwoPlayers')}
+        </div>
+        <button id="setup-next-btn" class="btn btn-primary" onclick="setupNext()" style="margin-top:8px;max-width:100%;flex-shrink:0;">
           ${T('next')}
         </button>
         `}
@@ -2724,6 +2740,29 @@ function renderSetup(app) {
     </div>
   `;
   renderTeamsList();
+}
+
+// Every team needs at least two named players before the game can be set up.
+function setupTeamsReady() {
+  return !!setupTeams && setupTeams.length >= 2 &&
+    setupTeams.every(t => t.players.filter(p => p && p.trim()).length >= 2);
+}
+
+function setupNext() {
+  if (!setupTeamsReady()) { updateNextGate(); return; }
+  goto('gameOptions');
+}
+
+// Called on every player edit — the Next button is not re-rendered while typing.
+function updateNextGate() {
+  const btn  = document.getElementById('setup-next-btn');
+  const hint = document.getElementById('setup-next-hint');
+  if (!btn) return;
+  const ready = setupTeamsReady();
+  btn.disabled = !ready;
+  btn.style.opacity = ready ? '' : '0.45';
+  btn.style.cursor  = ready ? '' : 'not-allowed';
+  if (hint) hint.style.display = ready ? 'none' : 'block';
 }
 
 /* =====================================================
@@ -2823,7 +2862,7 @@ function renderTeamsList() {
       <div class="player-row">
         <div class="player-num">${pi + 1}</div>
         <input class="player-input" value="${p}" placeholder="${T('playerPlaceholder')} ${pi + 1}"
-          oninput="setupTeams[${i}].players[${pi}]=this.value" />
+          oninput="setupTeams[${i}].players[${pi}]=this.value;updateNextGate()" />
         <button class="remove-btn" onclick="removePlayer(${i},${pi})" style="font-size:0.9rem;">✕</button>
       </div>
     `).join('');
@@ -2841,13 +2880,13 @@ function renderTeamsList() {
 
     const colorPicker = PICKER_COLORS.map(c => `
       <div onclick="setupTeams[${i}].color='${c}';renderTeamsList();"
-        style="width:18px;height:18px;border-radius:50%;background:${c};cursor:pointer;flex-shrink:0;
-               border:2.5px solid ${t.color===c?'var(--text)':'transparent'};transition:border-color 0.15s;"></div>
+        style="width:26px;height:26px;border-radius:50%;background:${c};cursor:pointer;flex-shrink:0;
+               border:3px solid ${t.color===c?'var(--text)':'transparent'};transition:border-color 0.15s;"></div>
     `).join('');
     const emojiPicker = PICKER_EMOJIS.map(e => `
       <button onclick="setupTeams[${i}].emoji='${e}';renderTeamsList();"
         style="background:${t.emoji===e?t.color+'22':'transparent'};border:${t.emoji===e?`1.5px solid ${t.color}`:'1.5px solid transparent'};
-               border-radius:6px;padding:1px 3px;font-size:0.9rem;cursor:pointer;line-height:1;">
+               border-radius:8px;padding:2px 4px;font-size:1.35rem;cursor:pointer;line-height:1;flex-shrink:0;">
         ${e}
       </button>
     `).join('');
@@ -2866,8 +2905,8 @@ function renderTeamsList() {
         </div>
 
         <!-- Color & emoji pickers -->
-        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:3px;">${colorPicker}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:1px;margin-bottom:3px;">${emojiPicker}</div>
+        <div class="picker-row" style="gap:5px;margin-bottom:5px;">${colorPicker}</div>
+        <div class="picker-row" style="gap:3px;margin-bottom:4px;">${emojiPicker}</div>
 
         <!-- Word level -->
         <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
@@ -2901,8 +2940,6 @@ function renderTeamsList() {
                   style="padding:2px 8px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);
                          color:var(--text-dim);font-size:0.7rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px;">
                   + ${name}
-                  <span onclick="event.stopPropagation();deleteSavedPlayer('${name.replace(/'/g,"\\'")}');"
-                    style="color:#ef4444;font-size:0.75rem;">✕</span>
                 </button>
               `).join('')}
             </div>`;
@@ -2911,6 +2948,7 @@ function renderTeamsList() {
       </div>
     `;
   }).join("");
+  updateNextGate();
 }
 
 function addTeam() {
@@ -2936,11 +2974,6 @@ function savePlayers(names) {
   // Most recently used first, so the names in play survive the cap
   const merged = [...new Set([...fresh, ...getSavedPlayers()])].slice(0, MAX_SAVED_PLAYERS);
   try { localStorage.setItem(SAVED_PLAYERS_KEY, JSON.stringify(merged)); } catch(e) {}
-}
-function deleteSavedPlayer(name) {
-  const list = getSavedPlayers().filter(n => n !== name);
-  try { localStorage.setItem(SAVED_PLAYERS_KEY, JSON.stringify(list)); } catch(e) {}
-  renderTeamsList();
 }
 function addSavedPlayerToTeam(teamIdx, name) {
   if (!setupTeams[teamIdx].players.includes(name)) {
@@ -3302,15 +3335,12 @@ function renderPlaying(app) {
           ${team.emoji} ${team.name} ${LANG_FLAGS[team.lang || 'he']}
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <div class="playing-score" style="color:${team.color};">${TT(tl,'square')} ${team.position}</div>
           <button id="pause-btn" onclick="togglePause()"
             style="background:rgba(0,0,0,0.08);border:none;border-radius:12px;padding:10px 20px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text);">
             ${TT(tl,'pause')}
           </button>
         </div>
       </div>
-
-      <div style="padding:0 20px 4px;">${buildTeamPositionStrip(ct)}</div>
 
       <div class="timer-wrap">
         <div class="timer-circle-wrap">
