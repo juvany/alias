@@ -7,3 +7,7 @@ once done, commit, push and update the server
 
 [2026-08-14T22:00:26+03:00] continue
 
+[2026-08-17T13:40:16+03:00] in charede game When the turn is running there is no need to show the team's score. Remove it from that screen.
+In the team selection screen, limit the icons to one row and make them a little bit bigger. Same for the colors, make them a little bit bigger. 
+In previous Participants buttons: remove the X. We don't need it. Do not allow moving to the next screen unless both teams have at least two players.
+

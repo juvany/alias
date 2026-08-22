@@ -2,3 +2,5 @@
 
 [2026-08-16T20:09:45+03:00] now in team seelct the continue button is hidden
 
+[2026-08-17T13:45:06+03:00] In the board game make the steps number more visible, maybe in black.
+
